@@ -8,6 +8,7 @@ import Login from './Login';
 import Explore from './Explore';
 import SavedSnippets from './SavedSnippets';
 import WebPlayground from './WebPlayground';
+import Problems from './Problems';
 
 const getIconUrlSafe = (id) => {
    const map = {
@@ -153,10 +154,22 @@ function App() {
   useEffect(() => {
     // Check URL for shared code
     const params = new URLSearchParams(window.location.search);
-    const sharedParam = params.get('s');
-    if (sharedParam) {
+    const shareId = params.get('share');
+    const legacyParam = params.get('s');
+    if (shareId) {
+      supabase.from('shared_snippets').select('lang, code').eq('id', shareId).single()
+        .then(({ data, error }) => {
+          if (!error && data) {
+            setLanguage(data.lang);
+            setCode(data.code);
+            setToast({ message: "Loaded shared snippet!", type: 'success' });
+            setTimeout(() => setToast(null), 3000);
+          }
+          window.history.replaceState({}, document.title, window.location.pathname);
+        });
+    } else if (legacyParam) {
       try {
-        const decoded = JSON.parse(decodeURIComponent(atob(sharedParam)));
+        const decoded = JSON.parse(decodeURIComponent(atob(legacyParam)));
         if (decoded.lang && decoded.code) {
           setLanguage(decoded.lang);
           setCode(decoded.code);
@@ -165,7 +178,7 @@ function App() {
         }
         window.history.replaceState({}, document.title, window.location.pathname);
       } catch (e) {
-         console.warn("Failed to parse shared snippet data", e);
+        console.warn("Failed to parse shared snippet data", e);
       }
     }
 
@@ -227,16 +240,20 @@ function App() {
     setCode(value || '');
   };
 
-  const handleShare = () => {
+  const handleShare = async () => {
     try {
-      const shareData = JSON.stringify({ lang: language, code: code });
-      const encoded = btoa(encodeURIComponent(shareData));
-      const url = `${window.location.origin}${window.location.pathname}?s=${encoded}`;
-      navigator.clipboard.writeText(url);
+      const { data, error } = await supabase
+        .from('shared_snippets')
+        .insert([{ lang: language, code: code }])
+        .select('id')
+        .single();
+      if (error) throw error;
+      const url = `${window.location.origin}${window.location.pathname}?share=${data.id}`;
+      await navigator.clipboard.writeText(url);
       setToast({ message: "Shareable link copied to clipboard!", type: 'success' });
       setTimeout(() => setToast(null), 3000);
     } catch(e) {
-      setToast({ message: "Error generating link", type: 'error' });
+      setToast({ message: "Error generating share link", type: 'error' });
       setTimeout(() => setToast(null), 3000);
     }
   };
@@ -553,6 +570,12 @@ ${code}`;
                 >
                   <MonitorPlay size={13} /> Web Dev
                 </button>
+                <button
+                  className={`nav-tab ${view === 'problems' ? 'active' : ''}`}
+                  onClick={() => setView('problems')}
+                >
+                  <Database size={13} /> Problems
+                </button>
               </nav>
             </div>
 
@@ -625,6 +648,8 @@ ${code}`;
             <SavedSnippets onBack={() => setView('editor')} onOpenInEditor={handleOpenInEditor} user={user} supabase={supabase} />
           ) : view === 'web' ? (
             <WebPlayground user={user} supabase={supabase} setToast={setToast} initialWebCode={initialWebCode} />
+          ) : view === 'problems' ? (
+            <Problems setView={setView} setLanguage={setLanguage} setCode={setCode} />
           ) : (
             <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
               <aside className="language-sidebar">
