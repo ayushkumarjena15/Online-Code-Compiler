@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Editor from '@monaco-editor/react';
-import { Play, Code2, Terminal, ChevronDown, CheckCircle2, AlertCircle, RefreshCw, LogOut, Save, Github, X, User, BookOpen, Wand2, Square, FolderOpen, Share2, MonitorPlay, Network, Database } from 'lucide-react';
+import { Play, Code2, Terminal, ChevronDown, CheckCircle2, AlertCircle, RefreshCw, LogOut, Save, Github, X, User, BookOpen, Wand2, Square, FolderOpen, Share2, MonitorPlay, Network, Database, Flame } from 'lucide-react';
 import axios from 'axios';
 import { supabase } from './supabaseClient';
 import { GoogleGenerativeAI } from '@google/generative-ai';
@@ -149,12 +149,40 @@ function App() {
   const [isVisualizing, setIsVisualizing] = useState(false);
 
   const [initialWebCode, setInitialWebCode] = useState(null);
+  const [streak, setStreak] = useState(0);
 
   const editorRef = useRef(null);
   const decorationsRef = useRef([]);
   const abortSpeech = useRef(false);
 
   useEffect(() => {
+    // Streak Validation Algorithm
+    const lastActive = localStorage.getItem('codezLastActiveDate');
+    const currentStreak = parseInt(localStorage.getItem('codezUserStreak') || '0', 10);
+    const today = new Date().toDateString();
+
+    if (lastActive !== today) {
+      if (lastActive) {
+        const lastDate = new Date(lastActive);
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        
+        if (lastDate.toDateString() === yesterday.toDateString()) {
+          localStorage.setItem('codezUserStreak', currentStreak + 1);
+          setStreak(currentStreak + 1);
+        } else {
+          localStorage.setItem('codezUserStreak', 1);
+          setStreak(1);
+        }
+      } else {
+        localStorage.setItem('codezUserStreak', 1);
+        setStreak(1);
+      }
+      localStorage.setItem('codezLastActiveDate', today);
+    } else {
+      setStreak(currentStreak || 1);
+    }
+
     // Check URL for shared code
     const params = new URLSearchParams(window.location.search);
     const shareId = params.get('share');
@@ -612,6 +640,11 @@ ${code}`;
                   <div className="header-sep" />
                 </>
               )}
+
+              <div style={{ display: 'flex', alignItems: 'center', background: 'rgba(249, 115, 22, 0.1)', border: '1px solid rgba(249, 115, 22, 0.3)', padding: '0.35rem 0.8rem', borderRadius: '20px', color: '#f97316', fontWeight: 'bold', fontSize: '0.85rem', marginRight: '0.5rem', gap: '0.35rem', cursor: 'default', boxShadow: '0 0 10px rgba(249, 115, 22, 0.15)' }} title="Your Current Login Streak!">
+                <Flame size={15} style={{ fill: streak > 0 ? '#f97316' : 'transparent', color: '#f97316' }} />
+                <span>{streak} Day{streak !== 1 ? 's' : ''}</span>
+              </div>
 
               {user ? (
                 <div className="user-pill">
