@@ -24,7 +24,7 @@ const getIconUrlSafe = (id) => {
 
 const generateAIContent = async (apiKey, prompt) => {
   const genAI = new GoogleGenerativeAI(apiKey);
-  const models = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-flash-latest"];
+  const models = ["gemini-2.5-flash-preview-04-17", "gemini-2.0-flash", "gemini-1.5-flash"];
   let lastError;
   for (const modelName of models) {
      try {
@@ -530,7 +530,7 @@ ${code}`;
             <div className="header-left">
               <div className="header-logo">
                 <div className="logo-mark" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <img src="/logo.png" alt="CodeZ Logo" style={{ width: '28px', height: '28px', objectFit: 'contain', filter: 'drop-shadow(0 2px 4px rgba(168, 85, 247, 0.4))' }} />
+                  <img src="/logo.png" alt="CodeZ Logo" style={{ width: '44px', height: '44px', objectFit: 'contain', filter: 'drop-shadow(0 2px 6px rgba(168, 85, 247, 0.5))' }} />
                 </div>
                 <span className="logo-text">CodeZ</span>
               </div>
@@ -814,7 +814,7 @@ ${code}`;
                                  </head>
                                  <body>
                                    <div class="mermaid-wrapper">
-                                     <div class="mermaid">${mermaidCode.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</div>
+                                     <div class="mermaid">${mermaidCode}</div>
                                    </div>
                                  </body>
                                  </html>
