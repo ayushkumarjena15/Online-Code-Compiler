@@ -127,33 +127,31 @@ export default function Problems({ setView, setLanguage, setCode }) {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '80px 3fr 1fr 1fr 2fr 120px', padding: '0.75rem 1rem', background: 'rgba(0,0,0,0.2)', borderBottom: '1px solid var(--panel-border)', fontWeight: 'bold', color: 'var(--text-2)', fontSize: '0.85rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '80px 3fr 1fr 2fr 120px', padding: '0.75rem 1rem', background: 'rgba(0,0,0,0.2)', borderBottom: '1px solid var(--panel-border)', fontWeight: 'bold', color: 'var(--text-2)', fontSize: '0.85rem' }}>
         <div>ID</div>
         <div>Title</div>
         <div>Difficulty</div>
-        <div>Acceptance</div>
         <div>Topics</div>
         <div style={{ textAlign: 'center' }}>Action</div>
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column' }}>
         {filteredProblems.map((prob, index) => (
-          <div key={prob.id} style={{ 
-            display: 'grid', gridTemplateColumns: '80px 3fr 1fr 1fr 2fr 120px', 
+          <div key={prob.id} style={{
+            display: 'grid', gridTemplateColumns: '80px 3fr 1fr 2fr 120px',
             padding: '1rem', 
             background: index % 2 === 0 ? 'var(--panel)' : 'transparent',
             borderBottom: '1px solid var(--panel-border)',
             alignItems: 'center',
             fontSize: '0.9rem'
           }}>
-            <div style={{ color: 'var(--text-3)' }}>{prob.id}.</div>
+            <div style={{ color: 'var(--text-3)' }}>{index + 1}.</div>
             <div style={{ fontWeight: '500', color: 'var(--text-main)' }}>
               <a href={prob.url} target="_blank" rel="noreferrer" style={{ color: 'inherit', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
                 {prob.title} <ExternalLink size={12} color="var(--text-3)" />
               </a>
             </div>
             <div style={{ color: getDifficultyColor(prob.difficulty), fontWeight: '600' }}>{prob.difficulty}</div>
-            <div style={{ color: 'var(--text-2)' }}>{prob.acceptance}</div>
             <div style={{ color: 'var(--text-3)', fontSize: '0.8rem', display: 'flex', flexWrap: 'wrap', gap: '0.3rem' }}>
               {prob.topic.split(',').map(t => (
                 <span key={t} style={{ background: 'rgba(255,255,255,0.05)', padding: '2px 8px', borderRadius: '12px' }}>{t.trim()}</span>
