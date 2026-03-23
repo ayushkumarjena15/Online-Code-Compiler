@@ -530,7 +530,7 @@ ${code}`;
             <div className="header-left">
               <div className="header-logo">
                 <div className="logo-mark" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <img src="/favicon.svg" alt="CodeZ Logo" style={{ width: '18px', height: '18px' }} />
+                  <img src="/logo.png" alt="CodeZ Logo" style={{ width: '18px', height: '18px' }} />
                 </div>
                 <span className="logo-text">CodeZ</span>
               </div>

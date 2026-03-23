@@ -618,6 +618,10 @@ body {
   min-height: 100vh;
   position: relative;
   width: 100%;
+  background-image: url('/auth background.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 .back-btn {
