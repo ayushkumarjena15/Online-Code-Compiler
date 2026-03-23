@@ -1,0 +1,5 @@
+﻿Scala [ 'scala-3.5.1', 'scala-3.3.4', 'scala-2.13.15' ]
+OCaml [ 'ocaml-5.2.0', 'ocaml-4.14.2' ]
+Crystal [ 'crystal-1.13.3' ]
+Erlang [ 'erlang-27.1', 'erlang-26.2.5.3', 'erlang-25.3.2.13' ]
+Swift [ 'swift-6.0.1', 'swift-5.10.1' ]

@@ -1,0 +1,7 @@
+﻿scala -> PASS 
+ocaml -> FAIL /opt/wandbox/ocaml-4.14.2/bin/with-env.sh: line 5: /opt/wandbox/ocaml-4.14.2/bin/opam: No such file or directory
+/opt/wandbox/ocaml-4.14.2/bin/with-env.sh: line 7: ocamlfind: command not found
+
+erlang -> FAIL 
+swift -> FAIL ERROR (catatonit:2): failed to exec pid1: No such file or directory
+
