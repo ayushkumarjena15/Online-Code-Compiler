@@ -432,7 +432,7 @@ function App() {
       const prompt = `You are a world-class AI coding tutor. You MUST strictly return a valid JSON array of step-by-step tutorial explanation objects for the provided code.
 Each object must perfectly match this structure:
 {
-  "line": 4, // The most relevant line number in the user's code for this step. Use null if general.
+  "line": 4, // The EXACT line number (1-indexed) in the code this step explains. NEVER highlight a blank line or closing bracket! Point precisely to the active code syntax.
   "color": "#3b82f6", // A distinct vivid bright HEX color representing this step (use different colors like purple, green, yellow, pink, blue).
   "uiText": "🔷 1. Structure of Node\\nEach node has 3 parts:\\n👉 data...", // Beautifully formatted text with emojis, headings, bullet points, and newlines.
   "spokenText": "Step 1. Structure of Node. Each node has 3 parts, data, next, and previous." // A completely clean transcript. Do NOT include ANY syntax characters (no asterisks, slashes, brackets, parenthesis, or emojis) so the TTS engine speaks smoothly.
