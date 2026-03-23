@@ -19,8 +19,8 @@ export default function Login({ onBack }) {
       </button>
 
       <div className="login-container">
-        <div className="login-logo">
-          <Code2 size={48} className="text-blue-500" />
+        <div className="login-logo" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+          <img src="/favicon.svg" alt="CodeZ Logo" style={{ width: '48px', height: '48px' }} />
           <h1>CodeZ</h1>
         </div>
         <p className="login-subtitle">Sign in to sync your code snippets</p>

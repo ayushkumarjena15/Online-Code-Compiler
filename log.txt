@@ -1,0 +1,11 @@
+﻿commit 8ccfa8dc9b6db872a018f3dab01ae55856ac2828
+Author: ayushkumarjena15 <ahalyajena28@gmail.com>
+Date:   Mon Mar 23 19:07:45 2026 +0530
+
+    Enhance AI Tutor with structure and Web Playground Supabase integration
+
+commit b7daf52ca97ab574dd0de87b3e5a9d4b0c8176c3
+Author: Ayush Kumar Jena <ahalyajena28@gmail.com>
+Date:   Sun Mar 22 22:22:42 2026 +0530
+
+    Initial commit
