@@ -2786,6 +2786,61 @@ int main() {
   },
 ];
 
+const ADDITIONAL_LANGUAGES = [
+  { id: 'csharp', name: 'C#', color: '#9b4f96', print: 'Console.WriteLine("Hello World!");' },
+  { id: 'rust', name: 'Rust', color: '#dea584', print: 'fn main() {\n    println!("Hello World!");\n}' },
+  { id: 'ruby', name: 'Ruby', color: '#cc342d', print: 'puts "Hello World!"' },
+  { id: 'typescript', name: 'TypeScript', color: '#3178c6', print: 'console.log("Hello World!");' },
+  { id: 'php', name: 'PHP', color: '#777bb4', print: '<?php\n  echo "Hello World!";\n?>' },
+  { id: 'scala', name: 'Scala', color: '#dc322f', print: 'object Main extends App {\n  println("Hello World!")\n}' },
+  { id: 'nim', name: 'Nim', color: '#ffe953', print: 'echo "Hello World!"' },
+  { id: 'r', name: 'R', color: '#276dc3', print: 'print("Hello World!")' },
+  { id: 'julia', name: 'Julia', color: '#9558b2', print: 'println("Hello World!")' },
+  { id: 'bash', name: 'Bash', color: '#4eaa25', print: 'echo "Hello World!"' },
+  { id: 'lua', name: 'Lua', color: '#000080', print: 'print("Hello World!")' },
+  { id: 'perl', name: 'Perl', color: '#39457e', print: 'print "Hello World!\\n";' },
+  { id: 'haskell', name: 'Haskell', color: '#5e5086', print: 'main = putStrLn "Hello World!"' },
+  { id: 'elixir', name: 'Elixir', color: '#4e2a8e', print: 'IO.puts "Hello World!"' },
+  { id: 'd', name: 'D', color: '#ba595e', print: 'import std.stdio;\nvoid main() {\n    writeln("Hello World!");\n}' },
+  { id: 'groovy', name: 'Groovy', color: '#4298b8', print: 'println "Hello World!"' },
+  { id: 'zig', name: 'Zig', color: '#ec915c', print: 'const std = @import("std");\npub fn main() void {\n    std.debug.print("Hello World!\\n", .{});\n}' },
+  { id: 'pascal', name: 'Pascal', color: '#E3F171', print: 'program Hello;\nbegin\n  writeln(\'Hello World!\');\nend.' },
+  { id: 'lisp', name: 'Lisp', color: '#3c9cd7', print: '(print "Hello World!")' }
+];
+
+ADDITIONAL_LANGUAGES.forEach(lang => {
+  CATEGORIES.push({
+    id: lang.id,
+    name: lang.name,
+    fullName: `${lang.name} Programming`,
+    icon: <Code2 size={20} />,
+    color: lang.color,
+    topics: [
+      {
+        title: `${lang.name} Quickstart`,
+        description: `Master the fundamental syntax, variables, and output mechanisms uniquely available in ${lang.name}.`,
+        difficulty: 'Beginner',
+        language: lang.id,
+        code: `// ${lang.name} Quickstart Sandbox\n\n${lang.print}\n`
+      },
+      {
+         title: 'Functions & Logic',
+         description: `Learn how to create reusable logic branches, iterative loops, and custom abstractions in ${lang.name}.`,
+         difficulty: 'Intermediate',
+         language: lang.id,
+         code: `// Implement your ${lang.name} functions here...\n`
+      },
+      {
+         title: 'Advanced Paradigms',
+         description: `Explore advanced system architectures, specific memory handlers, or specialized packages in ${lang.name}.`,
+         difficulty: 'Advanced',
+         language: lang.id,
+         code: `// Advanced ${lang.name} Implementation\n`
+      }
+    ]
+  });
+});
+
 const DIFFICULTY_COLORS = {
   Beginner:     { bg: 'rgba(16,185,129,0.15)', color: '#10b981', border: 'rgba(16,185,129,0.3)' },
   Intermediate: { bg: 'rgba(245,158,11,0.15)', color: '#f59e0b', border: 'rgba(245,158,11,0.3)' },

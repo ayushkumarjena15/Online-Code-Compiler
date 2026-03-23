@@ -9,6 +9,7 @@ import Explore from './Explore';
 import SavedSnippets from './SavedSnippets';
 import WebPlayground from './WebPlayground';
 import Problems from './Problems';
+import ProblemDetail from './ProblemDetail';
 
 const getIconUrlSafe = (id) => {
    const map = {
@@ -128,6 +129,8 @@ function App() {
   const [compilerIds, setCompilerIds] = useState({});
   const [user, setUser] = useState(null);
   const [view, setView] = useState('editor');
+  const [activeProblem, setActiveProblem] = useState(null);
+  const [isSqlProblem, setIsSqlProblem] = useState(false);
   const [toast, setToast] = useState(null);
   const [outputTab, setOutputTab] = useState('execute');
   const [userInput, setUserInput] = useState('');
@@ -649,7 +652,9 @@ ${code}`;
           ) : view === 'web' ? (
             <WebPlayground user={user} supabase={supabase} setToast={setToast} initialWebCode={initialWebCode} />
           ) : view === 'problems' ? (
-            <Problems setView={setView} setLanguage={setLanguage} setCode={setCode} />
+            <Problems onSelectProblem={(prob, isSql) => { setActiveProblem(prob); setIsSqlProblem(isSql); setView('problem'); }} />
+          ) : view === 'problem' && activeProblem ? (
+            <ProblemDetail problem={activeProblem} isSql={isSqlProblem} onBack={() => setView('problems')} />
           ) : (
             <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
               <aside className="language-sidebar">
