@@ -20,7 +20,7 @@ export default function Login({ onBack }) {
 
       <div className="login-container">
         <div className="login-logo" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
-          <img src="/logo.png" alt="CodeZ Logo" style={{ width: '96px', height: '96px', objectFit: 'contain', filter: 'drop-shadow(0 4px 24px rgba(168, 85, 247, 0.6))' }} />
+          <img src="/logo-white.png" alt="CodeZ Logo" style={{ width: '72px', height: '72px', objectFit: 'contain', borderRadius: '16px', filter: 'drop-shadow(0 4px 16px rgba(168, 85, 247, 0.5))' }} />
           <h1>CodeZ</h1>
         </div>
         <p className="login-subtitle">Sign in to sync your code snippets</p>
