@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Editor from '@monaco-editor/react';
-import { Play, Code2, Terminal, ChevronDown, CheckCircle2, AlertCircle, RefreshCw, LogOut, Save, Github, X, User, BookOpen, Wand2, Square, FolderOpen, Share2, MonitorPlay, Network } from 'lucide-react';
+import { Play, Code2, Terminal, ChevronDown, CheckCircle2, AlertCircle, RefreshCw, LogOut, Save, Github, X, User, BookOpen, Wand2, Square, FolderOpen, Share2, MonitorPlay, Network, Database } from 'lucide-react';
 import axios from 'axios';
 import { supabase } from './supabaseClient';
 import { GoogleGenerativeAI } from '@google/generative-ai';
