@@ -19,8 +19,8 @@ export default function Login({ onBack }) {
       </button>
 
       <div className="login-container">
-        <div className="login-logo" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
-          <img src="/logo.png" alt="CodeZ Logo" style={{ width: '80px', height: '80px', mixBlendMode: 'screen', filter: 'drop-shadow(0 0 12px rgba(168, 85, 247, 0.5))' }} />
+        <div className="login-logo" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+          <img src="/logo.png" alt="CodeZ Logo" style={{ width: '96px', height: '96px', objectFit: 'contain', filter: 'drop-shadow(0 4px 24px rgba(168, 85, 247, 0.6))' }} />
           <h1>CodeZ</h1>
         </div>
         <p className="login-subtitle">Sign in to sync your code snippets</p>

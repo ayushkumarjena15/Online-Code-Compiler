@@ -530,7 +530,7 @@ ${code}`;
             <div className="header-left">
               <div className="header-logo">
                 <div className="logo-mark" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <img src="/logo.png" alt="CodeZ Logo" style={{ width: '24px', height: '24px', mixBlendMode: 'screen', transform: 'scale(1.1)' }} />
+                  <img src="/logo.png" alt="CodeZ Logo" style={{ width: '28px', height: '28px', objectFit: 'contain', filter: 'drop-shadow(0 2px 4px rgba(168, 85, 247, 0.4))' }} />
                 </div>
                 <span className="logo-text">CodeZ</span>
               </div>

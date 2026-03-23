@@ -628,23 +628,26 @@ body {
   position: absolute;
   top: 1.5rem;
   left: 1.5rem;
-  background: transparent;
-  color: var(--text-2);
-  border: none;
+  background: rgba(10, 15, 30, 0.6);
+  color: var(--text);
+  border: 1px solid rgba(255,255,255,0.15);
   display: flex;
   align-items: center;
   gap: 0.45rem;
   font-size: 0.875rem;
   font-family: var(--sans);
   cursor: pointer;
-  transition: color 0.18s, background 0.18s;
+  transition: color 0.18s, background 0.18s, border-color 0.18s;
   padding: 0.45rem 0.75rem;
   border-radius: var(--radius-sm);
+  backdrop-filter: blur(8px);
+  font-weight: 500;
 }
 
 .back-btn:hover {
-  color: var(--text);
-  background: rgba(255,255,255,0.05);
+  color: #fff;
+  background: rgba(255,255,255,0.12);
+  border-color: rgba(255,255,255,0.28);
 }
 
 .login-container {
