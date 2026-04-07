@@ -58,7 +58,8 @@ export default function Leaderboard({ user, supabase }) {
   const fetchContests = async () => {
     try {
       setIsLoadingContests(true);
-      const res = await axios.get('https://kontests.net/api/v1/all');
+      // Added 10s timeout to prevent hanging on network issues
+      const res = await axios.get('https://kontests.net/api/v1/all', { timeout: 10000 });
       // Sort by start time soonest
       const upcoming = res.data
          .sort((a, b) => new Date(a.start_time) - new Date(b.start_time))
@@ -66,6 +67,7 @@ export default function Leaderboard({ user, supabase }) {
       setContests(upcoming);
     } catch (e) {
       console.error("Error fetching contests:", e);
+      setContests([]); // Ensure empty state on error
     } finally {
       setIsLoadingContests(false);
     }

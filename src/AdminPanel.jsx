@@ -16,6 +16,25 @@ export default function AdminPanel({ user, supabase }) {
     if (activeTab === 'dashboard') fetchStats();
   }, [filter, activeTab]);
 
+  useEffect(() => {
+    // Subscribe to real-time changes in code_submissions table
+    const channel = supabase
+      .channel('admin-updates')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'code_submissions' },
+        () => {
+          fetchSubmissions();
+          fetchStats();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
   const fetchStats = async () => {
     try {
       const { data: allSub, error: subErr } = await supabase.from('code_submissions').select('*');
@@ -101,19 +120,33 @@ export default function AdminPanel({ user, supabase }) {
             <p style={{ margin: '0.5rem 0 0 0', color: '#94a3b8', fontSize: '1rem' }}>Command center for system-wide verification & analytics</p>
           </div>
           
-          <div style={{ display: 'flex', background: '#1e293b', borderRadius: '12px', padding: '4px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
             <button 
-              onClick={() => setActiveTab('dashboard')}
-              style={{ padding: '0.6rem 1.25rem', border: 'none', borderRadius: '8px', background: activeTab === 'dashboard' ? '#fbbf24' : 'transparent', color: activeTab === 'dashboard' ? '#000' : '#94a3b8', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s' }}
+              onClick={() => { fetchSubmissions(); fetchStats(); }}
+              style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8', padding: '0.6rem 1rem', borderRadius: '12px', fontSize: '0.85rem', cursor: 'pointer', fontWeight: 600 }}
+              title="Manually refresh data"
             >
-               <LayoutDashboard size={18} /> Dashboard
+               <RefreshCw size={16} className={isLoading ? 'loader' : ''} /> Refresh
             </button>
-            <button 
-              onClick={() => setActiveTab('reviews')}
-              style={{ padding: '0.6rem 1.25rem', border: 'none', borderRadius: '8px', background: activeTab === 'reviews' ? '#fbbf24' : 'transparent', color: activeTab === 'reviews' ? '#000' : '#94a3b8', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s' }}
-            >
-               <Code2 size={18} /> Code Reviews
-            </button>
+            <div style={{ display: 'flex', background: '#1e293b', borderRadius: '12px', padding: '4px' }}>
+              <button 
+                onClick={() => setActiveTab('dashboard')}
+                style={{ padding: '0.6rem 1.25rem', border: 'none', borderRadius: '8px', background: activeTab === 'dashboard' ? '#fbbf24' : 'transparent', color: activeTab === 'dashboard' ? '#000' : '#94a3b8', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s' }}
+              >
+                 <LayoutDashboard size={18} /> Dashboard
+              </button>
+              <button 
+                onClick={() => setActiveTab('reviews')}
+                style={{ position: 'relative', padding: '0.6rem 1.25rem', border: 'none', borderRadius: '8px', background: activeTab === 'reviews' ? '#fbbf24' : 'transparent', color: activeTab === 'reviews' ? '#000' : '#94a3b8', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s' }}
+              >
+                 <Code2 size={18} /> Code Reviews
+                 {submissions.filter(s => s.status === 'pending').length > 0 && (
+                    <span style={{ position: 'absolute', top: '-5px', right: '-5px', background: '#ef4444', color: '#fff', fontSize: '0.65rem', padding: '2px 8px', borderRadius: '10px', border: '2px solid #0f172a', fontWeight: 800 }}>
+                      {submissions.filter(s => s.status === 'pending').length}
+                    </span>
+                 )}
+              </button>
+            </div>
           </div>
         </header>
 

@@ -320,6 +320,36 @@ function App() {
     }
   };
 
+  const handleSubmitReview = async () => {
+    if (!user) {
+      setToast({ message: "Please login to submit code for review", type: "error" });
+      setTimeout(() => setToast(null), 3000);
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      const { error } = await supabase
+        .from('code_submissions')
+        .insert([{
+          user_id: user.id,
+          problem_id: 'playground-code',
+          language,
+          code,
+          status: 'pending',
+          submitted_at: new Date().toISOString()
+        }]);
+
+      if (error) throw error;
+      setToast({ message: "Code submitted for review successfully!", type: "success" });
+    } catch (err) {
+      setToast({ message: "Failed to submit code: " + err.message, type: "error" });
+    } finally {
+      setIsLoading(false);
+      setTimeout(() => setToast(null), 3000);
+    }
+  };
+
   const executeCode = async () => {
     if (!code.trim()) return;
     
@@ -653,7 +683,7 @@ ${code}`;
       )}
 
       {view === 'login' && !user ? (
-        <Login onBack={() => setView('editor')} onAdminLogin={(admin) => { setUser(admin); setView('editor'); }} />
+        <Login onBack={() => setView('editor')} onAdminLogin={(admin) => { setUser(admin); setView('admin'); }} />
       ) : (
         <>
           <header className="header">
@@ -853,6 +883,16 @@ ${code}`;
                       <button className="btn-run" onClick={executeCode} disabled={isLoading || !code.trim() || isExplaining}>
                         {isLoading ? <span className="loader" /> : <Play size={15} />}
                         <span>{isLoading ? 'Running…' : 'Run'}</span>
+                      </button>
+                      <button 
+                        className="btn-run" 
+                        style={{ background: '#22c55e' }}
+                        onClick={handleSubmitReview} 
+                        disabled={isLoading || !code.trim() || !user || isExplaining}
+                        title={!user ? "Login to submit for review" : "Submit your code for admin review"}
+                      >
+                         <CheckCircle2 size={15} />
+                         <span>Submit Review</span>
                       </button>
                       <button className="icon-btn" onClick={handleShare} title="Share code via link" style={{ marginLeft: '4px' }}>
                         <Share2 size={16} />
