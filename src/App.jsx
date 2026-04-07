@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import Editor from '@monaco-editor/react';
-import { Play, Code2, Terminal, ChevronDown, CheckCircle2, AlertCircle, RefreshCw, LogOut, Save, Github, X, User, BookOpen, Wand2, Square, FolderOpen, Share2, MonitorPlay, Network, Database, Flame } from 'lucide-react';
+import Editor, { DiffEditor } from '@monaco-editor/react';
+import { initVimMode } from 'monaco-vim';
+import { Play, Code2, Terminal, ChevronDown, CheckCircle2, AlertCircle, RefreshCw, LogOut, Save, Github, X, User, BookOpen, Wand2, Square, FolderOpen, Share2, MonitorPlay, Network, Database, Flame, AlignLeft, Settings as SettingsIcon, Download, Wrench, Trophy, Award, Shield, LayoutDashboard, Users } from 'lucide-react';
+import Split from 'react-split';
 import axios from 'axios';
 import { supabase } from './supabaseClient';
 import { GoogleGenerativeAI } from '@google/generative-ai';
@@ -8,8 +10,12 @@ import Login from './Login';
 import Explore from './Explore';
 import SavedSnippets from './SavedSnippets';
 import WebPlayground from './WebPlayground';
+import Leaderboard from './Leaderboard';
+import Profile from './Profile';
 import Problems from './Problems';
 import ProblemDetail from './ProblemDetail';
+import AdminPanel from './AdminPanel';
+import { ALL_LANGUAGES, SNIPPETS, LANGUAGES, FALLBACK_COMPILERS, DSA_PROBLEMS } from "./problemData";
 
 const getIconUrlSafe = (id) => {
    const map = {
@@ -54,71 +60,6 @@ const checkNeedsInput = (code, langId) => {
   }
 };
 
-const ALL_LANGUAGES = [
-  { id: 'javascript', name: 'JavaScript', monaco: 'javascript', wandbox: 'JavaScript', snippet: `console.log("Hello, Web-Based Code Compiler!");\n\n// Write your JavaScript code here\nfunction calculateFactorial(initialNumber) {\n  let result = 1;\n  for(let i = 2; i <= initialNumber; i++) {\n    result *= i;\n  }\n  return result;\n}\n\nconsole.log(calculateFactorial(5));\n` },
-  { id: 'python', name: 'Python', monaco: 'python', wandbox: 'Python', snippet: `print("Hello, Web-Based Code Compiler!")\n\n# Write your Python code here\ndef generate_fibonacci(n):\n    sequence = [0, 1]\n    while len(sequence) < n:\n        sequence.append(sequence[-1] + sequence[-2])\n    return sequence\n\nprint(generate_fibonacci(10))\n` },
-  { id: 'java', name: 'Java', monaco: 'java', wandbox: 'Java', snippet: `class Main {\n    public static void main(String[] args) {\n        System.out.println("Hello, Web-Based Code Compiler!");\n    }\n}\n` },
-  { id: 'cpp', name: 'C++', monaco: 'cpp', wandbox: 'C++', snippet: `#include <iostream>\n\nusing namespace std;\n\nint main() {\n    cout << "Hello, Web-Based Code Compiler!" << endl;\n    return 0;\n}\n` },
-  { id: 'c', name: 'C', monaco: 'c', wandbox: 'C', snippet: `#include <stdio.h>\n\nint main() {\n    printf("Hello, Web-Based Code Compiler!\\n");\n    return 0;\n}\n` },
-  { id: 'csharp', name: 'C#', monaco: 'csharp', wandbox: 'C#', snippet: `using System;\n\nclass MainClass {\n    public static void Main (string[] args) {\n        Console.WriteLine ("Hello, Web-Based Code Compiler!");\n    }\n}\n` },
-  { id: 'go', name: 'Go', monaco: 'go', wandbox: 'Go', snippet: `package main\n\nimport "fmt"\n\nfunc main() {\n    fmt.Println("Hello, Web-Based Code Compiler!")\n}\n` },
-  { id: 'rust', name: 'Rust', monaco: 'rust', wandbox: 'Rust', snippet: `fn main() {\n    println!("Hello, Web-Based Code Compiler!");\n}\n` },
-  { id: 'ruby', name: 'Ruby', monaco: 'ruby', wandbox: 'Ruby', snippet: `puts "Hello, Web-Based Code Compiler!"\n` },
-  { id: 'typescript', name: 'TypeScript', monaco: 'typescript', wandbox: 'TypeScript', snippet: `const message: string = "Hello, Web-Based Code Compiler!";\nconsole.log(message);\n` },
-  { id: 'php', name: 'PHP', monaco: 'php', wandbox: 'PHP', snippet: `<?php\n    echo "Hello, Web-Based Code Compiler!";\n?>\n` },
-
-  { id: 'scala', name: 'Scala', monaco: 'scala', wandbox: 'Scala', snippet: `object Main {\n  def main(args: Array[String]): Unit = {\n    println("Hello, Web-Based Code Compiler!")\n  }\n}\n` },
-  { id: 'nim', name: 'Nim', monaco: 'plaintext', wandbox: 'Nim', snippet: `echo "Hello, Web-Based Code Compiler!"\n` },
-  { id: 'r', name: 'R', monaco: 'r', wandbox: 'R', snippet: `print("Hello, Web-Based Code Compiler!")\n` },
-  { id: 'julia', name: 'Julia', monaco: 'julia', wandbox: 'Julia', snippet: `println("Hello, Web-Based Code Compiler!")\n` },
-  { id: 'bash', name: 'Bash', monaco: 'shell', wandbox: 'Bash script', snippet: `echo "Hello, Web-Based Code Compiler!"\n` },
-  { id: 'sql', name: 'SQL', monaco: 'sql', wandbox: 'SQL', snippet: `-- You can write SQLite queries here\nCREATE TABLE test (id INTEGER, name TEXT);\nINSERT INTO test VALUES (1, 'Hello, Web-Based Code Compiler!');\nSELECT * FROM test;\n` },
-  { id: 'lua', name: 'Lua', monaco: 'lua', wandbox: 'Lua', snippet: `print("Hello, Web-Based Code Compiler!")\n` },
-  { id: 'perl', name: 'Perl', monaco: 'perl', wandbox: 'Perl', snippet: `print "Hello, Web-Based Code Compiler!\\n";\n` },
-  { id: 'haskell', name: 'Haskell', monaco: 'plaintext', wandbox: 'Haskell', snippet: `main :: IO ()\nmain = putStrLn "Hello, Web-Based Code Compiler!"\n` },
-  { id: 'elixir', name: 'Elixir', monaco: 'plaintext', wandbox: 'Elixir', snippet: `IO.puts "Hello, Web-Based Code Compiler!"\n` },
-  { id: 'd', name: 'D', monaco: 'plaintext', wandbox: 'D', snippet: `import std.stdio;\n\nvoid main()\n{\n    writeln("Hello, Web-Based Code Compiler!");\n}\n` },
-  { id: 'groovy', name: 'Groovy', monaco: 'plaintext', wandbox: 'Groovy', snippet: `println "Hello, Web-Based Code Compiler!"\n` },
-  { id: 'zig', name: 'Zig', monaco: 'plaintext', wandbox: 'Zig', snippet: `const std = @import("std");\n\npub fn main() !void {\n    const stdout = std.io.getStdOut().writer();\n    try stdout.print("Hello, Web-Based Code Compiler!\\n", .{});\n}\n` },
-  { id: 'pascal', name: 'Pascal', monaco: 'pascal', wandbox: 'Pascal', snippet: `program Hello;\nbegin\n  writeln ('Hello, Web-Based Code Compiler!');\nend.\n` },
-  { id: 'lisp', name: 'Lisp', monaco: 'plaintext', wandbox: 'Lisp', snippet: `(print "Hello, Web-Based Code Compiler!")\n` }
-];
-
-const SNIPPETS = ALL_LANGUAGES.reduce((acc, lang) => {
-  acc[lang.id] = lang.snippet;
-  return acc;
-}, {});
-
-const LANGUAGES = ALL_LANGUAGES.map(({ id, name, monaco }) => ({ id, name, monaco }));
-
-const FALLBACK_COMPILERS = {
-  javascript: 'nodejs-head',
-  python:     'cpython-3.14.0',
-  java:       'openjdk-head',
-  cpp:        'gcc-head',
-  c:          'gcc-head-c',
-  csharp:     'mono-head',
-  go:         'go-head',
-  rust:       'rust-head',
-  ruby:       'ruby-head',
-  typescript: 'typescript-5.6.3',
-  php:        'php-head',
-  scala:      'scala-3.3.4',
-  nim:        'nim-head',
-  r:          'r-head',
-  julia:      'julia-head',
-  bash:       'bash',
-  sql:        'sqlite-head',
-  lua:        'lua-head',
-  perl:       'perl-head',
-  haskell:    'ghc-head',
-  elixir:     'elixir-head',
-  d:          'dmd-head',
-  groovy:     'groovy-head',
-  zig:        'zig-head',
-  pascal:     'fpc-head',
-  lisp:       'sbcl-head',
-};
 
 function App() {
   const [language, setLanguage] = useState('javascript');
@@ -130,7 +71,7 @@ function App() {
   const [user, setUser] = useState(null);
   const [view, setView] = useState('editor');
   const [activeProblem, setActiveProblem] = useState(null);
-  const [isSqlProblem, setIsSqlProblem] = useState(false);
+  const [problemLanguage, setProblemLanguage] = useState('dsa');
   const [toast, setToast] = useState(null);
   const [outputTab, setOutputTab] = useState('execute');
   const [userInput, setUserInput] = useState('');
@@ -150,8 +91,44 @@ function App() {
 
   const [initialWebCode, setInitialWebCode] = useState(null);
   const [streak, setStreak] = useState(0);
+  const [complexity, setComplexity] = useState(null);
+  const [isAnalyzingComplexity, setIsAnalyzingComplexity] = useState(false);
+
+  // --- NEW FEATURES STATE ---
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [editorSettings, setEditorSettings] = useState({
+    theme: 'vs-dark',
+    fontSize: 15,
+    vimMode: false,
+    wordWrap: 'off',
+    tabSize: 4
+  });
+  const vimRef = useRef(null);
+  
+  const [diffCode, setDiffCode] = useState(null);
+  const [isFixingBug, setIsFixingBug] = useState(false);
 
   const editorRef = useRef(null);
+  const diffEditorRef = useRef(null);
+  const inlineProviderRef = useRef(null);
+
+  const analyzeComplexity = async () => {
+    setIsAnalyzingComplexity(true);
+    try {
+      const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+      if (!apiKey) return;
+      const prompt = `Analyze this code and return ONLY a valid JSON object in this exact format: {"time": "O(N)", "space": "O(1)"}. Give the time and space complexity in big O notation. No markdown formatting, wait or explanation.\n\nCode:\n${code}`;
+      let text = await generateAIContent(apiKey, prompt);
+      text = text.replace(/```[a-z]*\n?/gi, '').replace(/```/g, '').trim();
+      const parsed = JSON.parse(text);
+      if (parsed.time && parsed.space) setComplexity(parsed);
+    } catch {
+      setComplexity(null);
+    } finally {
+      setIsAnalyzingComplexity(false);
+    }
+  };
+
   const decorationsRef = useRef([]);
   const abortSpeech = useRef(false);
 
@@ -180,7 +157,9 @@ function App() {
       }
       localStorage.setItem('codezLastActiveDate', today);
     } else {
-      setStreak(currentStreak || 1);
+      const streakVal = currentStreak || 1;
+      setStreak(streakVal);
+      if (user?.role === 'admin') setView('admin');
     }
 
     // Check URL for shared code
@@ -216,13 +195,26 @@ function App() {
     // Verify Supabase Connection
     console.log("Supabase Client Loaded:", supabase);
 
-    // Track authentication state
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
+      if (user?.role !== 'admin') {
+        setUser(session?.user ?? null);
+      }
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
+    supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        // If logged in via standard supabase, set role to student by default
+        // In a real app, you'd fetch the role from a profiles table
+        const updatedUser = { ...session.user, role: session.user.role || 'student' };
+        setUser(prev => prev?.role === 'admin' ? prev : updatedUser);
+        
+        // Auto-switch view based on role for new login
+        if (_event === 'SIGNED_IN') {
+           setView(updatedUser.role === 'admin' ? 'admin' : 'editor');
+        }
+      } else {
+        setUser(null);
+      }
     });
 
     // Dynamically fetch Wandbox compiler versions
@@ -261,6 +253,45 @@ function App() {
       return () => subscription.unsubscribe();
   }, []);
 
+  useEffect(() => {
+    if (!editorRef.current) return;
+    if (editorSettings.vimMode) {
+      const statusNode = document.createElement('div');
+      vimRef.current = initVimMode(editorRef.current, statusNode);
+    } else if (vimRef.current) {
+      vimRef.current.dispose();
+      vimRef.current = null;
+    }
+    return () => {
+      if (vimRef.current) {
+         vimRef.current.dispose();
+         vimRef.current = null;
+      }
+    };
+  }, [editorSettings.vimMode, view]);
+
+  const handleFixBug = async () => {
+    if (!code.trim() || !output) return;
+    setIsFixingBug(true);
+    try {
+      const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+      if (!apiKey) {
+        showToast("Missing VITE_GEMINI_API_KEY", "error");
+        return;
+      }
+      const prompt = `You are an expert debugger. Fix the following code based on its execution error.\n\nCode:\n${code}\n\nError:\n${output}\n\nReturn EXACTLY and ONLY the fixed code without any markdown formatting, backticks, or explanation.`;
+      
+      let text = await generateAIContent(apiKey, prompt);
+      text = text.replace(/```[a-z]*\n?/gi, '').replace(/```/g, '').trim();
+      setDiffCode(text);
+      setOutputTab('execute'); // Ensure diff is visible
+    } catch (err) {
+      showToast("Error generating fix.", "error");
+    } finally {
+      setIsFixingBug(false);
+    }
+  };
+
   const handleLanguageChange = (langId) => {
     setLanguage(langId);
     setCode(SNIPPETS[langId]);
@@ -295,6 +326,11 @@ function App() {
     setIsLoading(true);
     setOutput('');
     setIsError(false);
+    setComplexity(null);
+    
+    if (language !== 'sql' && language !== 'web') {
+      analyzeComplexity();
+    }
     
     try {
       const compiler = compilerIds[language] || FALLBACK_COMPILERS[language];
@@ -350,6 +386,52 @@ function App() {
     setIsError(false);
   };
 
+  let autocompleteTimeout = null;
+  const handleEditorMount = (editor, monaco) => {
+    editorRef.current = editor;
+
+    if (inlineProviderRef.current) inlineProviderRef.current.dispose();
+    inlineProviderRef.current = monaco.languages.registerInlineCompletionsProvider('*', {
+      provideInlineCompletions: async (model, position, context, token) => {
+        if (context.triggerKind !== monaco.languages.InlineCompletionTriggerKind.Automatic) {
+           return { items: [] };
+        }
+        
+        const lineContent = model.getLineContent(position.lineNumber);
+        if (!lineContent.trim()) return { items: [] };
+
+        const prefix = model.getValueInRange({ startLineNumber: 1, startColumn: 1, endLineNumber: position.lineNumber, endColumn: position.column });
+        
+        return new Promise(resolve => {
+           clearTimeout(autocompleteTimeout);
+           autocompleteTimeout = setTimeout(async () => {
+              if (token.isCancellationRequested) {
+                 resolve({ items: [] });
+                 return;
+              }
+              const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+              if (!apiKey) { resolve({ items: [] }); return; }
+
+              try {
+                 const prompt = `You are a code completion AI like GitHub Copilot. Complete the following code snippet. Return ONLY the predicted completion text that follows exactly after the cursor, with no markdown blockticks and no explanations. Start directly with the text to append. Code so far:\n${prefix}`;
+                 let text = await generateAIContent(apiKey, prompt);
+                 text = text.replace(/```[a-z]*\n?/gi, '').replace(/```/g, '').trim();
+                 
+                 resolve({
+                   items: [{
+                     insertText: text,
+                     range: new monaco.Range(position.lineNumber, position.column, position.lineNumber, position.column)
+                   }]
+                 });
+              } catch {
+                 resolve({ items: [] });
+              }
+           }, 1000);
+        });
+      },
+      freeInlineCompletions: () => {}
+    });
+  };
   const handleLogin = async (provider) => {
     await supabase.auth.signInWithOAuth({
       provider: provider,
@@ -542,10 +624,10 @@ ${code}`;
     setOutputTab('visualize');
 
     try {
-      const prompt = `You are a helpful AI coding tutor. The user wants a clean 2D flowchart diagram summarizing their code.\n\nAnalyze this code:\n\n${code}\n\nGenerate ONLY a strictly valid Mermaid.js graph chart (like flowchart TD or graph TD) representing the primary data structure, architecture, or algorithm control flow. DO NOT wrap it in markdown blockticks like \`\`\`mermaid. Start directly with the graph declaration.`;
+      const prompt = `You are a helpful AI coding tutor. The user wants a clean 2D flowchart diagram summarizing their code.\n\nAnalyze this code:\n\n${code}\n\nGenerate ONLY a strictly valid Mermaid.js graph chart (like flowchart TD or graph TD) representing the primary data structure, architecture, or algorithm control flow. DO NOT wrap it in markdown blockticks like \`\`\`mermaid. Start directly with the graph declaration. IMPORTANT: Use alphanumeric node IDs. Avoid quotes and special characters such as ()[]{} in node text unless strictly necessary, and surround labels with double quotes if they contain spaces. No subgraphs!`;
       
       let text = await generateAIContent(apiKey, prompt);
-      text = text.replace(/```mermaid/gi, '').replace(/```/g, '').trim();
+      text = text.replace(/```[a-z]*\n?/gi, '').replace(/```/g, '').trim();
       
       setMermaidCode(text);
     } catch (err) {
@@ -571,7 +653,7 @@ ${code}`;
       )}
 
       {view === 'login' && !user ? (
-        <Login onBack={() => setView('editor')} />
+        <Login onBack={() => setView('editor')} onAdminLogin={(admin) => { setUser(admin); setView('editor'); }} />
       ) : (
         <>
           <header className="header">
@@ -583,12 +665,51 @@ ${code}`;
                 <span className="logo-text">CodeZ</span>
               </div>
               <nav className="header-nav">
-                <button
-                  className={`nav-tab ${view === 'editor' ? 'active' : ''}`}
-                  onClick={() => setView('editor')}
-                >
-                  <Terminal size={13} /> Editor
-                </button>
+                {user?.role === 'admin' ? (
+                  <>
+                    <button
+                      className={`nav-tab ${view === 'admin' ? 'active' : ''}`}
+                      onClick={() => setView('admin')}
+                      style={{ color: '#fbbf24', borderBottom: view === 'admin' ? '2px solid #fbbf24' : 'none' }}
+                    >
+                      <Shield size={13} style={{ color: '#fbbf24' }} /> Admin OS
+                    </button>
+                    <button
+                      className={`nav-tab ${view === 'editor' ? 'active' : ''}`}
+                      onClick={() => setView('editor')}
+                    >
+                      <Code2 size={13} /> Code Editor
+                    </button>
+                    <button
+                      className={`nav-tab ${view === 'problems' ? 'active' : ''}`}
+                      onClick={() => setView('problems')}
+                    >
+                      <Terminal size={13} /> Manage Problems
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      className={`nav-tab ${view === 'editor' ? 'active' : ''}`}
+                      onClick={() => setView('editor')}
+                    >
+                      <Code2 size={13} /> Editor
+                    </button>
+                    <button
+                      className={`nav-tab ${view === 'problems' ? 'active' : ''}`}
+                      onClick={() => setView('problems')}
+                    >
+                      <Terminal size={13} /> DSA Problems
+                    </button>
+                    <button
+                      className={`nav-tab ${view === 'web' ? 'active' : ''}`}
+                      onClick={() => setView('web')}
+                    >
+                      <MonitorPlay size={13} /> Web Dev
+                    </button>
+                  </>
+                )}
+                
                 <button
                   className={`nav-tab ${view === 'explore' ? 'active' : ''}`}
                   onClick={() => setView('explore')}
@@ -596,50 +717,22 @@ ${code}`;
                   <BookOpen size={13} /> Explore
                 </button>
                 <button
-                  className={`nav-tab ${view === 'web' ? 'active' : ''}`}
-                  onClick={() => setView('web')}
+                  className={`nav-tab ${view === 'leaderboard' ? 'active' : ''}`}
+                  onClick={() => setView('leaderboard')}
                 >
-                  <MonitorPlay size={13} /> Web Dev
+                  <Trophy size={13} /> Leaderboard
                 </button>
                 <button
-                  className={`nav-tab ${view === 'problems' ? 'active' : ''}`}
-                  onClick={() => setView('problems')}
+                  className={`nav-tab ${view === 'certifications' ? 'active' : ''}`}
+                  onClick={() => setView('certifications')}
                 >
-                  <Database size={13} /> Problems
+                  <Award size={13} /> Certifications
                 </button>
               </nav>
             </div>
 
             <div className="header-right">
-              {view === 'editor' && (
-                <>
-                  <div className="select-wrapper">
-                    <select value={language} onChange={(e) => handleLanguageChange(e.target.value)} className="language-select">
-                      {ALL_LANGUAGES.map(lang => (
-                        <option key={lang.id} value={lang.id}>{lang.name}</option>
-                      ))}
-                    </select>
-                    <ChevronDown size={14} className="select-icon" />
-                  </div>
-                  <button 
-                    className="btn-run" 
-                    style={{ background: '#a855f7' }}
-                    onClick={handleExplainCode} 
-                    disabled={isExplaining || !code.trim() || isLoading}
-                  >
-                    {isExplaining ? <span className="loader" /> : <Wand2 size={15} />}
-                    <span>{isExplaining ? 'Thinking…' : 'Explain'}</span>
-                  </button>
-                  <button className="btn-run" onClick={executeCode} disabled={isLoading || !code.trim() || isExplaining}>
-                    {isLoading ? <span className="loader" /> : <Play size={15} />}
-                    <span>{isLoading ? 'Running…' : 'Run'}</span>
-                  </button>
-                  <button className="icon-btn" onClick={handleShare} title="Share code via link" style={{ marginLeft: '4px' }}>
-                    <Share2 size={16} />
-                  </button>
-                  <div className="header-sep" />
-                </>
-              )}
+              {/* Editor tools moved to editor panel header */}
 
               <div style={{ display: 'flex', alignItems: 'center', background: 'rgba(249, 115, 22, 0.1)', border: '1px solid rgba(249, 115, 22, 0.3)', padding: '0.35rem 0.8rem', borderRadius: '20px', color: '#f97316', fontWeight: 'bold', fontSize: '0.85rem', marginRight: '0.5rem', gap: '0.35rem', cursor: 'default', boxShadow: '0 0 10px rgba(249, 115, 22, 0.15)' }} title="Your Current Login Streak!">
                 <Flame size={15} style={{ fill: streak > 0 ? '#f97316' : 'transparent', color: '#f97316' }} />
@@ -659,7 +752,11 @@ ${code}`;
                     {user.user_metadata?.full_name || user.email?.split('@')[0]}
                     {user.app_metadata?.provider === 'github' && <Github size={14} style={{marginLeft: '0.4rem', opacity: 0.8, color: '#f8fafc'}} title="Logged in via GitHub" />}
                     {user.app_metadata?.provider === 'google' && <span style={{ fontSize: '9px', background: '#ea4335', color: 'white', padding: '2px 5px', borderRadius: '4px', marginLeft: '0.5rem', fontWeight: 700, letterSpacing: '0.5px' }} title="Logged in via Google">GOOGLE</span>}
+                    {user.role === 'admin' && <span style={{ fontSize: '9px', background: '#fbbf24', color: '#000', padding: '2px 5px', borderRadius: '4px', marginLeft: '0.5rem', fontWeight: 800, letterSpacing: '0.5px' }}>ADMIN OS</span>}
                   </span>
+                  <button className="icon-btn" onClick={() => setView('profile')} title="My Profile">
+                    <User size={15} />
+                  </button>
                   <button className="icon-btn" onClick={handleSaveSnippet} title="Save snippet">
                     <Save size={15} />
                   </button>
@@ -685,9 +782,15 @@ ${code}`;
           ) : view === 'web' ? (
             <WebPlayground user={user} supabase={supabase} setToast={setToast} initialWebCode={initialWebCode} />
           ) : view === 'problems' ? (
-            <Problems onSelectProblem={(prob, isSql) => { setActiveProblem(prob); setIsSqlProblem(isSql); setView('problem'); }} />
+            <Problems onSelectProblem={(prob, lang) => { setActiveProblem(prob); setProblemLanguage(lang); setView('problem'); }} user={user} supabase={supabase} />
           ) : view === 'problem' && activeProblem ? (
-            <ProblemDetail problem={activeProblem} isSql={isSqlProblem} onBack={() => setView('problems')} />
+            <ProblemDetail problem={activeProblem} problemLanguage={problemLanguage} onBack={() => setView('problems')} user={user} supabase={supabase} />
+          ) : view === 'leaderboard' ? (
+            <Leaderboard user={user} supabase={supabase} />
+          ) : view === 'admin' && user?.role === 'admin' ? (
+            <AdminPanel user={user} supabase={supabase} />
+          ) : (view === 'profile' || view === 'certifications') ? (
+            <Profile user={user} supabase={supabase} />
           ) : (
             <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
               <aside className="language-sidebar">
@@ -710,34 +813,121 @@ ${code}`;
                   </button>
                 ))}
               </aside>
-              <main className="main-content">
-                <section className="editor-section">
-                  <div className="panel-header">
+              <Split className="main-content" sizes={[60, 40]} minSize={300} gutterSize={8} snapOffset={30} direction="horizontal" style={{ display: 'flex', flex: 1, overflow: 'hidden', padding: '0.75rem', gap: 0 }}>
+                <section className="editor-section" style={{ marginRight: '4px' }}>
+                  <div className="panel-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div className="panel-header-left">
                       <span className="panel-header-title">Editor</span>
-                      <span className="lang-badge">{currentLang?.name}</span>
+                      <span className="lang-badge" style={{ display: 'none' }}>{currentLang?.name}</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                      <div className="select-wrapper" style={{ marginRight: '0.5rem' }}>
+                        <select value={language} onChange={(e) => handleLanguageChange(e.target.value)} className="language-select">
+                          {ALL_LANGUAGES.map(lang => (
+                            <option key={lang.id} value={lang.id}>{lang.name}</option>
+                          ))}
+                        </select>
+                        <ChevronDown size={14} className="select-icon" />
+                      </div>
+                      <button
+                        className="btn-signin"
+                        onClick={() => {
+                          if (editorRef.current) {
+                            editorRef.current.getAction('editor.action.formatDocument').run();
+                          }
+                        }}
+                        title="Auto format code (Shift+Alt+F)"
+                        style={{ padding: '0.38rem 0.6rem', display: 'flex', alignItems: 'center', gap: '0.3rem', border: 'none' }}
+                      >
+                        <AlignLeft size={16} /> Format
+                      </button>
+                      <button 
+                        className="btn-run" 
+                        style={{ background: '#a855f7' }}
+                        onClick={handleExplainCode} 
+                        disabled={isExplaining || !code.trim() || isLoading}
+                      >
+                        {isExplaining ? <span className="loader" /> : <Wand2 size={15} />}
+                        <span>{isExplaining ? 'Thinking…' : 'Explain'}</span>
+                      </button>
+                      <button className="btn-run" onClick={executeCode} disabled={isLoading || !code.trim() || isExplaining}>
+                        {isLoading ? <span className="loader" /> : <Play size={15} />}
+                        <span>{isLoading ? 'Running…' : 'Run'}</span>
+                      </button>
+                      <button className="icon-btn" onClick={handleShare} title="Share code via link" style={{ marginLeft: '4px' }}>
+                        <Share2 size={16} />
+                      </button>
+                      <button className="icon-btn" onClick={() => setIsSettingsOpen(true)} title="Settings" style={{ marginLeft: '4px' }}>
+                        <SettingsIcon size={16} />
+                      </button>
+                      <button className="icon-btn" onClick={() => {
+                            const blob = new Blob([code], { type: 'text/plain' });
+                            const link = document.createElement('a');
+                            link.href = URL.createObjectURL(blob);
+                            link.download = `script.${currentLang?.id || 'txt'}`;
+                            link.click();
+                            setToast({ message: "File downloaded!", type: "success" });
+                      }} title="Export / Download" style={{ marginLeft: '4px' }}>
+                        <Download size={16} />
+                      </button>
                     </div>
                   </div>
-                <div className="editor-wrapper">
-                  <Editor
-                    height="100%"
-                    language={currentLang?.monaco}
-                    theme="vs-dark"
-                    value={code}
-                    onChange={handleEditorChange}
-                    onMount={(editor) => { editorRef.current = editor; }}
-                    options={{
-                      minimap: { enabled: false },
-                      fontSize: 15,
-                      fontFamily: 'Fira Code, monospace',
-                      lineHeight: 1.6,
-                      padding: { top: 16 },
-                      scrollBeyondLastLine: false,
-                      smoothScrolling: true,
-                      cursorBlinking: 'smooth',
-                      cursorSmoothCaretAnimation: true,
-                    }}
-                  />
+                <div className="editor-wrapper" style={{ display: 'flex', flexDirection: 'column' }}>
+                  {diffCode ? (
+                    <>
+                      <div style={{ padding: '8px', background: 'var(--panel-bg)', fontSize: '0.9rem', display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--panel-border)', alignItems: 'center' }}>
+                         <span>Review Fix vs Original</span>
+                         <div style={{ display: 'flex', gap: '0.5rem' }}>
+                           <button onClick={() => setDiffCode(null)} className="btn-close-modal" style={{ padding: '4px 8px', border: '1px solid var(--panel-border)', borderRadius: '4px' }}>Cancel</button>
+                           <button onClick={() => { setCode(diffCode); setDiffCode(null); }} className="btn-run">Apply Fix</button>
+                         </div>
+                      </div>
+                      <DiffEditor
+                        height="100%"
+                        original={code}
+                        modified={diffCode}
+                        language={currentLang?.monaco}
+                        theme={editorSettings.theme}
+                        onMount={(editor) => { diffEditorRef.current = editor; }}
+                        options={{
+                          minimap: { enabled: false },
+                          fontSize: editorSettings.fontSize,
+                          fontFamily: 'Fira Code, monospace',
+                          lineHeight: 1.6,
+                          padding: { top: 16 },
+                          scrollBeyondLastLine: false,
+                          smoothScrolling: true,
+                          wordWrap: editorSettings.wordWrap,
+                        }}
+                      />
+                    </>
+                  ) : (
+                    <Editor
+                      height="100%"
+                      language={currentLang?.monaco}
+                      theme={editorSettings.theme}
+                      value={code}
+                      onChange={handleEditorChange}
+                      onMount={handleEditorMount}
+                      options={{
+                        minimap: { enabled: false },
+                        tabSize: editorSettings.tabSize,
+                        fontSize: editorSettings.fontSize,
+                        fontFamily: 'Fira Code, monospace',
+                        lineHeight: 1.6,
+                        padding: { top: 16 },
+                        scrollBeyondLastLine: false,
+                        smoothScrolling: true,
+                        cursorBlinking: 'smooth',
+                        cursorSmoothCaretAnimation: true,
+                        wordWrap: editorSettings.wordWrap,
+                        inlineSuggest: { enabled: true },
+                      }}
+                    />
+                  )}
+                  {editorSettings.vimMode && !diffCode && (
+                    <div id="vim-status" style={{ height: '26px', background: 'var(--bg-2)', color: 'var(--text)', padding: '0 8px', fontSize: '13px', display: 'flex', alignItems: 'center', borderTop: '1px solid var(--panel-border)' }}></div>
+                  )}
                 </div>
               </section>
 
@@ -762,6 +952,13 @@ ${code}`;
                     >
                       <Network size={14} /> Visualizer
                     </button>
+                    <button 
+                      className={`tab-btn ${outputTab === 'mltools' ? 'active' : ''}`}
+                      onClick={() => setOutputTab('mltools')}
+                      style={outputTab === 'mltools' ? { borderBottom: '2px solid #a855f7' } : {}}
+                    >
+                      <Database size={14} /> AI Tools
+                    </button>
                   </div>
                   
                   <div className="panel-actions" style={{ paddingRight: '1.25rem', gap: '0.8rem', display: 'flex', alignItems: 'center' }}>
@@ -776,9 +973,17 @@ ${code}`;
                        </select>
                     )}
                     {outputTab === 'execute' ? (
-                      <button className="icon-btn" onClick={handleClearOutput} title="Clear output">
-                        <RefreshCw size={14} />
-                      </button>
+                      <>
+                        {isError && (
+                          <button className="btn-run" onClick={handleFixBug} disabled={isFixingBug} style={{ padding: '0.2rem 0.5rem', background: '#ef4444', color: '#fff', marginRight: '0.5rem' }}>
+                              {isFixingBug ? <span className="loader" /> : <Wrench size={14} />}
+                              <span>{isFixingBug ? 'Fixing...' : 'Fix My Bug'}</span>
+                          </button>
+                        )}
+                        <button className="icon-btn" onClick={handleClearOutput} title="Clear output">
+                          <RefreshCw size={14} />
+                        </button>
+                      </>
                     ) : (
                       isSpeaking && (
                         <button className="icon-btn" onClick={stopSpeaking} title="Stop Speaking" style={{ color: '#ef4444' }}>
@@ -789,9 +994,22 @@ ${code}`;
                   </div>
                 </div>
 
-                <div className="output-body" style={{ flex: 1, padding: outputTab === 'explain' ? 0 : '1.25rem', overflowY: outputTab === 'explain' ? 'hidden' : 'auto', display: 'flex', flexDirection: 'column', gap: outputTab === 'explain' ? 0 : '1.5rem' }}>
+                <div className="output-body" style={{ flex: 1, padding: (outputTab === 'explain' || outputTab === 'mltools') ? 0 : '1.25rem', overflowY: outputTab === 'explain' ? 'hidden' : 'auto', display: 'flex', flexDirection: 'column', gap: (outputTab === 'explain' || outputTab === 'mltools') ? 0 : '1.5rem' }}>
                   {outputTab === 'execute' ? (
                     <>
+                      {(complexity || isAnalyzingComplexity) && (
+                        <div style={{ padding: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.75rem', background: 'rgba(0,0,0,0.2)', border: '1px solid var(--panel-border)', borderRadius: '6px' }}>
+                          <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-3)' }}>Complexity</span>
+                          {isAnalyzingComplexity ? (
+                            <span style={{ fontSize: '0.75rem', color: '#a855f7', display: 'flex', alignItems: 'center', gap: '0.4rem' }}><span className="loader" style={{width: 10, height: 10, borderWidth: 2, borderColor: 'rgba(168,85,247,0.3)', borderTopColor: '#a855f7'}}/> Computing...</span>
+                          ) : complexity ? (
+                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                              <span style={{ fontSize: '0.75rem', background: 'rgba(59,130,246,0.15)', color: '#93c5fd', border: '1px solid rgba(59,130,246,0.3)', padding: '2px 8px', borderRadius: '4px', fontWeight: 600 }}>⏱️ Time: {complexity.time}</span>
+                              <span style={{ fontSize: '0.75rem', background: 'rgba(16,185,129,0.15)', color: '#6ee7b7', border: '1px solid rgba(16,185,129,0.3)', padding: '2px 8px', borderRadius: '4px', fontWeight: 600 }}>💾 Space: {complexity.space}</span>
+                            </div>
+                          ) : null}
+                        </div>
+                      )}
                       {(checkNeedsInput(code, language) || userInput.trim() !== '') && (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flexShrink: 0 }}>
                           <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-secondary)', fontWeight: 600 }}>Standard Input (stdin)</span>
@@ -964,6 +1182,15 @@ ${code}`;
                       </div>
 
                       <div style={{ 
+                        display: 'flex', gap: '0.5rem', padding: '0.4rem 1rem', flexWrap: 'wrap', 
+                        borderTop: '1px solid var(--panel-border)', background: 'var(--panel-bg)',
+                        position: 'sticky', bottom: '65px' 
+                      }}>
+                        <button onClick={() => { setTutorInput('Please review my code for best practices and space/time complexity.'); }} style={{ fontSize: '0.75rem', background: 'rgba(255,255,255,0.05)', cursor: 'pointer', color: 'var(--text-2)', border: '1px solid var(--panel-border)', borderRadius: '4px', padding: '3px 8px' }}>Code Review</button>
+                        <button onClick={() => { setTutorInput('Explain how I can optimize this code.'); }} style={{ fontSize: '0.75rem', background: 'rgba(255,255,255,0.05)', cursor: 'pointer', color: 'var(--text-2)', border: '1px solid var(--panel-border)', borderRadius: '4px', padding: '3px 8px' }}>Optimize Code</button>
+                        <button onClick={() => { setTutorInput('Generate a few edge case scenarios to test this code.'); }} style={{ fontSize: '0.75rem', background: 'rgba(255,255,255,0.05)', cursor: 'pointer', color: 'var(--text-2)', border: '1px solid var(--panel-border)', borderRadius: '4px', padding: '3px 8px' }}>Test Cases</button>
+                      </div>
+                      <div style={{ 
                         display: 'flex', 
                         gap: '0.5rem', 
                         flexShrink: 0, 
@@ -990,13 +1217,62 @@ ${code}`;
                         </button>
                       </div>
                     </div>
+                  ) : outputTab === 'mltools' ? (
+                    <AIToolsPanel
+                      code={code}
+                      language={language}
+                      output={output}
+                      isError={isError}
+                      setCode={setCode}
+                      generateAIContent={generateAIContent}
+                      onToast={(msg, type) => { setToast({ message: msg, type }); setTimeout(() => setToast(null), 3000); }}
+                      allLanguages={ALL_LANGUAGES}
+                    />
                   ) : null}
                 </div>
               </section>
-            </main>
+            </Split>
            </div>
           )}
         </>
+      )}
+      {isSettingsOpen && (
+        <div className="modal-overlay" onClick={() => setIsSettingsOpen(false)}>
+           <div className="settings-modal" onClick={e => e.stopPropagation()}>
+             <div className="settings-header">
+               <span>Editor Settings</span>
+               <button className="btn-close-modal" onClick={() => setIsSettingsOpen(false)}><X size={18} /></button>
+             </div>
+             
+             <div className="settings-group">
+               <label>Theme</label>
+               <select className="settings-input" value={editorSettings.theme} onChange={e => setEditorSettings({...editorSettings, theme: e.target.value})}>
+                  <option value="vs-dark">VS Dark</option>
+                  <option value="vs-light">Light</option>
+                  <option value="hc-black">High Contrast</option>
+               </select>
+             </div>
+             <div className="settings-group">
+               <label>Font Size</label>
+               <input type="number" className="settings-input" value={editorSettings.fontSize} onChange={e => setEditorSettings({...editorSettings, fontSize: Number(e.target.value)})} min="10" max="30" />
+             </div>
+             <div className="settings-group">
+               <label>Tab Size</label>
+               <input type="number" className="settings-input" value={editorSettings.tabSize} onChange={e => setEditorSettings({...editorSettings, tabSize: Number(e.target.value)})} min="2" max="8" />
+             </div>
+             <div className="settings-group">
+               <label>Word Wrap</label>
+               <select className="settings-input" value={editorSettings.wordWrap} onChange={e => setEditorSettings({...editorSettings, wordWrap: e.target.value})}>
+                  <option value="off">Off</option>
+                  <option value="on">On</option>
+               </select>
+             </div>
+             <div className="settings-group">
+               <label>Vim Mode</label>
+               <input type="checkbox" className="settings-checkbox" checked={editorSettings.vimMode} onChange={e => setEditorSettings({...editorSettings, vimMode: e.target.checked})} />
+             </div>
+           </div>
+        </div>
       )}
     </div>
   );

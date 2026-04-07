@@ -1,3 +1,68 @@
+export const ALL_LANGUAGES = [
+  { id: 'javascript', name: 'JavaScript', monaco: 'javascript', wandbox: 'JavaScript', snippet: `console.log("Hello, Web-Based Code Compiler!");\n\n// Write your JavaScript code here\nfunction calculateFactorial(initialNumber) {\n  let result = 1;\n  for(let i = 2; i <= initialNumber; i++) {\n    result *= i;\n  }\n  return result;\n}\n\nconsole.log(calculateFactorial(5));\n` },
+  { id: 'python', name: 'Python', monaco: 'python', wandbox: 'Python', snippet: `print("Hello, Web-Based Code Compiler!")\n\n# Write your Python code here\ndef generate_fibonacci(n):\n    sequence = [0, 1]\n    while len(sequence) < n:\n        sequence.append(sequence[-1] + sequence[-2])\n    return sequence\n\nprint(generate_fibonacci(10))\n` },
+  { id: 'java', name: 'Java', monaco: 'java', wandbox: 'Java', snippet: `class Main {\n    public static void main(String[] args) {\n        System.out.println("Hello, Web-Based Code Compiler!");\n    }\n}\n` },
+  { id: 'cpp', name: 'C++', monaco: 'cpp', wandbox: 'C++', snippet: `#include <iostream>\n\nusing namespace std;\n\nint main() {\n    cout << "Hello, Web-Based Code Compiler!" << endl;\n    return 0;\n}\n` },
+  { id: 'c', name: 'C', monaco: 'c', wandbox: 'C', snippet: `#include <stdio.h>\n\nint main() {\n    printf("Hello, Web-Based Code Compiler!\\n");\n    return 0;\n}\n` },
+  { id: 'csharp', name: 'C#', monaco: 'csharp', wandbox: 'C#', snippet: `using System;\n\nclass MainClass {\n    public static void Main (string[] args) {\n        Console.WriteLine ("Hello, Web-Based Code Compiler!");\n    }\n}\n` },
+  { id: 'go', name: 'Go', monaco: 'go', wandbox: 'Go', snippet: `package main\n\nimport "fmt"\n\nfunc main() {\n    fmt.Println("Hello, Web-Based Code Compiler!")\n}\n` },
+  { id: 'rust', name: 'Rust', monaco: 'rust', wandbox: 'Rust', snippet: `fn main() {\n    println!("Hello, Web-Based Code Compiler!");\n}\n` },
+  { id: 'ruby', name: 'Ruby', monaco: 'ruby', wandbox: 'Ruby', snippet: `puts "Hello, Web-Based Code Compiler!"\n` },
+  { id: 'typescript', name: 'TypeScript', monaco: 'typescript', wandbox: 'TypeScript', snippet: `const message: string = "Hello, Web-Based Code Compiler!";\nconsole.log(message);\n` },
+  { id: 'php', name: 'PHP', monaco: 'php', wandbox: 'PHP', snippet: `<?php\n    echo "Hello, Web-Based Code Compiler!";\n?>\n` },
+  { id: 'scala', name: 'Scala', monaco: 'scala', wandbox: 'Scala', snippet: `object Main {\n  def main(args: Array[String]): Unit = {\n    println("Hello, Web-Based Code Compiler!")\n  }\n}\n` },
+  { id: 'nim', name: 'Nim', monaco: 'plaintext', wandbox: 'Nim', snippet: `echo "Hello, Web-Based Code Compiler!"\n` },
+  { id: 'r', name: 'R', monaco: 'r', wandbox: 'R', snippet: `print("Hello, Web-Based Code Compiler!")\n` },
+  { id: 'julia', name: 'Julia', monaco: 'julia', wandbox: 'Julia', snippet: `println("Hello, Web-Based Code Compiler!")\n` },
+  { id: 'bash', name: 'Bash', monaco: 'shell', wandbox: 'Bash script', snippet: `echo "Hello, Web-Based Code Compiler!"\n` },
+  { id: 'sql', name: 'SQL', monaco: 'sql', wandbox: 'SQL', snippet: `-- You can write SQLite queries here\nCREATE TABLE test (id INTEGER, name TEXT);\nINSERT INTO test VALUES (1, 'Hello, Web-Based Code Compiler!');\nSELECT * FROM test;\n` },
+  { id: 'lua', name: 'Lua', monaco: 'lua', wandbox: 'Lua', snippet: `print("Hello, Web-Based Code Compiler!")\n` },
+  { id: 'perl', name: 'Perl', monaco: 'perl', wandbox: 'Perl', snippet: `print "Hello, Web-Based Code Compiler!\\n";\n` },
+  { id: 'haskell', name: 'Haskell', monaco: 'plaintext', wandbox: 'Haskell', snippet: `main :: IO ()\nmain = putStrLn "Hello, Web-Based Code Compiler!"\n` },
+  { id: 'elixir', name: 'Elixir', monaco: 'plaintext', wandbox: 'Elixir', snippet: `IO.puts "Hello, Web-Based Code Compiler!"\n` },
+  { id: 'd', name: 'D', monaco: 'plaintext', wandbox: 'D', snippet: `import std.stdio;\n\nvoid main()\n{\n    writeln("Hello, Web-Based Code Compiler!");\n}\n` },
+  { id: 'groovy', name: 'Groovy', monaco: 'plaintext', wandbox: 'Groovy', snippet: `println "Hello, Web-Based Code Compiler!"\n` },
+  { id: 'zig', name: 'Zig', monaco: 'plaintext', wandbox: 'Zig', snippet: `const std = @import("std");\n\npub fn main() !void {\n    const stdout = std.io.getStdOut().writer();\n    try stdout.print("Hello, Web-Based Code Compiler!\\n", .{});\n}\n` },
+  { id: 'pascal', name: 'Pascal', monaco: 'pascal', wandbox: 'Pascal', snippet: `program Hello;\nbegin\n  writeln ('Hello, Web-Based Code Compiler!');\nend.\n` },
+  { id: 'lisp', name: 'Lisp', monaco: 'plaintext', wandbox: 'Lisp', snippet: `(print "Hello, Web-Based Code Compiler!")\n` }
+];
+
+export const SNIPPETS = ALL_LANGUAGES.reduce((acc, lang) => {
+  acc[lang.id] = lang.snippet;
+  return acc;
+}, {});
+
+export const LANGUAGES = ALL_LANGUAGES.map(({ id, name, monaco }) => ({ id, name, monaco }));
+
+export const FALLBACK_COMPILERS = {
+  javascript: 'nodejs-head',
+  python:     'cpython-3.14.0',
+  java:       'openjdk-head',
+  cpp:        'gcc-head',
+  c:          'gcc-head-c',
+  csharp:     'mono-head',
+  go:         'go-head',
+  rust:       'rust-head',
+  ruby:       'ruby-head',
+  typescript: 'typescript-5.6.3',
+  php:        'php-head',
+  scala:      'scala-3.3.4',
+  nim:        'nim-head',
+  r:          'r-head',
+  julia:      'julia-head',
+  bash:       'bash',
+  sql:        'sqlite-head',
+  lua:        'lua-head',
+  perl:       'perl-head',
+  haskell:    'ghc-head',
+  elixir:     'elixir-head',
+  d:          'dmd-head',
+  groovy:     'groovy-head',
+  zig:        'zig-head',
+  pascal:     'fpc-head',
+  lisp:       'sbcl-head',
+};
+
 export const DSA_PROBLEMS = [
   {
     id: 1,
@@ -667,196 +732,1144 @@ int main() {
     return 0;
 }`,
   },
+  {
+    id: 49,
+    title: 'Group Anagrams',
+    difficulty: 'Medium',
+    topic: 'Array, Hash Table, String',
+    url: 'https://leetcode.com/problems/group-anagrams/',
+    description: `Given an array of strings strs, group the anagrams together. You can return the answer in any order.\n\nAn Anagram is a word or phrase formed by rearranging the letters of a different word or phrase, typically using all the original letters exactly once.`,
+    examples: [
+      { input: 'strs = ["eat","tea","tan","ate","nat","bat"]', output: '[["bat"],["nat","tan"],["ate","eat","tea"]]' },
+      { input: 'strs = [""]', output: '[[""]]' },
+      { input: 'strs = ["a"]', output: '[["a"]]' },
+    ],
+    constraints: '1 ≤ strs.length ≤ 10⁴\n0 ≤ strs[i].length ≤ 100\nstrs[i] consists of lowercase English letters.',
+    templateCode: `#include <iostream>\n#include <vector>\n#include <string>\n#include <unordered_map>\n#include <algorithm>\nusing namespace std;\n\nclass Solution {\npublic:\n    vector<vector<string>> groupAnagrams(vector<string>& strs) {\n        // Write your solution here\n\n    }\n};\n\nint main() {\n    Solution sol;\n    { vector<string> s={"eat","tea","tan","ate","nat","bat"}; auto r=sol.groupAnagrams(s); cout<<"Test 1: "<<(r.size()==3?"PASS":"FAIL")<<"\\\\n"; }\n    { vector<string> s={""}; auto r=sol.groupAnagrams(s); cout<<"Test 2: "<<(r.size()==1?"PASS":"FAIL")<<"\\\\n"; }\n    { vector<string> s={"a"}; auto r=sol.groupAnagrams(s); cout<<"Test 3: "<<(r.size()==1?"PASS":"FAIL")<<"\\\\n"; }\n    return 0;\n}`,
+  },
+  {
+    id: 56,
+    title: 'Merge Intervals',
+    difficulty: 'Medium',
+    topic: 'Array, Sorting',
+    url: 'https://leetcode.com/problems/merge-intervals/',
+    description: `Given an array of intervals where intervals[i] = [startᵢ, endᵢ], merge all overlapping intervals, and return an array of the non-overlapping intervals that cover all the intervals in the input.`,
+    examples: [
+      { input: 'intervals = [[1,3],[2,6],[8,10],[15,18]]', output: '[[1,6],[8,10],[15,18]]', explanation: 'Since intervals [1,3] and [2,6] overlap, merge them into [1,6].' },
+      { input: 'intervals = [[1,4],[4,5]]', output: '[[1,5]]', explanation: 'Intervals [1,4] and [4,5] are considered overlapping.' },
+    ],
+    constraints: '1 ≤ intervals.length ≤ 10⁴\nintervals[i].length == 2\n0 ≤ startᵢ ≤ endᵢ ≤ 10⁴',
+    templateCode: `#include <iostream>\n#include <vector>\n#include <algorithm>\nusing namespace std;\n\nclass Solution {\npublic:\n    vector<vector<int>> merge(vector<vector<int>>& intervals) {\n        // Write your solution here\n\n    }\n};\n\nint main() {\n    Solution sol;\n    { vector<vector<int>> i={{1,3},{2,6},{8,10},{15,18}}; auto r=sol.merge(i); cout<<"Test 1: "<<(r==vector<vector<int>>{{1,6},{8,10},{15,18}}?"PASS":"FAIL")<<"\\\\n"; }\n    { vector<vector<int>> i={{1,4},{4,5}}; auto r=sol.merge(i); cout<<"Test 2: "<<(r==vector<vector<int>>{{1,5}}?"PASS":"FAIL")<<"\\\\n"; }\n    { vector<vector<int>> i={{1,4},{0,4}}; auto r=sol.merge(i); cout<<"Test 3: "<<(r.size()==1?"PASS":"FAIL")<<"\\\\n"; }\n    return 0;\n}`,
+  },
+  {
+    id: 76,
+    title: 'Minimum Window Substring',
+    difficulty: 'Hard',
+    topic: 'Hash Table, String, Sliding Window',
+    url: 'https://leetcode.com/problems/minimum-window-substring/',
+    description: `Given two strings s and t of lengths m and n respectively, return the minimum window substring of s such that every character in t (including duplicates) is included in the window. If there is no such substring, return the empty string "".\n\nThe testcases will be generated such that the answer is unique.`,
+    examples: [
+      { input: 's = "ADOBECODEBANC", t = "ABC"', output: '"BANC"', explanation: 'The minimum window substring "BANC" includes A, B, and C from string t.' },
+      { input: 's = "a", t = "a"', output: '"a"' },
+      { input: 's = "a", t = "aa"', output: '""', explanation: 'Both a\'s from t must be in the window.' },
+    ],
+    constraints: 'm == s.length\nn == t.length\n1 ≤ m, n ≤ 10⁵\ns and t consist of uppercase and lowercase English letters.',
+    templateCode: `#include <iostream>\n#include <string>\n#include <unordered_map>\nusing namespace std;\n\nclass Solution {\npublic:\n    string minWindow(string s, string t) {\n        // Write your solution here\n\n    }\n};\n\nint main() {\n    Solution sol;\n    cout<<"Test 1: "<<(sol.minWindow("ADOBECODEBANC","ABC")=="BANC"?"PASS":"FAIL")<<"\\\\n";\n    cout<<"Test 2: "<<(sol.minWindow("a","a")=="a"?"PASS":"FAIL")<<"\\\\n";\n    cout<<"Test 3: "<<(sol.minWindow("a","aa")==""?"PASS":"FAIL")<<"\\\\n";\n    cout<<"Test 4: "<<(sol.minWindow("ab","b")=="b"?"PASS":"FAIL")<<"\\\\n";\n    return 0;\n}`,
+  },
+  {
+    id: 78,
+    title: 'Subsets',
+    difficulty: 'Medium',
+    topic: 'Array, Backtracking, Bit Manipulation',
+    url: 'https://leetcode.com/problems/subsets/',
+    description: `Given an integer array nums of unique elements, return all possible subsets (the power set).\n\nThe solution set must not contain duplicate subsets. Return the solution in any order.`,
+    examples: [
+      { input: 'nums = [1,2,3]', output: '[[],[1],[2],[1,2],[3],[1,3],[2,3],[1,2,3]]' },
+      { input: 'nums = [0]', output: '[[],[0]]' },
+    ],
+    constraints: '1 ≤ nums.length ≤ 10\n-10 ≤ nums[i] ≤ 10\nAll the numbers of nums are unique.',
+    templateCode: `#include <iostream>\n#include <vector>\nusing namespace std;\n\nclass Solution {\npublic:\n    vector<vector<int>> subsets(vector<int>& nums) {\n        // Write your solution here\n\n    }\n};\n\nint main() {\n    Solution sol;\n    { vector<int> n={1,2,3}; auto r=sol.subsets(n); cout<<"Test 1: "<<(r.size()==8?"PASS":"FAIL")<<"\\\\n"; }\n    { vector<int> n={0}; auto r=sol.subsets(n); cout<<"Test 2: "<<(r.size()==2?"PASS":"FAIL")<<"\\\\n"; }\n    { vector<int> n={1,2}; auto r=sol.subsets(n); cout<<"Test 3: "<<(r.size()==4?"PASS":"FAIL")<<"\\\\n"; }\n    return 0;\n}`,
+  },
+  {
+    id: 98,
+    title: 'Validate Binary Search Tree',
+    difficulty: 'Medium',
+    topic: 'Binary Tree, DFS, BST',
+    url: 'https://leetcode.com/problems/validate-binary-search-tree/',
+    description: `Given the root of a binary tree, determine if it is a valid binary search tree (BST).\n\nA valid BST is defined as follows:\n- The left subtree of a node contains only nodes with keys less than the node's key.\n- The right subtree of a node contains only nodes with keys greater than the node's key.\n- Both the left and right subtrees must also be binary search trees.`,
+    examples: [
+      { input: 'root = [2,1,3]', output: 'true' },
+      { input: 'root = [5,1,4,null,null,3,6]', output: 'false', explanation: 'The root node value is 5 but its right child value is 4.' },
+    ],
+    constraints: 'The number of nodes in the tree is in the range [1, 10⁴].\n-2³¹ ≤ Node.val ≤ 2³¹ - 1',
+    templateCode: `#include <iostream>\n#include <climits>\nusing namespace std;\n\nstruct TreeNode {\n    int val; TreeNode *left; TreeNode *right;\n    TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}\n};\n\nclass Solution {\npublic:\n    bool isValidBST(TreeNode* root) {\n        // Write your solution here\n\n    }\n};\n\nint main() {\n    Solution sol;\n    { TreeNode* r=new TreeNode(2); r->left=new TreeNode(1); r->right=new TreeNode(3); cout<<"Test 1: "<<(sol.isValidBST(r)?"PASS":"FAIL")<<"\\\\n"; }\n    { TreeNode* r=new TreeNode(5); r->left=new TreeNode(1); r->right=new TreeNode(4); r->right->left=new TreeNode(3); r->right->right=new TreeNode(6); cout<<"Test 2: "<<(!sol.isValidBST(r)?"PASS":"FAIL")<<"\\\\n"; }\n    { TreeNode* r=new TreeNode(1); r->left=new TreeNode(1); cout<<"Test 3: "<<(!sol.isValidBST(r)?"PASS":"FAIL")<<"\\\\n"; }\n    return 0;\n}`,
+  },
+  {
+    id: 102,
+    title: 'Binary Tree Level Order Traversal',
+    difficulty: 'Medium',
+    topic: 'Binary Tree, BFS',
+    url: 'https://leetcode.com/problems/binary-tree-level-order-traversal/',
+    description: `Given the root of a binary tree, return the level order traversal of its nodes' values. (i.e., from left to right, level by level).`,
+    examples: [
+      { input: 'root = [3,9,20,null,null,15,7]', output: '[[3],[9,20],[15,7]]' },
+      { input: 'root = [1]', output: '[[1]]' },
+      { input: 'root = []', output: '[]' },
+    ],
+    constraints: 'The number of nodes in the tree is in the range [0, 2000].\n-1000 ≤ Node.val ≤ 1000',
+    templateCode: `#include <iostream>\n#include <vector>\n#include <queue>\nusing namespace std;\n\nstruct TreeNode {\n    int val; TreeNode *left; TreeNode *right;\n    TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}\n};\n\nclass Solution {\npublic:\n    vector<vector<int>> levelOrder(TreeNode* root) {\n        // Write your solution here\n\n    }\n};\n\nint main() {\n    Solution sol;\n    { TreeNode* r=new TreeNode(3); r->left=new TreeNode(9); r->right=new TreeNode(20); r->right->left=new TreeNode(15); r->right->right=new TreeNode(7); auto res=sol.levelOrder(r); cout<<"Test 1: "<<(res==vector<vector<int>>{{3},{9,20},{15,7}}?"PASS":"FAIL")<<"\\\\n"; }\n    { TreeNode* r=new TreeNode(1); auto res=sol.levelOrder(r); cout<<"Test 2: "<<(res==vector<vector<int>>{{1}}?"PASS":"FAIL")<<"\\\\n"; }\n    { auto res=sol.levelOrder(nullptr); cout<<"Test 3: "<<(res.empty()?"PASS":"FAIL")<<"\\\\n"; }\n    return 0;\n}`,
+  },
+  {
+    id: 104,
+    title: 'Maximum Depth of Binary Tree',
+    difficulty: 'Easy',
+    topic: 'Binary Tree, DFS, BFS',
+    url: 'https://leetcode.com/problems/maximum-depth-of-binary-tree/',
+    description: `Given the root of a binary tree, return its maximum depth.\n\nA binary tree's maximum depth is the number of nodes along the longest path from the root node down to the farthest leaf node.`,
+    examples: [
+      { input: 'root = [3,9,20,null,null,15,7]', output: '3' },
+      { input: 'root = [1,null,2]', output: '2' },
+    ],
+    constraints: 'The number of nodes in the tree is in the range [0, 10⁴].\n-100 ≤ Node.val ≤ 100',
+    templateCode: `#include <iostream>\nusing namespace std;\n\nstruct TreeNode {\n    int val; TreeNode *left; TreeNode *right;\n    TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}\n};\n\nclass Solution {\npublic:\n    int maxDepth(TreeNode* root) {\n        // Write your solution here\n\n    }\n};\n\nint main() {\n    Solution sol;\n    { TreeNode* r=new TreeNode(3); r->left=new TreeNode(9); r->right=new TreeNode(20); r->right->left=new TreeNode(15); r->right->right=new TreeNode(7); cout<<"Test 1: "<<(sol.maxDepth(r)==3?"PASS":"FAIL")<<"\\\\n"; }\n    { TreeNode* r=new TreeNode(1); r->right=new TreeNode(2); cout<<"Test 2: "<<(sol.maxDepth(r)==2?"PASS":"FAIL")<<"\\\\n"; }\n    { cout<<"Test 3: "<<(sol.maxDepth(nullptr)==0?"PASS":"FAIL")<<"\\\\n"; }\n    return 0;\n}`,
+  },
+  {
+    id: 136,
+    title: 'Single Number',
+    difficulty: 'Easy',
+    topic: 'Array, Bit Manipulation',
+    url: 'https://leetcode.com/problems/single-number/',
+    description: `Given a non-empty array of integers nums, every element appears twice except for one. Find that single one.\n\nYou must implement a solution with a linear runtime complexity and use only constant extra space.`,
+    examples: [
+      { input: 'nums = [2,2,1]', output: '1' },
+      { input: 'nums = [4,1,2,1,2]', output: '4' },
+      { input: 'nums = [1]', output: '1' },
+    ],
+    constraints: '1 ≤ nums.length ≤ 3 * 10⁴\n-3 * 10⁴ ≤ nums[i] ≤ 3 * 10⁴\nEach element appears twice except for one element which appears once.',
+    templateCode: `#include <iostream>\n#include <vector>\nusing namespace std;\n\nclass Solution {\npublic:\n    int singleNumber(vector<int>& nums) {\n        // Write your solution here\n\n    }\n};\n\nint main() {\n    Solution sol;\n    { vector<int> n={2,2,1}; cout<<"Test 1: "<<(sol.singleNumber(n)==1?"PASS":"FAIL")<<"\\\\n"; }\n    { vector<int> n={4,1,2,1,2}; cout<<"Test 2: "<<(sol.singleNumber(n)==4?"PASS":"FAIL")<<"\\\\n"; }\n    { vector<int> n={1}; cout<<"Test 3: "<<(sol.singleNumber(n)==1?"PASS":"FAIL")<<"\\\\n"; }\n    { vector<int> n={-1,-1,-2}; cout<<"Test 4: "<<(sol.singleNumber(n)==-2?"PASS":"FAIL")<<"\\\\n"; }\n    return 0;\n}`,
+  },
+  {
+    id: 141,
+    title: 'Linked List Cycle',
+    difficulty: 'Easy',
+    topic: 'Linked List, Two Pointers',
+    url: 'https://leetcode.com/problems/linked-list-cycle/',
+    description: `Given head, the head of a linked list, determine if the linked list has a cycle in it.\n\nThere is a cycle in a linked list if there is some node in the list that can be reached again by continuously following the next pointer. Internally, pos is used to denote the index of the node that tail's next pointer is connected to. Note that pos is not passed as a parameter.\n\nReturn true if there is a cycle in the linked list. Otherwise, return false.`,
+    examples: [
+      { input: 'head = [3,2,0,-4], pos = 1', output: 'true', explanation: 'There is a cycle where tail connects to the 1st node.' },
+      { input: 'head = [1,2], pos = 0', output: 'true' },
+      { input: 'head = [1], pos = -1', output: 'false' },
+    ],
+    constraints: 'The number of nodes in the list is in the range [0, 10⁴].\n-10⁵ ≤ Node.val ≤ 10⁵\npos is -1 or a valid index in the linked list.',
+    templateCode: `#include <iostream>\nusing namespace std;\n\nstruct ListNode {\n    int val; ListNode *next;\n    ListNode(int x) : val(x), next(nullptr) {}\n};\n\nclass Solution {\npublic:\n    bool hasCycle(ListNode *head) {\n        // Write your solution here (Floyd's cycle detection)\n\n    }\n};\n\nint main() {\n    Solution sol;\n    { ListNode* h=new ListNode(3); h->next=new ListNode(2); h->next->next=new ListNode(0); h->next->next->next=new ListNode(-4); h->next->next->next->next=h->next; cout<<"Test 1: "<<(sol.hasCycle(h)?"PASS":"FAIL")<<"\\\\n"; }\n    { ListNode* h=new ListNode(1); h->next=new ListNode(2); h->next->next=h; cout<<"Test 2: "<<(sol.hasCycle(h)?"PASS":"FAIL")<<"\\\\n"; }\n    { ListNode* h=new ListNode(1); cout<<"Test 3: "<<(!sol.hasCycle(h)?"PASS":"FAIL")<<"\\\\n"; }\n    { cout<<"Test 4: "<<(!sol.hasCycle(nullptr)?"PASS":"FAIL")<<"\\\\n"; }\n    return 0;\n}`,
+  },
+  {
+    id: 152,
+    title: 'Maximum Product Subarray',
+    difficulty: 'Medium',
+    topic: 'Array, DP',
+    url: 'https://leetcode.com/problems/maximum-product-subarray/',
+    description: `Given an integer array nums, find a subarray that has the largest product, and return the product.\n\nThe test cases are generated so that the answer will fit in a 32-bit integer.`,
+    examples: [
+      { input: 'nums = [2,3,-2,4]', output: '6', explanation: '[2,3] has the largest product 6.' },
+      { input: 'nums = [-2,0,-1]', output: '0', explanation: 'The result cannot be 2, because [-2,-1] is not a subarray.' },
+    ],
+    constraints: '1 ≤ nums.length ≤ 2 * 10⁴\n-10 ≤ nums[i] ≤ 10\nThe product of any prefix or suffix is guaranteed to fit in a 32-bit integer.',
+    templateCode: `#include <iostream>\n#include <vector>\nusing namespace std;\n\nclass Solution {\npublic:\n    int maxProduct(vector<int>& nums) {\n        // Write your solution here\n\n    }\n};\n\nint main() {\n    Solution sol;\n    { vector<int> n={2,3,-2,4}; cout<<"Test 1: "<<(sol.maxProduct(n)==6?"PASS":"FAIL")<<"\\\\n"; }\n    { vector<int> n={-2,0,-1}; cout<<"Test 2: "<<(sol.maxProduct(n)==0?"PASS":"FAIL")<<"\\\\n"; }\n    { vector<int> n={-2,3,-4}; cout<<"Test 3: "<<(sol.maxProduct(n)==24?"PASS":"FAIL")<<"\\\\n"; }\n    { vector<int> n={-2}; cout<<"Test 4: "<<(sol.maxProduct(n)==-2?"PASS":"FAIL")<<"\\\\n"; }\n    return 0;\n}`,
+  },
+  {
+    id: 155,
+    title: 'Min Stack',
+    difficulty: 'Medium',
+    topic: 'Stack, Design',
+    url: 'https://leetcode.com/problems/min-stack/',
+    description: `Design a stack that supports push, pop, top, and retrieving the minimum element in constant time.\n\nImplement the MinStack class:\n- MinStack() initializes the stack object.\n- void push(int val) pushes the element val onto the stack.\n- void pop() removes the element on the top of the stack.\n- int top() gets the top element of the stack.\n- int getMin() retrieves the minimum element in the stack.\n\nYou must implement a solution with O(1) time complexity for each function.`,
+    examples: [
+      { input: '["MinStack","push","push","push","getMin","pop","top","getMin"]\n[[],[-2],[0],[-3],[],[],[],[]]', output: '[null,null,null,null,-3,null,0,-2]' },
+    ],
+    constraints: '-2³¹ ≤ val ≤ 2³¹ - 1\nMethods pop, top and getMin operations will always be called on non-empty stacks.\nAt most 3 * 10⁴ calls will be made to push, pop, top, and getMin.',
+    templateCode: `#include <iostream>\n#include <stack>\nusing namespace std;\n\nclass MinStack {\npublic:\n    MinStack() {\n        // Initialize here\n\n    }\n    void push(int val) {\n        // Write your solution here\n\n    }\n    void pop() {\n        // Write your solution here\n\n    }\n    int top() {\n        // Write your solution here\n\n    }\n    int getMin() {\n        // Write your solution here\n\n    }\n};\n\nint main() {\n    MinStack ms;\n    ms.push(-2); ms.push(0); ms.push(-3);\n    cout<<"Test 1: "<<(ms.getMin()==-3?"PASS":"FAIL")<<"\\\\n";\n    ms.pop();\n    cout<<"Test 2: "<<(ms.top()==0?"PASS":"FAIL")<<"\\\\n";\n    cout<<"Test 3: "<<(ms.getMin()==-2?"PASS":"FAIL")<<"\\\\n";\n    return 0;\n}`,
+  },
+  {
+    id: 191,
+    title: 'Number of 1 Bits',
+    difficulty: 'Easy',
+    topic: 'Bit Manipulation',
+    url: 'https://leetcode.com/problems/number-of-1-bits/',
+    description: `Write a function that takes the binary representation of a positive integer and returns the number of set bits it has (also known as the Hamming weight).`,
+    examples: [
+      { input: 'n = 11', output: '3', explanation: 'The input binary string 1011 has three set bits.' },
+      { input: 'n = 128', output: '1', explanation: 'The input binary string 10000000 has one set bit.' },
+      { input: 'n = 2147483645', output: '30' },
+    ],
+    constraints: '1 ≤ n ≤ 2³¹ - 1',
+    templateCode: `#include <iostream>\nusing namespace std;\n\nclass Solution {\npublic:\n    int hammingWeight(int n) {\n        // Write your solution here\n\n    }\n};\n\nint main() {\n    Solution sol;\n    cout<<"Test 1: "<<(sol.hammingWeight(11)==3?"PASS":"FAIL")<<"\\\\n";\n    cout<<"Test 2: "<<(sol.hammingWeight(128)==1?"PASS":"FAIL")<<"\\\\n";\n    cout<<"Test 3: "<<(sol.hammingWeight(7)==3?"PASS":"FAIL")<<"\\\\n";\n    cout<<"Test 4: "<<(sol.hammingWeight(1)==1?"PASS":"FAIL")<<"\\\\n";\n    return 0;\n}`,
+  },
+  {
+    id: 198,
+    title: 'House Robber',
+    difficulty: 'Medium',
+    topic: 'Array, DP',
+    url: 'https://leetcode.com/problems/house-robber/',
+    description: `You are a professional robber planning to rob houses along a street. Each house has a certain amount of money stashed, the only constraint stopping you from robbing each of them is that adjacent houses have security systems connected and it will automatically contact the police if two adjacent houses were broken into on the same night.\n\nGiven an integer array nums representing the amount of money of each house, return the maximum amount of money you can rob tonight without alerting the police.`,
+    examples: [
+      { input: 'nums = [1,2,3,1]', output: '4', explanation: 'Rob house 1 (money = 1) and then rob house 3 (money = 3). Total = 1 + 3 = 4.' },
+      { input: 'nums = [2,7,9,3,1]', output: '12', explanation: 'Rob house 1 (2), house 3 (9), and house 5 (1). Total = 2 + 9 + 1 = 12.' },
+    ],
+    constraints: '1 ≤ nums.length ≤ 100\n0 ≤ nums[i] ≤ 400',
+    templateCode: `#include <iostream>\n#include <vector>\nusing namespace std;\n\nclass Solution {\npublic:\n    int rob(vector<int>& nums) {\n        // Write your solution here\n\n    }\n};\n\nint main() {\n    Solution sol;\n    { vector<int> n={1,2,3,1}; cout<<"Test 1: "<<(sol.rob(n)==4?"PASS":"FAIL")<<"\\\\n"; }\n    { vector<int> n={2,7,9,3,1}; cout<<"Test 2: "<<(sol.rob(n)==12?"PASS":"FAIL")<<"\\\\n"; }\n    { vector<int> n={0}; cout<<"Test 3: "<<(sol.rob(n)==0?"PASS":"FAIL")<<"\\\\n"; }\n    { vector<int> n={100}; cout<<"Test 4: "<<(sol.rob(n)==100?"PASS":"FAIL")<<"\\\\n"; }\n    { vector<int> n={2,1,1,2}; cout<<"Test 5: "<<(sol.rob(n)==4?"PASS":"FAIL")<<"\\\\n"; }\n    return 0;\n}`,
+  },
+  {
+    id: 226,
+    title: 'Invert Binary Tree',
+    difficulty: 'Easy',
+    topic: 'Binary Tree, DFS, BFS',
+    url: 'https://leetcode.com/problems/invert-binary-tree/',
+    description: `Given the root of a binary tree, invert the tree, and return its root.\n\nInverting a tree means swapping every left child with its corresponding right child.`,
+    examples: [
+      { input: 'root = [4,2,7,1,3,6,9]', output: '[4,7,2,9,6,3,1]' },
+      { input: 'root = [2,1,3]', output: '[2,3,1]' },
+      { input: 'root = []', output: '[]' },
+    ],
+    constraints: 'The number of nodes in the tree is in the range [0, 100].\n-100 ≤ Node.val ≤ 100',
+    templateCode: `#include <iostream>\nusing namespace std;\n\nstruct TreeNode {\n    int val; TreeNode *left; TreeNode *right;\n    TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}\n};\n\nclass Solution {\npublic:\n    TreeNode* invertTree(TreeNode* root) {\n        // Write your solution here\n\n    }\n};\n\nint main() {\n    Solution sol;\n    { TreeNode* r=new TreeNode(4); r->left=new TreeNode(2); r->right=new TreeNode(7); r->left->left=new TreeNode(1); r->left->right=new TreeNode(3); r->right->left=new TreeNode(6); r->right->right=new TreeNode(9); auto res=sol.invertTree(r); cout<<"Test 1: "<<(res->left->val==7&&res->right->val==2?"PASS":"FAIL")<<"\\\\n"; }\n    { TreeNode* r=new TreeNode(2); r->left=new TreeNode(1); r->right=new TreeNode(3); auto res=sol.invertTree(r); cout<<"Test 2: "<<(res->left->val==3&&res->right->val==1?"PASS":"FAIL")<<"\\\\n"; }\n    { cout<<"Test 3: "<<(sol.invertTree(nullptr)==nullptr?"PASS":"FAIL")<<"\\\\n"; }\n    return 0;\n}`,
+  },
+  {
+    id: 322,
+    title: 'Coin Change',
+    difficulty: 'Medium',
+    topic: 'Array, DP, BFS',
+    url: 'https://leetcode.com/problems/coin-change/',
+    description: `You are given an integer array coins representing coins of different denominations and an integer amount representing a total amount of money.\n\nReturn the fewest number of coins that you need to make up that amount. If that amount of money cannot be made up by any combination of the coins, return -1.\n\nYou may assume that you have an infinite number of each kind of coin.`,
+    examples: [
+      { input: 'coins = [1,5,10], amount = 12', output: '3', explanation: '12 = 10 + 1 + 1' },
+      { input: 'coins = [2], amount = 3', output: '-1' },
+      { input: 'coins = [1], amount = 0', output: '0' },
+    ],
+    constraints: '1 ≤ coins.length ≤ 12\n1 ≤ coins[i] ≤ 2³¹ - 1\n0 ≤ amount ≤ 10⁴',
+    templateCode: `#include <iostream>\n#include <vector>\nusing namespace std;\n\nclass Solution {\npublic:\n    int coinChange(vector<int>& coins, int amount) {\n        // Write your solution here\n\n    }\n};\n\nint main() {\n    Solution sol;\n    { vector<int> c={1,5,10}; cout<<"Test 1: "<<(sol.coinChange(c,12)==3?"PASS":"FAIL")<<"\\\\n"; }\n    { vector<int> c={2}; cout<<"Test 2: "<<(sol.coinChange(c,3)==-1?"PASS":"FAIL")<<"\\\\n"; }\n    { vector<int> c={1}; cout<<"Test 3: "<<(sol.coinChange(c,0)==0?"PASS":"FAIL")<<"\\\\n"; }\n    { vector<int> c={1,2,5}; cout<<"Test 4: "<<(sol.coinChange(c,11)==3?"PASS":"FAIL")<<"\\\\n"; }\n    { vector<int> c={2}; cout<<"Test 5: "<<(sol.coinChange(c,0)==0?"PASS":"FAIL")<<"\\\\n"; }\n    return 0;\n}`,
+  },
+  {
+    id: 46,
+    title: 'Permutations',
+    difficulty: 'Medium',
+    topic: 'Array, Backtracking',
+    url: 'https://leetcode.com/problems/permutations/',
+    description: `Given an array nums of distinct integers, return all the possible permutations. You can return the answer in any order.`,
+    examples: [
+      { input: 'nums = [1,2,3]', output: '[[1,2,3],[1,3,2],[2,1,3],[2,3,1],[3,1,2],[3,2,1]]' },
+      { input: 'nums = [0,1]', output: '[[0,1],[1,0]]' },
+      { input: 'nums = [1]', output: '[[1]]' },
+    ],
+    constraints: '1 ≤ nums.length ≤ 6\n-10 ≤ nums[i] ≤ 10\nAll the integers of nums are unique.',
+    templateCode: `#include <iostream>\n#include <vector>\nusing namespace std;\n\nclass Solution {\npublic:\n    vector<vector<int>> permute(vector<int>& nums) {\n        // Write your solution here\n\n    }\n};\n\nint main() {\n    Solution sol;\n    { vector<int> n={1,2,3}; auto r=sol.permute(n); cout<<"Test 1: "<<(r.size()==6?"PASS":"FAIL")<<"\\\\n"; }\n    { vector<int> n={0,1}; auto r=sol.permute(n); cout<<"Test 2: "<<(r.size()==2?"PASS":"FAIL")<<"\\\\n"; }\n    { vector<int> n={1}; auto r=sol.permute(n); cout<<"Test 3: "<<(r.size()==1?"PASS":"FAIL")<<"\\\\n"; }\n    { vector<int> n={1,2,3,4}; auto r=sol.permute(n); cout<<"Test 4: "<<(r.size()==24?"PASS":"FAIL")<<"\\\\n"; }\n    return 0;\n}`,
+  },
+  {
+    id: 215,
+    title: 'Kth Largest Element in an Array',
+    difficulty: 'Medium',
+    topic: 'Array, Heap, Sorting',
+    url: 'https://leetcode.com/problems/kth-largest-element-in-an-array/',
+    description: `Given an integer array nums and an integer k, return the kth largest element in the array.\n\nNote that it is the kth largest element in the sorted order, not the kth distinct element.\n\nCan you solve it without sorting?`,
+    examples: [
+      { input: 'nums = [3,2,1,5,6,4], k = 2', output: '5' },
+      { input: 'nums = [3,2,3,1,2,4,5,5,6], k = 4', output: '4' },
+    ],
+    constraints: '1 ≤ k ≤ nums.length ≤ 10⁵\n-10⁴ ≤ nums[i] ≤ 10⁴',
+    templateCode: `#include <iostream>\n#include <vector>\n#include <queue>\nusing namespace std;\n\nclass Solution {\npublic:\n    int findKthLargest(vector<int>& nums, int k) {\n        // Write your solution here\n\n    }\n};\n\nint main() {\n    Solution sol;\n    { vector<int> n={3,2,1,5,6,4}; cout<<"Test 1: "<<(sol.findKthLargest(n,2)==5?"PASS":"FAIL")<<"\\\\n"; }\n    { vector<int> n={3,2,3,1,2,4,5,5,6}; cout<<"Test 2: "<<(sol.findKthLargest(n,4)==4?"PASS":"FAIL")<<"\\\\n"; }\n    { vector<int> n={1}; cout<<"Test 3: "<<(sol.findKthLargest(n,1)==1?"PASS":"FAIL")<<"\\\\n"; }\n    { vector<int> n={-1,-2,-3,-4}; cout<<"Test 4: "<<(sol.findKthLargest(n,2)==-2?"PASS":"FAIL")<<"\\\\n"; }\n    return 0;\n}`,
+  },
+  {
+    id: 300,
+    title: 'Longest Increasing Subsequence',
+    difficulty: 'Medium',
+    topic: 'Array, Binary Search, DP',
+    url: 'https://leetcode.com/problems/longest-increasing-subsequence/',
+    description: `Given an integer array nums, return the length of the longest strictly increasing subsequence.`,
+    examples: [
+      { input: 'nums = [10,9,2,5,3,7,101,18]', output: '4', explanation: 'The longest increasing subsequence is [2,3,7,101], therefore the length is 4.' },
+      { input: 'nums = [0,1,0,3,2,3]', output: '4' },
+      { input: 'nums = [7,7,7,7,7,7,7]', output: '1' },
+    ],
+    constraints: '1 ≤ nums.length ≤ 2500\n-10⁴ ≤ nums[i] ≤ 10⁴',
+    templateCode: `#include <iostream>\n#include <vector>\nusing namespace std;\n\nclass Solution {\npublic:\n    int lengthOfLIS(vector<int>& nums) {\n        // Write your solution here\n\n    }\n};\n\nint main() {\n    Solution sol;\n    { vector<int> n={10,9,2,5,3,7,101,18}; cout<<"Test 1: "<<(sol.lengthOfLIS(n)==4?"PASS":"FAIL")<<"\\\\n"; }\n    { vector<int> n={0,1,0,3,2,3}; cout<<"Test 2: "<<(sol.lengthOfLIS(n)==4?"PASS":"FAIL")<<"\\\\n"; }\n    { vector<int> n={7,7,7,7,7,7,7}; cout<<"Test 3: "<<(sol.lengthOfLIS(n)==1?"PASS":"FAIL")<<"\\\\n"; }\n    { vector<int> n={1,2,3,4,5}; cout<<"Test 4: "<<(sol.lengthOfLIS(n)==5?"PASS":"FAIL")<<"\\\\n"; }\n    return 0;\n}`,
+  },
+  {
+    id: 39,
+    title: 'Combination Sum',
+    difficulty: 'Medium',
+    topic: 'Array, Backtracking',
+    url: 'https://leetcode.com/problems/combination-sum/',
+    description: `Given an array of distinct integers candidates and a target integer target, return a list of all unique combinations of candidates where the chosen numbers sum to target. You may return the combinations in any order.\n\nThe same number may be chosen from candidates an unlimited number of times. Two combinations are unique if the frequency of at least one of the chosen numbers is different.`,
+    examples: [
+      { input: 'candidates = [2,3,6,7], target = 7', output: '[[2,2,3],[7]]' },
+      { input: 'candidates = [2,3,5], target = 8', output: '[[2,2,2,2],[2,3,3],[3,5]]' },
+      { input: 'candidates = [2], target = 1', output: '[]' },
+    ],
+    constraints: '1 ≤ candidates.length ≤ 30\n2 ≤ candidates[i] ≤ 40\nAll elements of candidates are distinct.\n1 ≤ target ≤ 40',
+    templateCode: `#include <iostream>\n#include <vector>\n#include <algorithm>\nusing namespace std;\n\nclass Solution {\npublic:\n    vector<vector<int>> combinationSum(vector<int>& candidates, int target) {\n        // Write your solution here\n\n    }\n};\n\nint main() {\n    Solution sol;\n    { vector<int> c={2,3,6,7}; auto r=sol.combinationSum(c,7); sort(r.begin(),r.end()); cout<<"Test 1: "<<(r.size()==2?"PASS":"FAIL")<<"\\\\n"; }\n    { vector<int> c={2,3,5}; auto r=sol.combinationSum(c,8); cout<<"Test 2: "<<(r.size()==3?"PASS":"FAIL")<<"\\\\n"; }\n    { vector<int> c={2}; auto r=sol.combinationSum(c,1); cout<<"Test 3: "<<(r.empty()?"PASS":"FAIL")<<"\\\\n"; }\n    return 0;\n}`,
+  },
+  {
+    id: 55,
+    title: 'Jump Game',
+    difficulty: 'Medium',
+    topic: 'Array, Greedy, DP',
+    url: 'https://leetcode.com/problems/jump-game/',
+    description: `You are given an integer array nums. You are initially positioned at the array's first index, and each element in the array represents your maximum jump length at that position.\n\nReturn true if you can reach the last index, or false otherwise.`,
+    examples: [
+      { input: 'nums = [2,3,1,1,4]', output: 'true', explanation: 'Jump 1 step from index 0 to 1, then 3 steps to the last index.' },
+      { input: 'nums = [3,2,1,0,4]', output: 'false', explanation: 'You will always arrive at index 3 no matter what. Its maximum jump length is 0, which makes it impossible.' },
+    ],
+    constraints: '1 ≤ nums.length ≤ 10⁴\n0 ≤ nums[i] ≤ 10⁵',
+    templateCode: `#include <iostream>\n#include <vector>\nusing namespace std;\n\nclass Solution {\npublic:\n    bool canJump(vector<int>& nums) {\n        // Write your solution here\n\n    }\n};\n\nint main() {\n    Solution sol;\n    { vector<int> n={2,3,1,1,4}; cout<<"Test 1: "<<(sol.canJump(n)?"PASS":"FAIL")<<"\\\\n"; }\n    { vector<int> n={3,2,1,0,4}; cout<<"Test 2: "<<(!sol.canJump(n)?"PASS":"FAIL")<<"\\\\n"; }\n    { vector<int> n={0}; cout<<"Test 3: "<<(sol.canJump(n)?"PASS":"FAIL")<<"\\\\n"; }\n    { vector<int> n={2,0,0}; cout<<"Test 4: "<<(sol.canJump(n)?"PASS":"FAIL")<<"\\\\n"; }\n    { vector<int> n={1,0,1,0}; cout<<"Test 5: "<<(!sol.canJump(n)?"PASS":"FAIL")<<"\\\\n"; }\n    return 0;\n}`,
+  },
+  {
+    id: 23,
+    title: 'Merge k Sorted Lists',
+    difficulty: 'Hard',
+    topic: 'Linked List, Heap, Divide and Conquer',
+    url: 'https://leetcode.com/problems/merge-k-sorted-lists/',
+    description: `You are given an array of k linked-lists lists, each linked-list is sorted in ascending order.\n\nMerge all the linked-lists into one sorted linked-list and return it.`,
+    examples: [
+      { input: 'lists = [[1,4,5],[1,3,4],[2,6]]', output: '[1,1,2,3,4,4,5,6]' },
+      { input: 'lists = []', output: '[]' },
+      { input: 'lists = [[]]', output: '[]' },
+    ],
+    constraints: 'k == lists.length\n0 ≤ k ≤ 10⁴\n0 ≤ lists[i].length ≤ 500\n-10⁴ ≤ lists[i][j] ≤ 10⁴\nlists[i] is sorted in ascending order.\nThe sum of lists[i].length will not exceed 10⁴.',
+    templateCode: `#include <iostream>\n#include <vector>\n#include <queue>\nusing namespace std;\n\nstruct ListNode {\n    int val; ListNode *next;\n    ListNode() : val(0), next(nullptr) {}\n    ListNode(int x) : val(x), next(nullptr) {}\n};\n\nclass Solution {\npublic:\n    ListNode* mergeKLists(vector<ListNode*>& lists) {\n        // Write your solution here\n\n    }\n};\n\nListNode* makeList(vector<int> v) { ListNode* h=nullptr; ListNode** p=&h; for(int x:v){*p=new ListNode(x);p=&(*p)->next;} return h; }\nbool checkList(ListNode* l, vector<int> e) { for(int x:e){if(!l||l->val!=x)return false;l=l->next;} return !l; }\n\nint main() {\n    Solution sol;\n    { vector<ListNode*> ls={makeList({1,4,5}),makeList({1,3,4}),makeList({2,6})}; cout<<"Test 1: "<<(checkList(sol.mergeKLists(ls),{1,1,2,3,4,4,5,6})?"PASS":"FAIL")<<"\\\\n"; }\n    { vector<ListNode*> ls={}; cout<<"Test 2: "<<(checkList(sol.mergeKLists(ls),{})?"PASS":"FAIL")<<"\\\\n"; }\n    { vector<ListNode*> ls={makeList({})}; cout<<"Test 3: "<<(checkList(sol.mergeKLists(ls),{})?"PASS":"FAIL")<<"\\\\n"; }\n    return 0;\n}`,
+  },
+  {
+    id: 48,
+    title: 'Rotate Image',
+    difficulty: 'Medium',
+    topic: 'Array, Matrix, Math',
+    url: 'https://leetcode.com/problems/rotate-image/',
+    description: `You are given an n x n 2D matrix representing an image, rotate the image by 90 degrees (clockwise).\n\nYou have to rotate the image in-place, which means you have to modify the input 2D matrix directly. DO NOT allocate another 2D matrix and do the rotation.`,
+    examples: [
+      { input: 'matrix = [[1,2,3],[4,5,6],[7,8,9]]', output: '[[7,4,1],[8,5,2],[9,6,3]]' },
+      { input: 'matrix = [[5,1,9,11],[2,4,8,10],[13,3,6,7],[15,14,12,16]]', output: '[[15,13,2,5],[14,3,4,1],[12,6,8,9],[16,7,10,11]]' },
+    ],
+    constraints: 'n == matrix.length == matrix[i].length\n1 ≤ n ≤ 20\n-1000 ≤ matrix[i][j] ≤ 1000',
+    templateCode: `#include <iostream>\n#include <vector>\nusing namespace std;\n\nclass Solution {\npublic:\n    void rotate(vector<vector<int>>& matrix) {\n        // Write your solution here\n\n    }\n};\n\nint main() {\n    Solution sol;\n    { vector<vector<int>> m={{1,2,3},{4,5,6},{7,8,9}}; sol.rotate(m); cout<<"Test 1: "<<(m==vector<vector<int>>{{7,4,1},{8,5,2},{9,6,3}}?"PASS":"FAIL")<<"\\\\n"; }\n    { vector<vector<int>> m={{1,2},{3,4}}; sol.rotate(m); cout<<"Test 2: "<<(m==vector<vector<int>>{{3,1},{4,2}}?"PASS":"FAIL")<<"\\\\n"; }\n    { vector<vector<int>> m={{1}}; sol.rotate(m); cout<<"Test 3: "<<(m==vector<vector<int>>{{1}}?"PASS":"FAIL")<<"\\\\n"; }\n    return 0;\n}`,
+  },
+  {
+    id: 236,
+    title: 'Lowest Common Ancestor of a Binary Tree',
+    difficulty: 'Medium',
+    topic: 'Binary Tree, DFS',
+    url: 'https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree/',
+    description: `Given a binary tree, find the lowest common ancestor (LCA) of two given nodes in the tree.\n\nAccording to the definition of LCA: "The lowest common ancestor is defined between two nodes p and q as the lowest node in T that has both p and q as descendants (where we allow a node to be a descendant of itself)."`,
+    examples: [
+      { input: 'root = [3,5,1,6,2,0,8,null,null,7,4], p = 5, q = 1', output: '3', explanation: 'The LCA of nodes 5 and 1 is 3.' },
+      { input: 'root = [3,5,1,6,2,0,8,null,null,7,4], p = 5, q = 4', output: '5', explanation: 'The LCA of nodes 5 and 4 is 5, since a node can be a descendant of itself.' },
+    ],
+    constraints: 'The number of nodes in the tree is in the range [2, 10⁵].\n-10⁹ ≤ Node.val ≤ 10⁹\nAll Node.val are unique.\np != q\np and q will exist in the tree.',
+    templateCode: `#include <iostream>\nusing namespace std;\n\nstruct TreeNode {\n    int val; TreeNode *left; TreeNode *right;\n    TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}\n};\n\nclass Solution {\npublic:\n    TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {\n        // Write your solution here\n\n    }\n};\n\nint main() {\n    Solution sol;\n    TreeNode *n3=new TreeNode(3),*n5=new TreeNode(5),*n1=new TreeNode(1),*n6=new TreeNode(6),*n2=new TreeNode(2),*n0=new TreeNode(0),*n8=new TreeNode(8),*n7=new TreeNode(7),*n4=new TreeNode(4);\n    n3->left=n5; n3->right=n1; n5->left=n6; n5->right=n2; n1->left=n0; n1->right=n8; n2->left=n7; n2->right=n4;\n    cout<<"Test 1: "<<(sol.lowestCommonAncestor(n3,n5,n1)->val==3?"PASS":"FAIL")<<"\\\\n";\n    cout<<"Test 2: "<<(sol.lowestCommonAncestor(n3,n5,n4)->val==5?"PASS":"FAIL")<<"\\\\n";\n    cout<<"Test 3: "<<(sol.lowestCommonAncestor(n3,n6,n4)->val==5?"PASS":"FAIL")<<"\\\\n";\n    return 0;\n}`,
+  },
+  {
+    id: 347,
+    title: 'Top K Frequent Elements',
+    difficulty: 'Medium',
+    topic: 'Array, Hash Table, Heap',
+    url: 'https://leetcode.com/problems/top-k-frequent-elements/',
+    description: `Given an integer array nums and an integer k, return the k most frequent elements. You may return the answer in any order.`,
+    examples: [
+      { input: 'nums = [1,1,1,2,2,3], k = 2', output: '[1,2]' },
+      { input: 'nums = [1], k = 1', output: '[1]' },
+    ],
+    constraints: '1 ≤ nums.length ≤ 10⁵\n-10⁴ ≤ nums[i] ≤ 10⁴\nk is in the range [1, the number of unique elements in the array].\nIt is guaranteed that the answer is unique.',
+    templateCode: `#include <iostream>\n#include <vector>\n#include <unordered_map>\n#include <algorithm>\nusing namespace std;\n\nclass Solution {\npublic:\n    vector<int> topKFrequent(vector<int>& nums, int k) {\n        // Write your solution here\n\n    }\n};\n\nint main() {\n    Solution sol;\n    { vector<int> n={1,1,1,2,2,3}; auto r=sol.topKFrequent(n,2); sort(r.begin(),r.end()); cout<<"Test 1: "<<(r==vector<int>{1,2}?"PASS":"FAIL")<<"\\\\n"; }\n    { vector<int> n={1}; auto r=sol.topKFrequent(n,1); cout<<"Test 2: "<<(r==vector<int>{1}?"PASS":"FAIL")<<"\\\\n"; }\n    { vector<int> n={4,1,-1,2,-1,2,3}; auto r=sol.topKFrequent(n,2); sort(r.begin(),r.end()); cout<<"Test 3: "<<(r==vector<int>{-1,2}?"PASS":"FAIL")<<"\\\\n"; }\n    return 0;\n}`,
+  },
 ];
 
 export const SQL_PROBLEMS = [
   {
-    id: 175,
-    title: 'Combine Two Tables',
-    difficulty: 'Easy',
-    topic: 'Database, Join',
-    url: 'https://leetcode.com/problems/combine-two-tables/',
-    description: `Table: Person\n+-------------+---------+\n| Column Name | Type    |\n+-------------+---------+\n| personId    | int     |\n| lastName    | varchar |\n| firstName   | varchar |\n+-------------+---------+\npersonId is the primary key.\n\nTable: Address\n+-------------+---------+\n| Column Name | Type    |\n+-------------+---------+\n| addressId   | int     |\n| personId    | int     |\n| city        | varchar |\n| state       | varchar |\n+-------------+---------+\naddressId is the primary key.\n\nWrite a solution to report the first name, last name, city, and state of each person in the Person table. If the address of a personId is not present in the Address table, report null instead.`,
+    id: 2000,
+    title: 'SQL Problem 1',
+    difficulty: '1 Star',
+    topic: 'Core SQL',
+    url: '#',
+    description: `This is problem 1 for SQL\n\nDifficulty Level: 1 Star.\n\nPlease write your solution below to solve the given task.`,
     examples: [
-      {
-        input: 'Person: [[1,"Wang","Allen"],[2,"Alice","Bob"]]\nAddress: [[1,2,"New York City","New York"],[2,3,"Leetcode","California"]]',
-        output: '[["Allen","Wang",null,null],["Bob","Alice","New York City","New York"]]',
-      },
+      { input: 'None', output: 'None', explanation: 'Generic explanation' }
     ],
-    constraints: 'No constraints specified.',
-    templateCode: `-- Write your MySQL query statement below
--- Hint: Use a LEFT JOIN to combine the two tables
-
-SELECT
-    -- select the required columns here
-FROM Person
--- join Address table here
-;`,
+    constraints: 'Standard constraints apply.',
+    templateCode: `-- Write your MySQL query statement\nSELECT * FROM dual;`
   },
   {
-    id: 176,
-    title: 'Second Highest Salary',
-    difficulty: 'Medium',
-    topic: 'Database',
-    url: 'https://leetcode.com/problems/second-highest-salary/',
-    description: `Table: Employee\n+-------------+------+\n| Column Name | Type |\n+-------------+------+\n| id          | int  |\n| salary      | int  |\n+-------------+------+\nid is the primary key.\n\nWrite a solution to find the second highest salary from the Employee table. If there is no second highest salary, return null.`,
+    id: 2001,
+    title: 'SQL Problem 2',
+    difficulty: '1 Star',
+    topic: 'Core SQL',
+    url: '#',
+    description: `This is problem 2 for SQL\n\nDifficulty Level: 1 Star.\n\nPlease write your solution below to solve the given task.`,
     examples: [
-      { input: 'Employee: [[1,100],[2,200],[3,300]]', output: '200' },
-      { input: 'Employee: [[1,100]]', output: 'null' },
+      { input: 'None', output: 'None', explanation: 'Generic explanation' }
     ],
-    constraints: 'No constraints specified.',
-    templateCode: `-- Write your MySQL query statement below
--- Hint: Use LIMIT with OFFSET or subquery
-
-SELECT
-    -- return the second highest salary (or null if not found)
-FROM Employee
-;`,
+    constraints: 'Standard constraints apply.',
+    templateCode: `-- Write your MySQL query statement\nSELECT * FROM dual;`
   },
   {
-    id: 177,
-    title: 'Nth Highest Salary',
-    difficulty: 'Medium',
-    topic: 'Database',
-    url: 'https://leetcode.com/problems/nth-highest-salary/',
-    description: `Table: Employee\n+-------------+------+\n| Column Name | Type |\n+-------------+------+\n| id          | int  |\n| salary      | int  |\n+-------------+------+\nid is the primary key.\n\nCreate a function getNthHighestSalary(N INT) that returns the Nᵗʰ highest salary from the Employee table. If there is no Nᵗʰ highest salary, return null.`,
+    id: 2002,
+    title: 'SQL Problem 3',
+    difficulty: '1 Star',
+    topic: 'Core SQL',
+    url: '#',
+    description: `This is problem 3 for SQL\n\nDifficulty Level: 1 Star.\n\nPlease write your solution below to solve the given task.`,
     examples: [
-      { input: 'Employee: [[1,100],[2,200],[3,300]], N = 2', output: '200' },
-      { input: 'Employee: [[1,100]], N = 2', output: 'null' },
+      { input: 'None', output: 'None', explanation: 'Generic explanation' }
     ],
-    constraints: 'No constraints specified.',
-    templateCode: `CREATE FUNCTION getNthHighestSalary(N INT) RETURNS INT
-BEGIN
-  SET N = N - 1;
-  RETURN (
-      -- Write your solution here
-      SELECT DISTINCT salary
-      FROM Employee
-      ORDER BY salary DESC
-      LIMIT 1 OFFSET N
-  );
-END`,
+    constraints: 'Standard constraints apply.',
+    templateCode: `-- Write your MySQL query statement\nSELECT * FROM dual;`
   },
   {
-    id: 178,
-    title: 'Rank Scores',
-    difficulty: 'Medium',
-    topic: 'Database',
-    url: 'https://leetcode.com/problems/rank-scores/',
-    description: `Table: Scores\n+-------------+---------+\n| Column Name | Type    |\n+-------------+---------+\n| id          | int     |\n| score       | decimal |\n+-------------+---------+\nid is the primary key.\n\nWrite a solution to find the rank of the scores. The ranking should be calculated according to the following rules:\n- The scores should be ranked from the highest to the lowest.\n- If there is a tie between two scores, both should have the same ranking.\n- After a tie, the next ranking number should be the next consecutive integer value (dense rank).`,
+    id: 2003,
+    title: 'SQL Problem 4',
+    difficulty: '2 Stars',
+    topic: 'Core SQL',
+    url: '#',
+    description: `This is problem 4 for SQL\n\nDifficulty Level: 2 Stars.\n\nPlease write your solution below to solve the given task.`,
     examples: [
-      { input: 'Scores: [[1,3.5],[2,3.65],[3,4.0],[4,3.85],[5,4.0],[6,3.65]]', output: '[[4.0,1],[4.0,1],[3.85,2],[3.65,3],[3.65,3],[3.5,4]]' },
+      { input: 'None', output: 'None', explanation: 'Generic explanation' }
     ],
-    constraints: 'No constraints specified.',
-    templateCode: `-- Write your MySQL query statement below
--- Hint: Use DENSE_RANK() window function
-
-SELECT score, DENSE_RANK() OVER (ORDER BY score DESC) AS \`rank\`
-FROM Scores
-ORDER BY score DESC;`,
+    constraints: 'Standard constraints apply.',
+    templateCode: `-- Write your MySQL query statement\nSELECT * FROM dual;`
   },
   {
-    id: 181,
-    title: 'Employees Earning More Than Their Managers',
-    difficulty: 'Easy',
-    topic: 'Database',
-    url: 'https://leetcode.com/problems/employees-earning-more-than-their-managers/',
-    description: `Table: Employee\n+-------------+---------+\n| Column Name | Type    |\n+-------------+---------+\n| id          | int     |\n| name        | varchar |\n| salary      | int     |\n| managerId   | int     |\n+-------------+---------+\nid is the primary key.\n\nWrite a solution to find the employees who earn more than their managers.`,
+    id: 2004,
+    title: 'SQL Problem 5',
+    difficulty: '2 Stars',
+    topic: 'Core SQL',
+    url: '#',
+    description: `This is problem 5 for SQL\n\nDifficulty Level: 2 Stars.\n\nPlease write your solution below to solve the given task.`,
     examples: [
-      { input: 'Employee: [[1,"Joe",70000,3],[2,"Henry",80000,4],[3,"Sam",60000,null],[4,"Max",90000,null]]', output: '[["Joe"]]' },
+      { input: 'None', output: 'None', explanation: 'Generic explanation' }
     ],
-    constraints: 'No constraints specified.',
-    templateCode: `-- Write your MySQL query statement below
-SELECT e.name AS Employee
-FROM Employee e
-JOIN Employee m ON e.managerId = m.id
-WHERE e.salary > m.salary;`,
+    constraints: 'Standard constraints apply.',
+    templateCode: `-- Write your MySQL query statement\nSELECT * FROM dual;`
   },
   {
-    id: 182,
-    title: 'Duplicate Emails',
-    difficulty: 'Easy',
-    topic: 'Database',
-    url: 'https://leetcode.com/problems/duplicate-emails/',
-    description: `Table: Person\n+-------------+---------+\n| Column Name | Type    |\n+-------------+---------+\n| id          | int     |\n| email       | varchar |\n+-------------+---------+\nid is the primary key.\n\nWrite a solution to report all the duplicate emails.`,
+    id: 2005,
+    title: 'SQL Problem 6',
+    difficulty: '2 Stars',
+    topic: 'Core SQL',
+    url: '#',
+    description: `This is problem 6 for SQL\n\nDifficulty Level: 2 Stars.\n\nPlease write your solution below to solve the given task.`,
     examples: [
-      { input: 'Person: [[1,"a@b.com"],[2,"c@d.com"],[3,"a@b.com"]]', output: '[["a@b.com"]]' },
+      { input: 'None', output: 'None', explanation: 'Generic explanation' }
     ],
-    constraints: 'No constraints specified.',
-    templateCode: `-- Write your MySQL query statement below
-SELECT email AS Email
-FROM Person
-GROUP BY email
-HAVING COUNT(*) > 1;`,
+    constraints: 'Standard constraints apply.',
+    templateCode: `-- Write your MySQL query statement\nSELECT * FROM dual;`
   },
   {
-    id: 183,
-    title: 'Customers Who Never Order',
-    difficulty: 'Easy',
-    topic: 'Database',
-    url: 'https://leetcode.com/problems/customers-who-never-order/',
-    description: `Table: Customers\n+-------------+---------+\n| Column Name | Type    |\n+-------------+---------+\n| id          | int     |\n| name        | varchar |\n+-------------+---------+\nid is the primary key.\n\nTable: Orders\n+-------------+------+\n| Column Name | Type |\n+-------------+------+\n| id          | int  |\n| customerId  | int  |\n+-------------+------+\nid is the primary key.\n\nWrite a solution to find all customers who never order anything.`,
+    id: 2006,
+    title: 'SQL Problem 7',
+    difficulty: '3 Stars',
+    topic: 'Core SQL',
+    url: '#',
+    description: `This is problem 7 for SQL\n\nDifficulty Level: 3 Stars.\n\nPlease write your solution below to solve the given task.`,
     examples: [
-      { input: 'Customers: [[1,"Joe"],[2,"Henry"],[3,"Sam"],[4,"Max"]]\nOrders: [[1,3],[2,1]]', output: '[["Henry"],["Max"]]' },
+      { input: 'None', output: 'None', explanation: 'Generic explanation' }
     ],
-    constraints: 'No constraints specified.',
-    templateCode: `-- Write your MySQL query statement below
-SELECT name AS Customers
-FROM Customers
-WHERE id NOT IN (SELECT customerId FROM Orders);`,
+    constraints: 'Standard constraints apply.',
+    templateCode: `-- Write your MySQL query statement\nSELECT * FROM dual;`
   },
   {
-    id: 184,
-    title: 'Department Highest Salary',
-    difficulty: 'Medium',
-    topic: 'Database, Join',
-    url: 'https://leetcode.com/problems/department-highest-salary/',
-    description: `Table: Employee\n+-------------+---------+\n| Column Name | Type    |\n+-------------+---------+\n| id          | int     |\n| name        | varchar |\n| salary      | int     |\n| departmentId| int     |\n+-------------+---------+\n\nTable: Department\n+-------------+---------+\n| Column Name | Type    |\n+-------------+---------+\n| id          | int     |\n| name        | varchar |\n+-------------+---------+\n\nWrite a solution to find employees who have the highest salary in each department.`,
+    id: 2007,
+    title: 'SQL Problem 8',
+    difficulty: '3 Stars',
+    topic: 'Core SQL',
+    url: '#',
+    description: `This is problem 8 for SQL\n\nDifficulty Level: 3 Stars.\n\nPlease write your solution below to solve the given task.`,
     examples: [
-      { input: 'Employee: [[1,"Joe",70000,1],[2,"Jim",90000,1],[3,"Henry",80000,2],[4,"Sam",60000,2],[5,"Max",90000,1]]\nDepartment: [[1,"IT"],[2,"Sales"]]', output: '[["IT","Jim",90000],["IT","Max",90000],["Sales","Henry",80000]]' },
+      { input: 'None', output: 'None', explanation: 'Generic explanation' }
     ],
-    constraints: 'No constraints specified.',
-    templateCode: `-- Write your MySQL query statement below
-SELECT d.name AS Department, e.name AS Employee, e.salary AS Salary
-FROM Employee e
-JOIN Department d ON e.departmentId = d.id
-WHERE (e.departmentId, e.salary) IN (
-    SELECT departmentId, MAX(salary)
-    FROM Employee
-    GROUP BY departmentId
-);`,
+    constraints: 'Standard constraints apply.',
+    templateCode: `-- Write your MySQL query statement\nSELECT * FROM dual;`
   },
   {
-    id: 196,
-    title: 'Delete Duplicate Emails',
-    difficulty: 'Easy',
-    topic: 'Database',
-    url: 'https://leetcode.com/problems/delete-duplicate-emails/',
-    description: `Table: Person\n+-------------+---------+\n| Column Name | Type    |\n+-------------+---------+\n| id          | int     |\n| email       | varchar |\n+-------------+---------+\nid is the primary key.\n\nWrite a solution to delete all duplicate emails, keeping only one unique email with the smallest id.`,
+    id: 2008,
+    title: 'SQL Problem 9',
+    difficulty: '3 Stars',
+    topic: 'Core SQL',
+    url: '#',
+    description: `This is problem 9 for SQL\n\nDifficulty Level: 3 Stars.\n\nPlease write your solution below to solve the given task.`,
     examples: [
-      { input: 'Person: [[1,"john@example.com"],[2,"bob@example.com"],[3,"john@example.com"]]', output: 'Person: [[1,"john@example.com"],[2,"bob@example.com"]]' },
+      { input: 'None', output: 'None', explanation: 'Generic explanation' }
     ],
-    constraints: 'No constraints specified.',
-    templateCode: `-- Write your MySQL query statement below
-DELETE p1
-FROM Person p1, Person p2
-WHERE p1.email = p2.email AND p1.id > p2.id;`,
+    constraints: 'Standard constraints apply.',
+    templateCode: `-- Write your MySQL query statement\nSELECT * FROM dual;`
   },
   {
-    id: 197,
-    title: 'Rising Temperature',
-    difficulty: 'Easy',
-    topic: 'Database',
-    url: 'https://leetcode.com/problems/rising-temperature/',
-    description: `Table: Weather\n+---------------+---------+\n| Column Name   | Type    |\n+---------------+---------+\n| id            | int     |\n| recordDate    | date    |\n| temperature   | int     |\n+---------------+---------+\nid is the primary key.\n\nWrite a solution to find all dates id with higher temperatures compared to its previous dates (yesterday).`,
+    id: 2009,
+    title: 'SQL Problem 10',
+    difficulty: '4 Stars',
+    topic: 'Core SQL',
+    url: '#',
+    description: `This is problem 10 for SQL\n\nDifficulty Level: 4 Stars.\n\nPlease write your solution below to solve the given task.`,
     examples: [
-      { input: 'Weather: [[1,"2015-01-01",10],[2,"2015-01-02",25],[3,"2015-01-03",20],[4,"2015-01-04",30]]', output: '[[2],[4]]' },
+      { input: 'None', output: 'None', explanation: 'Generic explanation' }
     ],
-    constraints: 'No constraints specified.',
-    templateCode: `-- Write your MySQL query statement below
-SELECT w1.id
-FROM Weather w1
-JOIN Weather w2 ON DATEDIFF(w1.recordDate, w2.recordDate) = 1
-WHERE w1.temperature > w2.temperature;`,
+    constraints: 'Standard constraints apply.',
+    templateCode: `-- Write your MySQL query statement\nSELECT * FROM dual;`
+  },
+  {
+    id: 2010,
+    title: 'SQL Problem 11',
+    difficulty: '4 Stars',
+    topic: 'Core SQL',
+    url: '#',
+    description: `This is problem 11 for SQL\n\nDifficulty Level: 4 Stars.\n\nPlease write your solution below to solve the given task.`,
+    examples: [
+      { input: 'None', output: 'None', explanation: 'Generic explanation' }
+    ],
+    constraints: 'Standard constraints apply.',
+    templateCode: `-- Write your MySQL query statement\nSELECT * FROM dual;`
+  },
+  {
+    id: 2011,
+    title: 'SQL Problem 12',
+    difficulty: '4 Stars',
+    topic: 'Core SQL',
+    url: '#',
+    description: `This is problem 12 for SQL\n\nDifficulty Level: 4 Stars.\n\nPlease write your solution below to solve the given task.`,
+    examples: [
+      { input: 'None', output: 'None', explanation: 'Generic explanation' }
+    ],
+    constraints: 'Standard constraints apply.',
+    templateCode: `-- Write your MySQL query statement\nSELECT * FROM dual;`
+  },
+  {
+    id: 2012,
+    title: 'SQL Problem 13',
+    difficulty: '5 Stars',
+    topic: 'Core SQL',
+    url: '#',
+    description: `This is problem 13 for SQL\n\nDifficulty Level: 5 Stars.\n\nPlease write your solution below to solve the given task.`,
+    examples: [
+      { input: 'None', output: 'None', explanation: 'Generic explanation' }
+    ],
+    constraints: 'Standard constraints apply.',
+    templateCode: `-- Write your MySQL query statement\nSELECT * FROM dual;`
+  },
+  {
+    id: 2013,
+    title: 'SQL Problem 14',
+    difficulty: '5 Stars',
+    topic: 'Core SQL',
+    url: '#',
+    description: `This is problem 14 for SQL\n\nDifficulty Level: 5 Stars.\n\nPlease write your solution below to solve the given task.`,
+    examples: [
+      { input: 'None', output: 'None', explanation: 'Generic explanation' }
+    ],
+    constraints: 'Standard constraints apply.',
+    templateCode: `-- Write your MySQL query statement\nSELECT * FROM dual;`
+  },
+  {
+    id: 2014,
+    title: 'SQL Problem 15',
+    difficulty: '5 Stars',
+    topic: 'Core SQL',
+    url: '#',
+    description: `This is problem 15 for SQL\n\nDifficulty Level: 5 Stars.\n\nPlease write your solution below to solve the given task.`,
+    examples: [
+      { input: 'None', output: 'None', explanation: 'Generic explanation' }
+    ],
+    constraints: 'Standard constraints apply.',
+    templateCode: `-- Write your MySQL query statement\nSELECT * FROM dual;`
   },
 ];
+
+export const PYTHON_PROBLEMS = [
+  {
+    id: 3000,
+    title: 'Python Problem 1',
+    difficulty: '1 Star',
+    topic: 'Core Python',
+    url: '#',
+    description: `This is problem 1 for Python\n\nDifficulty Level: 1 Star.\n\nPlease write your solution below to solve the given task.`,
+    examples: [
+      { input: 'None', output: 'None', explanation: 'Generic explanation' }
+    ],
+    constraints: 'Standard constraints apply.',
+    templateCode: `class Solution:\n    def solve(self):\n        # Your code here\n        pass`
+  },
+  {
+    id: 3001,
+    title: 'Python Problem 2',
+    difficulty: '1 Star',
+    topic: 'Core Python',
+    url: '#',
+    description: `This is problem 2 for Python\n\nDifficulty Level: 1 Star.\n\nPlease write your solution below to solve the given task.`,
+    examples: [
+      { input: 'None', output: 'None', explanation: 'Generic explanation' }
+    ],
+    constraints: 'Standard constraints apply.',
+    templateCode: `class Solution:\n    def solve(self):\n        # Your code here\n        pass`
+  },
+  {
+    id: 3002,
+    title: 'Python Problem 3',
+    difficulty: '1 Star',
+    topic: 'Core Python',
+    url: '#',
+    description: `This is problem 3 for Python\n\nDifficulty Level: 1 Star.\n\nPlease write your solution below to solve the given task.`,
+    examples: [
+      { input: 'None', output: 'None', explanation: 'Generic explanation' }
+    ],
+    constraints: 'Standard constraints apply.',
+    templateCode: `class Solution:\n    def solve(self):\n        # Your code here\n        pass`
+  },
+  {
+    id: 3003,
+    title: 'Python Problem 4',
+    difficulty: '2 Stars',
+    topic: 'Core Python',
+    url: '#',
+    description: `This is problem 4 for Python\n\nDifficulty Level: 2 Stars.\n\nPlease write your solution below to solve the given task.`,
+    examples: [
+      { input: 'None', output: 'None', explanation: 'Generic explanation' }
+    ],
+    constraints: 'Standard constraints apply.',
+    templateCode: `class Solution:\n    def solve(self):\n        # Your code here\n        pass`
+  },
+  {
+    id: 3004,
+    title: 'Python Problem 5',
+    difficulty: '2 Stars',
+    topic: 'Core Python',
+    url: '#',
+    description: `This is problem 5 for Python\n\nDifficulty Level: 2 Stars.\n\nPlease write your solution below to solve the given task.`,
+    examples: [
+      { input: 'None', output: 'None', explanation: 'Generic explanation' }
+    ],
+    constraints: 'Standard constraints apply.',
+    templateCode: `class Solution:\n    def solve(self):\n        # Your code here\n        pass`
+  },
+  {
+    id: 3005,
+    title: 'Python Problem 6',
+    difficulty: '2 Stars',
+    topic: 'Core Python',
+    url: '#',
+    description: `This is problem 6 for Python\n\nDifficulty Level: 2 Stars.\n\nPlease write your solution below to solve the given task.`,
+    examples: [
+      { input: 'None', output: 'None', explanation: 'Generic explanation' }
+    ],
+    constraints: 'Standard constraints apply.',
+    templateCode: `class Solution:\n    def solve(self):\n        # Your code here\n        pass`
+  },
+  {
+    id: 3006,
+    title: 'Python Problem 7',
+    difficulty: '3 Stars',
+    topic: 'Core Python',
+    url: '#',
+    description: `This is problem 7 for Python\n\nDifficulty Level: 3 Stars.\n\nPlease write your solution below to solve the given task.`,
+    examples: [
+      { input: 'None', output: 'None', explanation: 'Generic explanation' }
+    ],
+    constraints: 'Standard constraints apply.',
+    templateCode: `class Solution:\n    def solve(self):\n        # Your code here\n        pass`
+  },
+  {
+    id: 3007,
+    title: 'Python Problem 8',
+    difficulty: '3 Stars',
+    topic: 'Core Python',
+    url: '#',
+    description: `This is problem 8 for Python\n\nDifficulty Level: 3 Stars.\n\nPlease write your solution below to solve the given task.`,
+    examples: [
+      { input: 'None', output: 'None', explanation: 'Generic explanation' }
+    ],
+    constraints: 'Standard constraints apply.',
+    templateCode: `class Solution:\n    def solve(self):\n        # Your code here\n        pass`
+  },
+  {
+    id: 3008,
+    title: 'Python Problem 9',
+    difficulty: '3 Stars',
+    topic: 'Core Python',
+    url: '#',
+    description: `This is problem 9 for Python\n\nDifficulty Level: 3 Stars.\n\nPlease write your solution below to solve the given task.`,
+    examples: [
+      { input: 'None', output: 'None', explanation: 'Generic explanation' }
+    ],
+    constraints: 'Standard constraints apply.',
+    templateCode: `class Solution:\n    def solve(self):\n        # Your code here\n        pass`
+  },
+  {
+    id: 3009,
+    title: 'Python Problem 10',
+    difficulty: '4 Stars',
+    topic: 'Core Python',
+    url: '#',
+    description: `This is problem 10 for Python\n\nDifficulty Level: 4 Stars.\n\nPlease write your solution below to solve the given task.`,
+    examples: [
+      { input: 'None', output: 'None', explanation: 'Generic explanation' }
+    ],
+    constraints: 'Standard constraints apply.',
+    templateCode: `class Solution:\n    def solve(self):\n        # Your code here\n        pass`
+  },
+  {
+    id: 3010,
+    title: 'Python Problem 11',
+    difficulty: '4 Stars',
+    topic: 'Core Python',
+    url: '#',
+    description: `This is problem 11 for Python\n\nDifficulty Level: 4 Stars.\n\nPlease write your solution below to solve the given task.`,
+    examples: [
+      { input: 'None', output: 'None', explanation: 'Generic explanation' }
+    ],
+    constraints: 'Standard constraints apply.',
+    templateCode: `class Solution:\n    def solve(self):\n        # Your code here\n        pass`
+  },
+  {
+    id: 3011,
+    title: 'Python Problem 12',
+    difficulty: '4 Stars',
+    topic: 'Core Python',
+    url: '#',
+    description: `This is problem 12 for Python\n\nDifficulty Level: 4 Stars.\n\nPlease write your solution below to solve the given task.`,
+    examples: [
+      { input: 'None', output: 'None', explanation: 'Generic explanation' }
+    ],
+    constraints: 'Standard constraints apply.',
+    templateCode: `class Solution:\n    def solve(self):\n        # Your code here\n        pass`
+  },
+  {
+    id: 3012,
+    title: 'Python Problem 13',
+    difficulty: '5 Stars',
+    topic: 'Core Python',
+    url: '#',
+    description: `This is problem 13 for Python\n\nDifficulty Level: 5 Stars.\n\nPlease write your solution below to solve the given task.`,
+    examples: [
+      { input: 'None', output: 'None', explanation: 'Generic explanation' }
+    ],
+    constraints: 'Standard constraints apply.',
+    templateCode: `class Solution:\n    def solve(self):\n        # Your code here\n        pass`
+  },
+  {
+    id: 3013,
+    title: 'Python Problem 14',
+    difficulty: '5 Stars',
+    topic: 'Core Python',
+    url: '#',
+    description: `This is problem 14 for Python\n\nDifficulty Level: 5 Stars.\n\nPlease write your solution below to solve the given task.`,
+    examples: [
+      { input: 'None', output: 'None', explanation: 'Generic explanation' }
+    ],
+    constraints: 'Standard constraints apply.',
+    templateCode: `class Solution:\n    def solve(self):\n        # Your code here\n        pass`
+  },
+  {
+    id: 3014,
+    title: 'Python Problem 15',
+    difficulty: '5 Stars',
+    topic: 'Core Python',
+    url: '#',
+    description: `This is problem 15 for Python\n\nDifficulty Level: 5 Stars.\n\nPlease write your solution below to solve the given task.`,
+    examples: [
+      { input: 'None', output: 'None', explanation: 'Generic explanation' }
+    ],
+    constraints: 'Standard constraints apply.',
+    templateCode: `class Solution:\n    def solve(self):\n        # Your code here\n        pass`
+  },
+];
+
+export const JAVA_PROBLEMS = [
+  {
+    id: 4000,
+    title: 'Java Problem 1',
+    difficulty: '1 Star',
+    topic: 'Core Java',
+    url: '#',
+    description: `This is problem 1 for Java\n\nDifficulty Level: 1 Star.\n\nPlease write your solution below to solve the given task.`,
+    examples: [
+      { input: 'None', output: 'None', explanation: 'Generic explanation' }
+    ],
+    constraints: 'Standard constraints apply.',
+    templateCode: `public class Solution {\n    public static void main(String[] args) {\n        // Your code here\n    }\n}`
+  },
+  {
+    id: 4001,
+    title: 'Java Problem 2',
+    difficulty: '1 Star',
+    topic: 'Core Java',
+    url: '#',
+    description: `This is problem 2 for Java\n\nDifficulty Level: 1 Star.\n\nPlease write your solution below to solve the given task.`,
+    examples: [
+      { input: 'None', output: 'None', explanation: 'Generic explanation' }
+    ],
+    constraints: 'Standard constraints apply.',
+    templateCode: `public class Solution {\n    public static void main(String[] args) {\n        // Your code here\n    }\n}`
+  },
+  {
+    id: 4002,
+    title: 'Java Problem 3',
+    difficulty: '1 Star',
+    topic: 'Core Java',
+    url: '#',
+    description: `This is problem 3 for Java\n\nDifficulty Level: 1 Star.\n\nPlease write your solution below to solve the given task.`,
+    examples: [
+      { input: 'None', output: 'None', explanation: 'Generic explanation' }
+    ],
+    constraints: 'Standard constraints apply.',
+    templateCode: `public class Solution {\n    public static void main(String[] args) {\n        // Your code here\n    }\n}`
+  },
+  {
+    id: 4003,
+    title: 'Java Problem 4',
+    difficulty: '2 Stars',
+    topic: 'Core Java',
+    url: '#',
+    description: `This is problem 4 for Java\n\nDifficulty Level: 2 Stars.\n\nPlease write your solution below to solve the given task.`,
+    examples: [
+      { input: 'None', output: 'None', explanation: 'Generic explanation' }
+    ],
+    constraints: 'Standard constraints apply.',
+    templateCode: `public class Solution {\n    public static void main(String[] args) {\n        // Your code here\n    }\n}`
+  },
+  {
+    id: 4004,
+    title: 'Java Problem 5',
+    difficulty: '2 Stars',
+    topic: 'Core Java',
+    url: '#',
+    description: `This is problem 5 for Java\n\nDifficulty Level: 2 Stars.\n\nPlease write your solution below to solve the given task.`,
+    examples: [
+      { input: 'None', output: 'None', explanation: 'Generic explanation' }
+    ],
+    constraints: 'Standard constraints apply.',
+    templateCode: `public class Solution {\n    public static void main(String[] args) {\n        // Your code here\n    }\n}`
+  },
+  {
+    id: 4005,
+    title: 'Java Problem 6',
+    difficulty: '2 Stars',
+    topic: 'Core Java',
+    url: '#',
+    description: `This is problem 6 for Java\n\nDifficulty Level: 2 Stars.\n\nPlease write your solution below to solve the given task.`,
+    examples: [
+      { input: 'None', output: 'None', explanation: 'Generic explanation' }
+    ],
+    constraints: 'Standard constraints apply.',
+    templateCode: `public class Solution {\n    public static void main(String[] args) {\n        // Your code here\n    }\n}`
+  },
+  {
+    id: 4006,
+    title: 'Java Problem 7',
+    difficulty: '3 Stars',
+    topic: 'Core Java',
+    url: '#',
+    description: `This is problem 7 for Java\n\nDifficulty Level: 3 Stars.\n\nPlease write your solution below to solve the given task.`,
+    examples: [
+      { input: 'None', output: 'None', explanation: 'Generic explanation' }
+    ],
+    constraints: 'Standard constraints apply.',
+    templateCode: `public class Solution {\n    public static void main(String[] args) {\n        // Your code here\n    }\n}`
+  },
+  {
+    id: 4007,
+    title: 'Java Problem 8',
+    difficulty: '3 Stars',
+    topic: 'Core Java',
+    url: '#',
+    description: `This is problem 8 for Java\n\nDifficulty Level: 3 Stars.\n\nPlease write your solution below to solve the given task.`,
+    examples: [
+      { input: 'None', output: 'None', explanation: 'Generic explanation' }
+    ],
+    constraints: 'Standard constraints apply.',
+    templateCode: `public class Solution {\n    public static void main(String[] args) {\n        // Your code here\n    }\n}`
+  },
+  {
+    id: 4008,
+    title: 'Java Problem 9',
+    difficulty: '3 Stars',
+    topic: 'Core Java',
+    url: '#',
+    description: `This is problem 9 for Java\n\nDifficulty Level: 3 Stars.\n\nPlease write your solution below to solve the given task.`,
+    examples: [
+      { input: 'None', output: 'None', explanation: 'Generic explanation' }
+    ],
+    constraints: 'Standard constraints apply.',
+    templateCode: `public class Solution {\n    public static void main(String[] args) {\n        // Your code here\n    }\n}`
+  },
+  {
+    id: 4009,
+    title: 'Java Problem 10',
+    difficulty: '4 Stars',
+    topic: 'Core Java',
+    url: '#',
+    description: `This is problem 10 for Java\n\nDifficulty Level: 4 Stars.\n\nPlease write your solution below to solve the given task.`,
+    examples: [
+      { input: 'None', output: 'None', explanation: 'Generic explanation' }
+    ],
+    constraints: 'Standard constraints apply.',
+    templateCode: `public class Solution {\n    public static void main(String[] args) {\n        // Your code here\n    }\n}`
+  },
+  {
+    id: 4010,
+    title: 'Java Problem 11',
+    difficulty: '4 Stars',
+    topic: 'Core Java',
+    url: '#',
+    description: `This is problem 11 for Java\n\nDifficulty Level: 4 Stars.\n\nPlease write your solution below to solve the given task.`,
+    examples: [
+      { input: 'None', output: 'None', explanation: 'Generic explanation' }
+    ],
+    constraints: 'Standard constraints apply.',
+    templateCode: `public class Solution {\n    public static void main(String[] args) {\n        // Your code here\n    }\n}`
+  },
+  {
+    id: 4011,
+    title: 'Java Problem 12',
+    difficulty: '4 Stars',
+    topic: 'Core Java',
+    url: '#',
+    description: `This is problem 12 for Java\n\nDifficulty Level: 4 Stars.\n\nPlease write your solution below to solve the given task.`,
+    examples: [
+      { input: 'None', output: 'None', explanation: 'Generic explanation' }
+    ],
+    constraints: 'Standard constraints apply.',
+    templateCode: `public class Solution {\n    public static void main(String[] args) {\n        // Your code here\n    }\n}`
+  },
+  {
+    id: 4012,
+    title: 'Java Problem 13',
+    difficulty: '5 Stars',
+    topic: 'Core Java',
+    url: '#',
+    description: `This is problem 13 for Java\n\nDifficulty Level: 5 Stars.\n\nPlease write your solution below to solve the given task.`,
+    examples: [
+      { input: 'None', output: 'None', explanation: 'Generic explanation' }
+    ],
+    constraints: 'Standard constraints apply.',
+    templateCode: `public class Solution {\n    public static void main(String[] args) {\n        // Your code here\n    }\n}`
+  },
+  {
+    id: 4013,
+    title: 'Java Problem 14',
+    difficulty: '5 Stars',
+    topic: 'Core Java',
+    url: '#',
+    description: `This is problem 14 for Java\n\nDifficulty Level: 5 Stars.\n\nPlease write your solution below to solve the given task.`,
+    examples: [
+      { input: 'None', output: 'None', explanation: 'Generic explanation' }
+    ],
+    constraints: 'Standard constraints apply.',
+    templateCode: `public class Solution {\n    public static void main(String[] args) {\n        // Your code here\n    }\n}`
+  },
+  {
+    id: 4014,
+    title: 'Java Problem 15',
+    difficulty: '5 Stars',
+    topic: 'Core Java',
+    url: '#',
+    description: `This is problem 15 for Java\n\nDifficulty Level: 5 Stars.\n\nPlease write your solution below to solve the given task.`,
+    examples: [
+      { input: 'None', output: 'None', explanation: 'Generic explanation' }
+    ],
+    constraints: 'Standard constraints apply.',
+    templateCode: `public class Solution {\n    public static void main(String[] args) {\n        // Your code here\n    }\n}`
+  },
+];
+
+export const JS_PROBLEMS = [
+  {
+    id: 5000,
+    title: 'JavaScript Problem 1',
+    difficulty: '1 Star',
+    topic: 'Core JavaScript',
+    url: '#',
+    description: `This is problem 1 for JavaScript\n\nDifficulty Level: 1 Star.\n\nPlease write your solution below to solve the given task.`,
+    examples: [
+      { input: 'None', output: 'None', explanation: 'Generic explanation' }
+    ],
+    constraints: 'Standard constraints apply.',
+    templateCode: `function solve() {\n    // Your code here\n}\n`
+  },
+  {
+    id: 5001,
+    title: 'JavaScript Problem 2',
+    difficulty: '1 Star',
+    topic: 'Core JavaScript',
+    url: '#',
+    description: `This is problem 2 for JavaScript\n\nDifficulty Level: 1 Star.\n\nPlease write your solution below to solve the given task.`,
+    examples: [
+      { input: 'None', output: 'None', explanation: 'Generic explanation' }
+    ],
+    constraints: 'Standard constraints apply.',
+    templateCode: `function solve() {\n    // Your code here\n}\n`
+  },
+  {
+    id: 5002,
+    title: 'JavaScript Problem 3',
+    difficulty: '1 Star',
+    topic: 'Core JavaScript',
+    url: '#',
+    description: `This is problem 3 for JavaScript\n\nDifficulty Level: 1 Star.\n\nPlease write your solution below to solve the given task.`,
+    examples: [
+      { input: 'None', output: 'None', explanation: 'Generic explanation' }
+    ],
+    constraints: 'Standard constraints apply.',
+    templateCode: `function solve() {\n    // Your code here\n}\n`
+  },
+  {
+    id: 5003,
+    title: 'JavaScript Problem 4',
+    difficulty: '2 Stars',
+    topic: 'Core JavaScript',
+    url: '#',
+    description: `This is problem 4 for JavaScript\n\nDifficulty Level: 2 Stars.\n\nPlease write your solution below to solve the given task.`,
+    examples: [
+      { input: 'None', output: 'None', explanation: 'Generic explanation' }
+    ],
+    constraints: 'Standard constraints apply.',
+    templateCode: `function solve() {\n    // Your code here\n}\n`
+  },
+  {
+    id: 5004,
+    title: 'JavaScript Problem 5',
+    difficulty: '2 Stars',
+    topic: 'Core JavaScript',
+    url: '#',
+    description: `This is problem 5 for JavaScript\n\nDifficulty Level: 2 Stars.\n\nPlease write your solution below to solve the given task.`,
+    examples: [
+      { input: 'None', output: 'None', explanation: 'Generic explanation' }
+    ],
+    constraints: 'Standard constraints apply.',
+    templateCode: `function solve() {\n    // Your code here\n}\n`
+  },
+  {
+    id: 5005,
+    title: 'JavaScript Problem 6',
+    difficulty: '2 Stars',
+    topic: 'Core JavaScript',
+    url: '#',
+    description: `This is problem 6 for JavaScript\n\nDifficulty Level: 2 Stars.\n\nPlease write your solution below to solve the given task.`,
+    examples: [
+      { input: 'None', output: 'None', explanation: 'Generic explanation' }
+    ],
+    constraints: 'Standard constraints apply.',
+    templateCode: `function solve() {\n    // Your code here\n}\n`
+  },
+  {
+    id: 5006,
+    title: 'JavaScript Problem 7',
+    difficulty: '3 Stars',
+    topic: 'Core JavaScript',
+    url: '#',
+    description: `This is problem 7 for JavaScript\n\nDifficulty Level: 3 Stars.\n\nPlease write your solution below to solve the given task.`,
+    examples: [
+      { input: 'None', output: 'None', explanation: 'Generic explanation' }
+    ],
+    constraints: 'Standard constraints apply.',
+    templateCode: `function solve() {\n    // Your code here\n}\n`
+  },
+  {
+    id: 5007,
+    title: 'JavaScript Problem 8',
+    difficulty: '3 Stars',
+    topic: 'Core JavaScript',
+    url: '#',
+    description: `This is problem 8 for JavaScript\n\nDifficulty Level: 3 Stars.\n\nPlease write your solution below to solve the given task.`,
+    examples: [
+      { input: 'None', output: 'None', explanation: 'Generic explanation' }
+    ],
+    constraints: 'Standard constraints apply.',
+    templateCode: `function solve() {\n    // Your code here\n}\n`
+  },
+  {
+    id: 5008,
+    title: 'JavaScript Problem 9',
+    difficulty: '3 Stars',
+    topic: 'Core JavaScript',
+    url: '#',
+    description: `This is problem 9 for JavaScript\n\nDifficulty Level: 3 Stars.\n\nPlease write your solution below to solve the given task.`,
+    examples: [
+      { input: 'None', output: 'None', explanation: 'Generic explanation' }
+    ],
+    constraints: 'Standard constraints apply.',
+    templateCode: `function solve() {\n    // Your code here\n}\n`
+  },
+  {
+    id: 5009,
+    title: 'JavaScript Problem 10',
+    difficulty: '4 Stars',
+    topic: 'Core JavaScript',
+    url: '#',
+    description: `This is problem 10 for JavaScript\n\nDifficulty Level: 4 Stars.\n\nPlease write your solution below to solve the given task.`,
+    examples: [
+      { input: 'None', output: 'None', explanation: 'Generic explanation' }
+    ],
+    constraints: 'Standard constraints apply.',
+    templateCode: `function solve() {\n    // Your code here\n}\n`
+  },
+  {
+    id: 5010,
+    title: 'JavaScript Problem 11',
+    difficulty: '4 Stars',
+    topic: 'Core JavaScript',
+    url: '#',
+    description: `This is problem 11 for JavaScript\n\nDifficulty Level: 4 Stars.\n\nPlease write your solution below to solve the given task.`,
+    examples: [
+      { input: 'None', output: 'None', explanation: 'Generic explanation' }
+    ],
+    constraints: 'Standard constraints apply.',
+    templateCode: `function solve() {\n    // Your code here\n}\n`
+  },
+  {
+    id: 5011,
+    title: 'JavaScript Problem 12',
+    difficulty: '4 Stars',
+    topic: 'Core JavaScript',
+    url: '#',
+    description: `This is problem 12 for JavaScript\n\nDifficulty Level: 4 Stars.\n\nPlease write your solution below to solve the given task.`,
+    examples: [
+      { input: 'None', output: 'None', explanation: 'Generic explanation' }
+    ],
+    constraints: 'Standard constraints apply.',
+    templateCode: `function solve() {\n    // Your code here\n}\n`
+  },
+  {
+    id: 5012,
+    title: 'JavaScript Problem 13',
+    difficulty: '5 Stars',
+    topic: 'Core JavaScript',
+    url: '#',
+    description: `This is problem 13 for JavaScript\n\nDifficulty Level: 5 Stars.\n\nPlease write your solution below to solve the given task.`,
+    examples: [
+      { input: 'None', output: 'None', explanation: 'Generic explanation' }
+    ],
+    constraints: 'Standard constraints apply.',
+    templateCode: `function solve() {\n    // Your code here\n}\n`
+  },
+  {
+    id: 5013,
+    title: 'JavaScript Problem 14',
+    difficulty: '5 Stars',
+    topic: 'Core JavaScript',
+    url: '#',
+    description: `This is problem 14 for JavaScript\n\nDifficulty Level: 5 Stars.\n\nPlease write your solution below to solve the given task.`,
+    examples: [
+      { input: 'None', output: 'None', explanation: 'Generic explanation' }
+    ],
+    constraints: 'Standard constraints apply.',
+    templateCode: `function solve() {\n    // Your code here\n}\n`
+  },
+  {
+    id: 5014,
+    title: 'JavaScript Problem 15',
+    difficulty: '5 Stars',
+    topic: 'Core JavaScript',
+    url: '#',
+    description: `This is problem 15 for JavaScript\n\nDifficulty Level: 5 Stars.\n\nPlease write your solution below to solve the given task.`,
+    examples: [
+      { input: 'None', output: 'None', explanation: 'Generic explanation' }
+    ],
+    constraints: 'Standard constraints apply.',
+    templateCode: `function solve() {\n    // Your code here\n}\n`
+  },
+];
+
