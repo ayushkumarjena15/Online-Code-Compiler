@@ -201,7 +201,7 @@ function App() {
       }
     });
 
-    supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
         // If logged in via standard supabase, set role to student by default
         // In a real app, you'd fetch the role from a profiles table
