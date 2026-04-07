@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CheckCircle2, XCircle, MessageSquare, Code2, ExternalLink, Clock, User, Filter, Search, LayoutDashboard, Shield, Users, Activity } from 'lucide-react';
+import { CheckCircle2, XCircle, MessageSquare, Code2, ExternalLink, Clock, User, Filter, Search, LayoutDashboard, Shield, Users, Activity, RefreshCw } from 'lucide-react';
 
 export default function AdminPanel({ user, supabase }) {
   const [submissions, setSubmissions] = useState([]);

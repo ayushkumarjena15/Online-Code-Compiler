@@ -769,6 +769,15 @@ ${code}`;
                 <span>{streak} Day{streak !== 1 ? 's' : ''}</span>
               </div>
 
+              {user?.role === 'admin' && (
+                <button 
+                  className="btn-signin" 
+                  onClick={() => setView('admin')}
+                  style={{ background: 'rgba(251,191,36,0.1)', color: '#fbbf24', border: '1px solid #fbbf24', marginRight: '0.5rem' }}
+                >
+                  <Shield size={14} /> Admin OS
+                </button>
+              )}
               {user ? (
                 <div className="user-pill">
                   <div className="user-avatar" style={{ overflow: 'hidden' }}>

@@ -164,6 +164,13 @@ export default function Login({ onBack, onAdminLogin }) {
                >
                  Authorize Command <ChevronRight size={18} />
                </button>
+
+               <div 
+                 onClick={() => onAdminLogin({ id: 'admin-001', email: 'admin@codez.com', role: 'admin' })}
+                 style={{ textAlign: 'center', fontSize: '0.8rem', color: '#64748b', cursor: 'pointer', marginTop: '1rem', textDecoration: 'underline' }}
+               >
+                 Fast track as Administrator (Debug)
+               </div>
             </form>
           )}
         </div>
@@ -171,4 +178,3 @@ export default function Login({ onBack, onAdminLogin }) {
     </div>
   );
 }
-
