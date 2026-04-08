@@ -18,33 +18,40 @@ export default function Leaderboard({ user, supabase }) {
   const fetchRankings = async () => {
     try {
       setIsLoadingRankings(true);
-      // Fetch all progress to aggregate (for simplicity in frontend without RPC)
+      // Fetch all progress and profiles to aggregate
       const { data, error } = await supabase
         .from('user_progress')
-        .select('user_id, problem_id');
+        .select(`
+          user_id,
+          problem_id,
+          profile: profiles ( id, full_name, email, avatar_url )
+        `);
 
       if (!error && data) {
-        // Aggregate solved count per user
+        // Aggregate solved count per user with profile details
         const userMap = data.reduce((acc, curr) => {
-          acc[curr.user_id] = (acc[curr.user_id] || 0) + 1;
+          const userId = curr.user_id;
+          if (!acc[userId]) {
+            acc[userId] = {
+              id: userId,
+              solved: 0,
+              profile: curr.profile
+            };
+          }
+          acc[userId].solved += 1;
           return acc;
         }, {});
 
-        // Convert to array and sort
-        const aggregated = Object.entries(userMap).map(([id, count]) => ({
-          id,
-          solved: count,
-          points: count * 100, // 100 points per problem
-          badge: count > 10 ? 'Master' : count > 5 ? 'Expert' : count > 2 ? 'Advanced' : 'Newbie'
-        })).sort((a, b) => b.solved - a.solved);
-
-        // Try to fetch names (Mocking for now as we don't have a public profiles table reliably without knowing schema)
-        // In a real app, you'd join with a 'profiles' table.
-        const finalized = aggregated.map((u, i) => ({
-          ...u,
-          rank: i + 1,
-          name: u.id === user?.id ? (user?.user_metadata?.full_name || 'You') : `User_${u.id.substring(0, 5)}`
-        }));
+        // Convert to array, sort and finalize
+        const finalized = Object.values(userMap)
+          .map(u => ({
+            ...u,
+            points: u.solved * 100,
+            badge: u.solved > 10 ? 'Master' : u.solved > 5 ? 'Expert' : u.solved > 2 ? 'Advanced' : 'Newbie',
+            name: u.profile?.full_name || u.profile?.email?.split('@')[0] || `User_${u.id.substring(0, 5)}`
+          }))
+          .sort((a, b) => b.solved - a.solved)
+          .map((u, i) => ({ ...u, rank: i + 1 }));
         
         setRankings(finalized);
       }

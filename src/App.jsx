@@ -103,7 +103,9 @@ function App() {
     wordWrap: 'off',
     tabSize: 4
   });
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const vimRef = useRef(null);
+  const profileMenuRef = useRef(null);
   
   const [diffCode, setDiffCode] = useState(null);
   const [isFixingBug, setIsFixingBug] = useState(false);
@@ -250,7 +252,17 @@ function App() {
          console.error("Failed to load generic compilers", err);
       });
 
-      return () => subscription.unsubscribe();
+      const handleClickOutside = (event) => {
+        if (profileMenuRef.current && !profileMenuRef.current.contains(event.target)) {
+          setIsProfileMenuOpen(false);
+        }
+      };
+      document.addEventListener('mousedown', handleClickOutside);
+
+      return () => {
+        subscription.unsubscribe();
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
   }, []);
 
   useEffect(() => {
@@ -752,12 +764,6 @@ ${code}`;
                 >
                   <Trophy size={13} /> Leaderboard
                 </button>
-                <button
-                  className={`nav-tab ${view === 'certifications' ? 'active' : ''}`}
-                  onClick={() => setView('certifications')}
-                >
-                  <Award size={13} /> Certifications
-                </button>
               </nav>
             </div>
 
@@ -779,32 +785,48 @@ ${code}`;
                 </button>
               )}
               {user ? (
-                <div className="user-pill">
-                  <div className="user-avatar" style={{ overflow: 'hidden' }}>
-                    {user.user_metadata?.avatar_url ? (
-                      <img src={user.user_metadata.avatar_url} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    ) : (
-                      (user.email?.[0] ?? 'U').toUpperCase()
-                    )}
+                <div className="user-pill-container" ref={profileMenuRef}>
+                  <div className="user-pill" onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)} style={{ cursor: 'pointer' }}>
+                    <div className="user-avatar" style={{ overflow: 'hidden' }}>
+                      {user.user_metadata?.avatar_url ? (
+                        <img src={user.user_metadata.avatar_url} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      ) : (
+                        (user.email?.[0] ?? 'U').toUpperCase()
+                      )}
+                    </div>
+                    <span className="user-name" style={{ display: 'flex', alignItems: 'center' }}>
+                      {user.user_metadata?.full_name || user.email?.split('@')[0]}
+                      {user.app_metadata?.provider === 'github' && <Github size={14} style={{marginLeft: '0.4rem', opacity: 0.8, color: '#f8fafc'}} title="Logged in via GitHub" />}
+                      {user.app_metadata?.provider === 'google' && <span style={{ fontSize: '9px', background: '#ea4335', color: 'white', padding: '2px 5px', borderRadius: '4px', marginLeft: '0.5rem', fontWeight: 700, letterSpacing: '0.5px' }} title="Logged in via Google">GOOGLE</span>}
+                      {user.role === 'admin' && <span style={{ fontSize: '9px', background: '#fbbf24', color: '#000', padding: '2px 5px', borderRadius: '4px', marginLeft: '0.5rem', fontWeight: 800, letterSpacing: '0.5px' }}>ADMIN OS</span>}
+                    </span>
+                    <ChevronDown size={14} style={{ opacity: 0.6, transform: isProfileMenuOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
                   </div>
-                  <span className="user-name" style={{ display: 'flex', alignItems: 'center' }}>
-                    {user.user_metadata?.full_name || user.email?.split('@')[0]}
-                    {user.app_metadata?.provider === 'github' && <Github size={14} style={{marginLeft: '0.4rem', opacity: 0.8, color: '#f8fafc'}} title="Logged in via GitHub" />}
-                    {user.app_metadata?.provider === 'google' && <span style={{ fontSize: '9px', background: '#ea4335', color: 'white', padding: '2px 5px', borderRadius: '4px', marginLeft: '0.5rem', fontWeight: 700, letterSpacing: '0.5px' }} title="Logged in via Google">GOOGLE</span>}
-                    {user.role === 'admin' && <span style={{ fontSize: '9px', background: '#fbbf24', color: '#000', padding: '2px 5px', borderRadius: '4px', marginLeft: '0.5rem', fontWeight: 800, letterSpacing: '0.5px' }}>ADMIN OS</span>}
-                  </span>
-                  <button className="icon-btn" onClick={() => setView('profile')} title="My Profile">
-                    <User size={15} />
-                  </button>
-                  <button className="icon-btn" onClick={handleSaveSnippet} title="Save snippet">
-                    <Save size={15} />
-                  </button>
-                  <button className="icon-btn" onClick={() => setView('snippets')} title="My Snippets">
-                    <FolderOpen size={15} />
-                  </button>
-                  <button className="icon-btn" onClick={handleLogout} title="Sign out">
-                    <LogOut size={15} />
-                  </button>
+
+                  {isProfileMenuOpen && (
+                    <div className="profile-dropdown">
+                      <div className="dropdown-header">
+                        <span className="dropdown-user-email">{user.email}</span>
+                      </div>
+                      <div className="dropdown-divider"></div>
+                      <button className="dropdown-item" onClick={() => { setView('profile'); setIsProfileMenuOpen(false); }}>
+                        <User size={15} /> <span>My Profile</span>
+                      </button>
+                      <button className="dropdown-item" onClick={() => { setView('certifications'); setIsProfileMenuOpen(false); }}>
+                        <Award size={15} /> <span>Certifications</span>
+                      </button>
+                      <button className="dropdown-item" onClick={() => { setView('snippets'); setIsProfileMenuOpen(false); }}>
+                        <FolderOpen size={15} /> <span>My Snippets</span>
+                      </button>
+                      <button className="dropdown-item" onClick={handleSaveSnippet}>
+                        <Save size={15} /> <span>Save current code</span>
+                      </button>
+                      <div className="dropdown-divider"></div>
+                      <button className="dropdown-item logout" onClick={() => { handleLogout(); setIsProfileMenuOpen(false); }}>
+                        <LogOut size={15} /> <span>Sign out</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <button className="btn-signin" onClick={() => setView('login')}>

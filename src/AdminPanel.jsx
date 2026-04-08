@@ -65,7 +65,7 @@ export default function AdminPanel({ user, supabase }) {
         .from('code_submissions')
         .select(`
           *,
-          user_email: user_id ( email )
+          profile: profiles ( email, full_name )
         `)
         .order('submitted_at', { ascending: false });
 
@@ -245,7 +245,7 @@ export default function AdminPanel({ user, supabase }) {
                               <Code2 size={16} color="#fbbf24" />
                            </div>
                            <div>
-                              <div style={{ fontSize: '0.9rem', fontWeight: 600, color: '#f8fafc' }}>{sub.user_email?.email || 'Anonymous'}</div>
+                              <div style={{ fontSize: '0.9rem', fontWeight: 600, color: '#f8fafc' }}>{sub.profile?.full_name || sub.profile?.email || 'Anonymous'}</div>
                               <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Submitted <span style={{ color: '#fbbf24' }}>{sub.problem_id}</span> in {sub.language}</div>
                            </div>
                         </div>
@@ -312,7 +312,7 @@ export default function AdminPanel({ user, supabase }) {
                     </div>
                     <div style={{ borderTop: '1px solid #334155', paddingTop: '1rem' }}>
                       <div style={{ fontSize: '0.85rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <User size={14} /> Submitted by: <span style={{ color: '#f8fafc', fontWeight: 600 }}>{sub.user_email?.email || 'Anonymous'}</span>
+                        <User size={14} /> Submitted by: <span style={{ color: '#f8fafc', fontWeight: 600 }}>{sub.profile?.full_name || sub.profile?.email || 'Anonymous'}</span>
                       </div>
                       <p style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '4px' }}>{new Date(sub.submitted_at).toLocaleString()}</p>
                     </div>
@@ -333,7 +333,7 @@ export default function AdminPanel({ user, supabase }) {
             <div style={{ padding: '1.5rem', borderBottom: '1px solid #334155', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                <div>
                   <h2 style={{ margin: 0, textTransform: 'capitalize' }}>Reviewing: {selectedSubmission.problem_id.replace(/-/g, ' ')}</h2>
-                  <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.85rem', color: '#94a3b8' }}>Developer: {selectedSubmission.user_email?.email}</p>
+                  <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.85rem', color: '#94a3b8' }}>Developer: {selectedSubmission.profile?.full_name || selectedSubmission.profile?.email || 'Anonymous'}</p>
                </div>
                <button onClick={() => setSelectedSubmission(null)} style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer' }}><XCircle size={28} /></button>
             </div>
