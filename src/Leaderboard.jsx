@@ -86,92 +86,146 @@ export default function Leaderboard({ user, supabase }) {
   };
 
   return (
-    <div style={{ flex: 1, overflowY: 'auto', background: 'var(--bg-main)', padding: '2rem' }}>
-      <div style={{ maxWidth: '1000px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+    <div style={{ flex: 1, overflowY: 'auto', background: 'transparent', padding: '2.5rem' }}>
+      <div style={{ maxWidth: '1100px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
         
         {/* Header Options */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--panel-border)', paddingBottom: '1rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <Trophy size={32} color="#f97316" />
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: '1px solid var(--panel-border)', paddingBottom: '1.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+            <div style={{ 
+              padding: '16px', borderRadius: '20px', background: 'rgba(251, 191, 36, 0.1)', 
+              border: '1px solid rgba(251, 191, 36, 0.2)', boxShadow: '0 0 30px rgba(251, 191, 36, 0.1)'
+            }}>
+               <Trophy size={40} color="#fbbf24" style={{ filter: 'drop-shadow(0 0 8px rgba(251,191,36,0.4))' }} />
+            </div>
             <div>
-              <h2 style={{ margin: 0, fontSize: '1.8rem', color: 'var(--text-main)' }}>Global Leaderboard</h2>
-              <p style={{ margin: '0.2rem 0 0 0', color: 'var(--text-3)', fontSize: '0.9rem' }}>Compete with programmers worldwide and track upcoming contests.</p>
+              <h1 style={{ margin: 0, fontSize: '2.4rem', color: '#fff', fontWeight: 800, letterSpacing: '-1.5px' }}>Top <span style={{ color: '#fbbf24' }}>Developers</span></h1>
+              <p style={{ margin: '0.4rem 0 0 0', color: 'var(--text-2)', fontSize: '1rem', fontWeight: 500, opacity: 0.8 }}>Benchmark your skills against the global elite.</p>
             </div>
           </div>
           
-          <div style={{ display: 'flex', background: 'rgba(0,0,0,0.2)', padding: '4px', borderRadius: '8px', border: '1px solid var(--panel-border)' }}>
+          <div style={{ 
+            display: 'flex', background: 'rgba(0,0,0,0.3)', padding: '6px', borderRadius: '16px', 
+            border: '1px solid var(--panel-border)', backdropFilter: 'blur(10px)'
+          }}>
              <button
                 onClick={() => setActiveTab('rankings')}
                 style={{
-                  background: activeTab === 'rankings' ? 'var(--panel-bg)' : 'transparent',
-                  color: activeTab === 'rankings' ? 'var(--text-main)' : 'var(--text-3)',
-                  border: 'none', padding: '0.5rem 1rem', borderRadius: '6px',
-                  fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem',
-                  boxShadow: activeTab === 'rankings' ? '0 2px 4px rgba(0,0,0,0.1)' : 'none'
+                  background: activeTab === 'rankings' ? 'rgba(255,255,255,0.08)' : 'transparent',
+                  color: activeTab === 'rankings' ? '#fff' : 'var(--text-3)',
+                  border: 'none', padding: '0.6rem 1.25rem', borderRadius: '12px',
+                  fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.65rem',
+                  transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+                  boxShadow: activeTab === 'rankings' ? '0 4px 15px rgba(0,0,0,0.3)' : 'none'
                 }}
              >
-                <Medal size={16} /> Rankings
+                <Medal size={18} /> Hall of Fame
              </button>
              <button
                 onClick={() => setActiveTab('contests')}
                 style={{
-                  background: activeTab === 'contests' ? 'var(--panel-bg)' : 'transparent',
-                  color: activeTab === 'contests' ? 'var(--text-main)' : 'var(--text-3)',
-                  border: 'none', padding: '0.5rem 1rem', borderRadius: '6px',
-                  fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem',
-                  boxShadow: activeTab === 'contests' ? '0 2px 4px rgba(0,0,0,0.1)' : 'none'
+                  background: activeTab === 'contests' ? 'rgba(255,255,255,0.08)' : 'transparent',
+                  color: activeTab === 'contests' ? '#fff' : 'var(--text-3)',
+                  border: 'none', padding: '0.6rem 1.25rem', borderRadius: '12px',
+                  fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.65rem',
+                  transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+                  boxShadow: activeTab === 'contests' ? '0 4px 15px rgba(0,0,0,0.3)' : 'none'
                 }}
              >
-                <CalendarDays size={16} /> Contests
+                <CalendarDays size={18} /> Live Contests
              </button>
           </div>
         </div>
 
         {/* Content */}
          {activeTab === 'rankings' && (
-            <div style={{ background: 'var(--panel-bg)', borderRadius: '12px', border: '1px solid var(--panel-border)', overflow: 'hidden' }}>
+            <div style={{ 
+              background: 'rgba(15, 23, 42, 0.4)', borderRadius: '24px', 
+              border: '1px solid var(--panel-border)', overflow: 'hidden',
+              backdropFilter: 'blur(20px)', boxShadow: '0 20px 50px rgba(0,0,0,0.3)'
+            }}>
               {isLoadingRankings ? (
-                <div style={{ padding: '4rem', display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', gap: '1rem' }}>
-                   <span className="loader" style={{ width: 32, height: 32, borderTopColor: '#a855f7' }}></span>
-                   <span style={{ color: 'var(--text-3)' }}>Calculating rankings...</span>
+                <div style={{ padding: '6rem', display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', gap: '1.5rem' }}>
+                   <div className="loader" style={{ width: 48, height: 48, borderTopColor: '#fbbf24', borderLeftWidth: '3px' }}></div>
+                   <span style={{ color: 'var(--text-2)', fontWeight: 600, letterSpacing: '1px', textTransform: 'uppercase', fontSize: '0.8rem' }}>Compiling Global Data...</span>
                 </div>
               ) : rankings.length === 0 ? (
-                <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-3)' }}>
-                  <Trophy size={48} opacity={0.1} style={{ marginBottom: '1rem' }} />
-                  No rankings found. Be the first to solve a problem!
+                <div style={{ padding: '6rem', textAlign: 'center', color: 'var(--text-3)' }}>
+                  <Trophy size={64} opacity={0.05} style={{ marginBottom: '1.5rem' }} />
+                  <p style={{ fontSize: '1.1rem', fontWeight: 500 }}>The podium is currently empty. Be the first to claim it!</p>
                 </div>
               ) : (
                 <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                   <thead>
-                    <tr style={{ background: 'rgba(0,0,0,0.2)', color: 'var(--text-2)', fontSize: '0.85rem', textTransform: 'uppercase' }}>
-                      <th style={{ padding: '1rem', borderBottom: '1px solid var(--panel-border)', width: '80px', textAlign: 'center' }}>Rank</th>
-                      <th style={{ padding: '1rem', borderBottom: '1px solid var(--panel-border)' }}>Developer</th>
-                      <th style={{ padding: '1rem', borderBottom: '1px solid var(--panel-border)' }}>Badge</th>
-                      <th style={{ padding: '1rem', borderBottom: '1px solid var(--panel-border)' }}>Points</th>
-                      <th style={{ padding: '1rem', borderBottom: '1px solid var(--panel-border)' }}>Solved</th>
+                    <tr style={{ background: 'rgba(0,0,0,0.4)', color: 'var(--text-3)', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1.5px' }}>
+                      <th style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid var(--panel-border)', width: '100px', textAlign: 'center' }}>Rank</th>
+                      <th style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid var(--panel-border)' }}>Developer</th>
+                      <th style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid var(--panel-border)' }}>Badge</th>
+                      <th style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid var(--panel-border)' }}>Points</th>
+                      <th style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid var(--panel-border)' }}>Achievements</th>
                     </tr>
                   </thead>
                   <tbody>
                     {rankings.map((u, i) => (
-                       <tr key={u.id} style={{ borderBottom: '1px solid var(--panel-border)', background: u.id === user?.id ? 'rgba(168,85,247,0.05)' : i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.01)' }}>
-                         <td style={{ padding: '1rem', textAlign: 'center', fontSize: '1.2rem', fontWeight: 700, color: i === 0 ? '#fbbf24' : i === 1 ? '#e2e8f0' : i === 2 ? '#b45309' : 'var(--text-2)' }}>
-                           #{u.rank}
-                         </td>
-                         <td style={{ padding: '1rem', display: 'flex', alignItems: 'center', gap: '0.75rem', fontWeight: 600, color: u.id === user?.id ? '#d8b4fe' : 'var(--text-main)' }}>
-                           <div style={{ width: 32, height: 32, borderRadius: '50%', background: u.id === user?.id ? 'linear-gradient(135deg, #a855f7, #3b82f6)' : '#334155', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '14px', border: u.id === user?.id ? '2px solid rgba(168,85,247,0.5)' : 'none' }}>
-                             {u.name.charAt(0)}
+                       <tr key={u.id} className="rank-row" style={{ 
+                         borderBottom: '1px solid var(--panel-border)', 
+                         background: u.id === user?.id ? 'rgba(59, 130, 246, 0.08)' : 'transparent',
+                         transition: 'background 0.3s ease'
+                       }}>
+                         <td style={{ padding: '1.25rem', textAlign: 'center' }}>
+                           <div style={{ 
+                             display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '40px', height: '40px',
+                             borderRadius: '12px', fontWeight: 800, fontSize: '1.1rem',
+                             background: i === 0 ? 'linear-gradient(135deg, #fbbf24 0%, #d97706 100%)' : 
+                                         i === 1 ? 'linear-gradient(135deg, #e2e8f0 0%, #94a3b8 100%)' :
+                                         i === 2 ? 'linear-gradient(135deg, #b45309 0%, #78350f 100%)' : 'rgba(255,255,255,0.05)',
+                             color: i < 3 ? '#000' : 'var(--text-2)',
+                             boxShadow: i < 3 ? '0 4px 12px rgba(0,0,0,0.2)' : 'none'
+                           }}>
+                             {u.rank}
                            </div>
-                           {u.name} {u.id === user?.id && <span style={{ fontSize: '0.6rem', background: '#a855f7', color: 'white', padding: '1px 4px', borderRadius: '4px', marginLeft: '4px' }}>YOU</span>}
                          </td>
-                         <td style={{ padding: '1rem' }}>
-                            <span style={{ padding: '4px 10px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 700, background: 'rgba(168,85,247,0.1)', color: '#cf9df7', border: '1px solid rgba(168,85,247,0.3)' }}>
+                         <td style={{ padding: '1.25rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                              <div style={{ 
+                                width: 44, height: 44, borderRadius: '14px', 
+                                background: u.id === user?.id ? 'linear-gradient(135deg, #a855f7, #3b82f6)' : '#1e293b', 
+                                display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                                color: '#fff', fontSize: '1.1rem', fontWeight: 700,
+                                border: u.id === user?.id ? '2px solid rgba(168,85,247,0.5)' : '1px solid rgba(255,255,255,0.05)',
+                                overflow: 'hidden'
+                              }}>
+                                {u.profile?.avatar_url ? (
+                                  <img src={u.profile.avatar_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                ) : (
+                                  u.name.charAt(0)
+                                )}
+                              </div>
+                              <div>
+                                <div style={{ color: '#fff', fontWeight: 700, fontSize: '1.05rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                  {u.name}
+                                  {u.id === user?.id && <span style={{ fontSize: '0.65rem', background: '#3b82f6', color: '#fff', padding: '2px 8px', borderRadius: '6px', letterSpacing: '0.5px', fontWeight: 800 }}>YOU</span>}
+                                </div>
+                                <div style={{ fontSize: '0.8rem', color: 'var(--text-3)', marginTop: '2px' }}>Member since 2026</div>
+                              </div>
+                            </div>
+                         </td>
+                         <td style={{ padding: '1.25rem' }}>
+                            <span style={{ 
+                              padding: '5px 12px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 800, 
+                              background: 'rgba(59, 130, 246, 0.12)', color: '#60a5fa', 
+                              border: '1px solid rgba(59, 130, 246, 0.25)', letterSpacing: '0.5px', textTransform: 'uppercase'
+                            }}>
                                {u.badge}
                             </span>
                          </td>
-                         <td style={{ padding: '1rem', fontWeight: 700, color: '#fbbf24' }}>{u.points.toLocaleString()}</td>
-                         <td style={{ padding: '1rem', color: 'var(--text-2)' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                               <Target size={14} color="#22c55e" /> {u.solved}
+                         <td style={{ padding: '1.25rem', fontWeight: 800, color: '#fbbf24', fontSize: '1.1rem' }}>{u.points.toLocaleString()}</td>
+                         <td style={{ padding: '1.25rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: '#10b981', fontWeight: 700 }}>
+                               <div style={{ padding: '6px', borderRadius: '8px', background: 'rgba(16, 185, 129, 0.1)' }}>
+                                  <Target size={16} />
+                               </div>
+                               {u.solved} Problems Solved
                             </div>
                          </td>
                        </tr>
@@ -183,52 +237,79 @@ export default function Leaderboard({ user, supabase }) {
          )}
 
         {activeTab === 'contests' && (
-           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
              {isLoadingContests ? (
-               <div style={{ padding: '4rem', display: 'flex', justifyContent: 'center' }}>
-                 <span className="loader" style={{ width: 24, height: 24, borderTopColor: '#a855f7' }}></span>
+               <div style={{ padding: '6rem', display: 'flex', justifyContent: 'center' }}>
+                 <div className="loader" style={{ width: 40, height: 40, borderTopColor: '#3b82f6' }}></div>
                </div>
              ) : contests.length > 0 ? (
-               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.25rem' }}>
+               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '1.75rem' }}>
                  {contests.slice(0, 20).map((c, i) => (
-                    <div key={i} style={{ background: 'var(--panel-bg)', border: '1px solid var(--panel-border)', borderRadius: '12px', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem', transition: 'transform 0.2s, box-shadow 0.2s' }}>
-                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                          <span style={{ padding: '3px 8px', borderRadius: '4px', background: 'rgba(59,130,246,0.1)', color: '#93c5fd', fontSize: '0.75rem', fontWeight: 600, border: '1px solid rgba(59,130,246,0.2)' }}>
+                    <div key={i} className="contest-card" style={{ 
+                      background: 'rgba(15, 23, 42, 0.4)', border: '1px solid var(--panel-border)', 
+                      borderRadius: '24px', padding: '1.75rem', display: 'flex', flexDirection: 'column', 
+                      gap: '1.25rem', backdropFilter: 'blur(20px)', transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)'
+                    }}>
+                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span style={{ 
+                            padding: '6px 14px', borderRadius: '10px', background: 'rgba(59, 130, 246, 0.15)', 
+                            color: '#93c5fd', fontSize: '0.8rem', fontWeight: 700, border: '1px solid rgba(59, 130, 246, 0.3)',
+                            letterSpacing: '0.5px'
+                          }}>
                             {c.site}
                           </span>
                           {c.status === 'CODING' && (
-                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#22c55e', fontSize: '0.75rem', fontWeight: 700 }}>
-                              <Activity size={12} /> LIVE NEXT
-                            </span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(34, 197, 94, 0.1)', padding: '6px 12px', borderRadius: '10px', border: '1px solid rgba(34, 197, 94, 0.2)' }}>
+                              <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 10px #22c55e' }}></div>
+                              <span style={{ color: '#22c55e', fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Live Now</span>
+                            </div>
                           )}
                        </div>
                        
-                       <h3 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--text-main)', lineHeight: 1.3 }}>{c.name}</h3>
+                       <h3 style={{ margin: 0, fontSize: '1.25rem', color: '#fff', fontWeight: 700, lineHeight: 1.4 }}>{c.name}</h3>
                        
-                       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', background: 'rgba(0,0,0,0.2)', padding: '0.75rem', borderRadius: '8px' }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
-                            <span style={{ color: 'var(--text-3)' }}>Starts:</span>
-                            <strong style={{ color: '#e2e8f0' }}>{formatDate(c.start_time)}</strong>
+                       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', background: 'rgba(0,0,0,0.3)', padding: '1rem', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.02)' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
+                            <span style={{ color: 'var(--text-3)', fontWeight: 500 }}>Global Start</span>
+                            <strong style={{ color: '#f1f5f9' }}>{formatDate(c.start_time)}</strong>
                           </div>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
-                            <span style={{ color: 'var(--text-3)' }}>Ends:</span>
-                            <strong style={{ color: '#e2e8f0' }}>{formatDate(c.end_time)}</strong>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
+                            <span style={{ color: 'var(--text-3)', fontWeight: 500 }}>Duration</span>
+                            <strong style={{ color: '#f1f5f9' }}>48 Hours</strong>
                           </div>
                        </div>
                        
-                       <a href={c.url} target="_blank" rel="noreferrer" style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', padding: '0.6rem', background: 'var(--bg-main)', color: 'var(--text-2)', border: '1px solid var(--panel-border)', borderRadius: '6px', textDecoration: 'none', fontWeight: 600, fontSize: '0.85rem', transition: 'all 0.2s' }}>
-                          View Contest <ExternalLink size={14} />
+                       <a 
+                         href={c.url} 
+                         target="_blank" 
+                         rel="noreferrer" 
+                         style={{ 
+                           marginTop: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                           gap: '0.75rem', padding: '1rem', background: '#3b82f6', color: '#fff', 
+                           borderRadius: '16px', textDecoration: 'none', fontWeight: 700, 
+                           fontSize: '0.95rem', transition: 'all 0.3s', boxShadow: '0 4px 15px rgba(59, 130, 246, 0.2)'
+                         }}
+                         className="contest-link"
+                       >
+                          Register Now <ExternalLink size={18} />
                        </a>
                     </div>
                  ))}
                </div>
              ) : (
-               <p style={{ color: 'var(--text-3)' }}>No upcoming contests found at this time.</p>
+               <div style={{ textAlign: 'center', padding: '5rem', color: 'var(--text-3)' }}>
+                 <p style={{ fontSize: '1.2rem' }}>No upcoming battles detected on the radar.</p>
+               </div>
              )}
            </div>
         )}
 
       </div>
+      <style>{`
+        .rank-row:hover { background: rgba(255,255,255,0.04) !important; }
+        .contest-card:hover { transform: translateY(-8px); border-color: rgba(59, 130, 246, 0.5); box-shadow: 0 15px 40px rgba(0,0,0,0.4); }
+        .contest-link:hover { background: #2563eb; transform: scale(1.02); }
+      `}</style>
     </div>
   );
 }
