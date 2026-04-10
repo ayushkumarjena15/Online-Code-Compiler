@@ -192,15 +192,21 @@ export default function AdminPanel({ user, supabase }) {
 
       setIsScheduling(true);
 
+      const insertPayload = {
+        title: newContest.title,
+        description: newContest.description,
+        start_time: new Date(newContest.start_time).toISOString(),
+        end_time: new Date(newContest.end_time).toISOString(),
+      };
+
+      // Debug admin ID does not exist in auth.users, so we omit created_by for it
+      if (user.id !== '00000000-0000-0000-0000-000000000000') {
+        insertPayload.created_by = user.id;
+      }
+
       const { data: contestData, error: contestError } = await supabase
         .from('contests')
-        .insert({
-          title: newContest.title,
-          description: newContest.description,
-          start_time: new Date(newContest.start_time).toISOString(),
-          end_time: new Date(newContest.end_time).toISOString(),
-          created_by: user.id
-        })
+        .insert(insertPayload)
         .select()
         .single();
 
