@@ -82,7 +82,7 @@ export default function Login({ onBack, onAdminLogin }) {
                  CodeZ <span style={{ color: activePortal === 'admin' ? '#fbbf24' : '#a855f7' }}>{activePortal === 'admin' ? 'OS' : 'Hub'}</span>
                </h1>
                <p style={{ margin: '10px 0 0', color: '#94a3b8', fontSize: '1rem', fontWeight: 500, opacity: 0.8 }}>
-                 {activePortal === 'admin' ? 'Enterprise Management Console' : 'The next generation of cloud coding'}
+                 {activePortal === 'admin' ? 'Enterprise Management Console' : 'Online Code Compiler'}
                </p>
             </div>
           </div>

@@ -1,5 +1,5 @@
 <<<<<<< HEAD
-# Online-Code-Compiler
+# CodeZ | Online Code Compiler
 =======
 # React + Vite
 

@@ -704,7 +704,10 @@ ${code}`;
                 <div className="logo-mark" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <img src="/logo-white.png" alt="CodeZ Logo" style={{ width: '32px', height: '32px', objectFit: 'contain', borderRadius: '8px', filter: 'drop-shadow(0 2px 6px rgba(168, 85, 247, 0.4))' }} />
                 </div>
-                <span className="logo-text">CodeZ</span>
+                <div className="logo-text-wrapper" style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.1 }}>
+                  <span className="logo-text" style={{ fontSize: '1.2rem' }}>CodeZ</span>
+                  <span className="logo-subtitle" style={{ fontSize: '0.65rem', color: 'var(--text-3)', fontWeight: 600, letterSpacing: '0.5px', textTransform: 'uppercase' }}>Online Code Compiler</span>
+                </div>
               </div>
               <nav className="header-nav">
                 {user?.role === 'admin' ? (
