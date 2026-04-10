@@ -337,6 +337,14 @@ export default function Leaderboard({ user, supabase }) {
                                 <span style={{ color: 'var(--text-3)' }}>Starts</span>
                                 <strong style={{ color: '#fff' }}>{formatDate(c.start_time)}</strong>
                               </div>
+                              {isUpcoming && (
+                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
+                                  <span style={{ color: '#fbbf24', fontWeight: 600 }}>Countdown</span>
+                                  <strong style={{ color: '#fbbf24' }}>
+                                    {Math.ceil((new Date(c.start_time) - new Date()) / (1000 * 60 * 60))} Hours Left
+                                  </strong>
+                                </div>
+                              )}
                               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
                                 <span style={{ color: 'var(--text-3)' }}>Problems</span>
                                 <strong style={{ color: '#fbbf24' }}>{c.contest_problems?.length || 0} Sets</strong>

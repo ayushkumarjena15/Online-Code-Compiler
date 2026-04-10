@@ -388,25 +388,36 @@ export default function AdminPanel({ user, supabase }) {
                          style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid #334155', borderRadius: '10px', padding: '0.75rem', color: 'white', outline: 'none' }}
                        />
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                       <label style={{ fontSize: '0.9rem', color: '#94a3b8', fontWeight: 600 }}>Select Problems</label>
-                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', background: 'rgba(0,0,0,0.2)', border: '1px solid #334155', borderRadius: '10px', padding: '0.75rem', maxHeight: '150px', overflowY: 'auto' }}>
-                          {DSA_PROBLEMS.map(prob => (
-                            <label key={prob.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: newContest.problems.includes(prob.id) ? 'rgba(251,191,36,0.2)' : 'rgba(255,255,255,0.05)', padding: '4px 10px', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem', border: '1px solid transparent', borderColor: newContest.problems.includes(prob.id) ? '#fbbf24' : 'transparent' }}>
-                               <input 
-                                 type="checkbox" 
-                                 checked={newContest.problems.includes(prob.id)}
-                                 onChange={(e) => {
-                                   if (e.target.checked) setNewContest({...newContest, problems: [...newContest.problems, prob.id]});
-                                   else setNewContest({...newContest, problems: newContest.problems.filter(id => id !== prob.id)});
-                                 }}
-                                 style={{ display: 'none' }}
-                               />
-                               {prob.title}
-                            </label>
-                          ))}
-                       </div>
-                    </div>
+                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', gridColumn: 'span 2' }}>
+                        <label style={{ fontSize: '0.9rem', color: '#94a3b8', fontWeight: 600 }}>Assignment (Select Questions)</label>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '0.8rem', background: 'rgba(0,0,0,0.2)', border: '1px solid #334155', borderRadius: '10px', padding: '1rem', maxHeight: '250px', overflowY: 'auto' }}>
+                           {DSA_PROBLEMS.map(prob => (
+                             <label 
+                               key={prob.id} 
+                               style={{ 
+                                 display: 'flex', alignItems: 'center', gap: '0.75rem', background: newContest.problems.includes(prob.id) ? 'rgba(251,191,36,0.1)' : 'rgba(255,255,255,0.02)', 
+                                 padding: '10px', borderRadius: '10px', cursor: 'pointer', fontSize: '0.85rem', 
+                                 border: '1px solid', borderColor: newContest.problems.includes(prob.id) ? '#fbbf24' : 'transparent',
+                                 transition: 'all 0.2s'
+                               }}
+                             >
+                                <input 
+                                  type="checkbox" 
+                                  checked={newContest.problems.includes(prob.id)}
+                                  onChange={(e) => {
+                                    if (e.target.checked) setNewContest({...newContest, problems: [...newContest.problems, prob.id]});
+                                    else setNewContest({...newContest, problems: newContest.problems.filter(id => id !== prob.id)});
+                                  }}
+                                  style={{ width: '16px', height: '16px', accentColor: '#fbbf24' }}
+                                />
+                                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                  <span style={{ fontWeight: 600, color: newContest.problems.includes(prob.id) ? '#fbbf24' : '#fff' }}>{prob.title}</span>
+                                  <span style={{ fontSize: '0.7rem', color: '#64748b' }}>{prob.difficulty} | {prob.topic}</span>
+                                </div>
+                             </label>
+                           ))}
+                        </div>
+                     </div>
                  </div>
                  
                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
