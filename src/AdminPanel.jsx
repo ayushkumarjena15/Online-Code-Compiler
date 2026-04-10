@@ -1,6 +1,38 @@
 import React, { useState, useEffect } from 'react';
-import { CheckCircle2, XCircle, MessageSquare, Code2, ExternalLink, Clock, User, Filter, Search, LayoutDashboard, Shield, Users, Activity, RefreshCw, Calendar, Plus, Trash2, Target, Trophy, Terminal } from 'lucide-react';
-import { DSA_PROBLEMS } from './problemData';
+import { 
+  CheckCircle2, 
+  XCircle, 
+  MessageSquare, 
+  Code2, 
+  ExternalLink, 
+  Clock, 
+  User, 
+  Filter, 
+  Search, 
+  LayoutDashboard, 
+  Shield, 
+  Users, 
+  Activity, 
+  RefreshCw, 
+  Calendar, 
+  Plus, 
+  Trash2, 
+  Target, 
+  Trophy, 
+  Terminal,
+  BarChart3,
+  PieChart,
+  TrendingUp,
+  Cpu,
+  Monitor
+} from 'lucide-react';
+import { 
+  DSA_PROBLEMS, 
+  SQL_PROBLEMS, 
+  PYTHON_PROBLEMS, 
+  JAVA_PROBLEMS, 
+  JS_PROBLEMS 
+} from './problemData';
 
 export default function AdminPanel({ user, supabase }) {
   const [submissions, setSubmissions] = useState([]);
@@ -10,11 +42,20 @@ export default function AdminPanel({ user, supabase }) {
   const [filter, setFilter] = useState('pending');
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [stats, setStats] = useState({ users: 0, submissions: 0, verified: 0, languages: {}, topProblems: [] });
+  const [stats, setStats] = useState({ 
+    users: 0, 
+    submissions: 0, 
+    verified: 0, 
+    languages: {}, 
+    topProblems: [],
+    recentActivity: [] 
+  });
   const [contests, setContests] = useState([]);
   const [isCreatingContest, setIsCreatingContest] = useState(false);
-  const [newContest, setNewContest] = useState({ title: '', description: '', start_time: '', end_time: '', problems: [] });
+  const [newContest, setNewContest] = useState({ title: '', description: '', start_time: '', end_time: '', problems: [], category: 'dsa' });
   const [isScheduling, setIsScheduling] = useState(false);
+
+  const allAvailableProblems = [...DSA_PROBLEMS, ...SQL_PROBLEMS, ...PYTHON_PROBLEMS, ...JAVA_PROBLEMS, ...JS_PROBLEMS];
 
   useEffect(() => {
     fetchSubmissions();
@@ -45,29 +86,36 @@ export default function AdminPanel({ user, supabase }) {
       const { data: allSub, error: subErr } = await supabase.from('code_submissions').select('*');
       if (subErr) throw subErr;
 
-      const uniqueUsers = new Set(allSub.map(s => s.user_id)).size;
+      const { data: allUsers, error: userErr } = await supabase.from('profiles').select('id');
+      if (userErr) throw userErr;
+
       const verified = allSub.filter(s => s.status === 'verified').length;
       
       const langCounts = {};
       const problemCounts = {};
       
       allSub.forEach(s => {
-        langCounts[s.language] = (langCounts[s.language] || 0) + 1;
-        problemCounts[s.problem_id] = (problemCounts[s.problem_id] || 0) + 1;
+        const lang = s.language || 'Unknown';
+        langCounts[lang] = (langCounts[lang] || 0) + 1;
+        
+        const prob = allAvailableProblems.find(p => p.id.toString() === s.problem_id.toString());
+        const title = prob ? prob.title : `Problem #${s.problem_id}`;
+        problemCounts[title] = (problemCounts[title] || 0) + 1;
       });
 
-      // Sort problems by popularity (highest first)
+      // Sort problems by popularity
       const sortedProblems = Object.entries(problemCounts)
-        .map(([id, count]) => ({ id, count }))
+        .map(([title, count]) => ({ title, count }))
         .sort((a, b) => b.count - a.count)
-        .slice(0, 5); // Top 5
+        .slice(0, 5);
 
       setStats({
-        users: uniqueUsers,
+        users: allUsers.length,
         submissions: allSub.length,
         verified,
         languages: langCounts,
-        topProblems: sortedProblems
+        topProblems: sortedProblems,
+        recentActivity: allSub.slice(0, 10)
       });
     } catch (err) {
       console.error('Error fetching stats:', err);
@@ -89,7 +137,6 @@ export default function AdminPanel({ user, supabase }) {
       const { data, error } = await query;
       if (error) throw error;
 
-      // Fetch user emails separately for display
       const userIds = [...new Set((data || []).map(s => s.user_id))];
       let profileMap = {};
       if (userIds.length > 0) {
@@ -100,11 +147,14 @@ export default function AdminPanel({ user, supabase }) {
         (profiles || []).forEach(p => { profileMap[p.id] = p; });
       }
 
-      // Attach profile info to each submission
-      const enriched = (data || []).map(s => ({
-        ...s,
-        profile: profileMap[s.user_id] || { email: 'Unknown', full_name: '' }
-      }));
+      const enriched = (data || []).map(s => {
+        const prob = allAvailableProblems.find(p => p.id.toString() === s.problem_id.toString());
+        return {
+          ...s,
+          problemTitle: prob ? prob.title : `Problem #${s.problem_id}`,
+          profile: profileMap[s.user_id] || { email: 'Unknown', full_name: '' }
+        };
+      });
 
       setSubmissions(enriched);
     } catch (err) {
@@ -136,13 +186,12 @@ export default function AdminPanel({ user, supabase }) {
     
     try {
       if (!newContest.title || !newContest.start_time || !newContest.end_time || newContest.problems.length === 0) {
-        alert('Validation Error: Please provide a Title, set Start/End times, and select at least one Problem.');
+        alert('Missing required fields.');
         return;
       }
 
       setIsScheduling(true);
 
-      // 1. Create Contest
       const { data: contestData, error: contestError } = await supabase
         .from('contests')
         .insert({
@@ -157,7 +206,6 @@ export default function AdminPanel({ user, supabase }) {
 
       if (contestError) throw contestError;
 
-      // 2. Add Problems
       const problemInserts = newContest.problems.map(probId => ({
         contest_id: contestData.id,
         problem_id: probId.toString()
@@ -169,12 +217,12 @@ export default function AdminPanel({ user, supabase }) {
 
       if (probError) throw probError;
 
-      alert('Contest scheduled successfully!');
+      alert('Contest created!');
       setIsCreatingContest(false);
-      setNewContest({ title: '', description: '', start_time: '', end_time: '', problems: [] });
+      setNewContest({ title: '', description: '', start_time: '', end_time: '', problems: [], category: 'dsa' });
       fetchContests();
     } catch (err) {
-      console.error('Admin Contest Error:', err);
+      console.error('Contest Error:', err);
       alert('Error: ' + err.message);
     } finally {
       setIsScheduling(false);
@@ -182,13 +230,13 @@ export default function AdminPanel({ user, supabase }) {
   };
 
   const handleDeleteContest = async (id) => {
-    if (!confirm('Are you sure you want to delete this contest?')) return;
+    if (!confirm('Delete this contest?')) return;
     try {
       const { error } = await supabase.from('contests').delete().eq('id', id);
       if (error) throw error;
       fetchContests();
     } catch (err) {
-      alert('Error deleting contest: ' + err.message);
+      alert('Error: ' + err.message);
     }
   };
 
@@ -203,297 +251,376 @@ export default function AdminPanel({ user, supabase }) {
       setSelectedSubmission(null);
       setFeedback('');
       fetchSubmissions();
-      fetchStats();
-      alert(`Submission ${status} successfully!`);
     } catch (err) {
-      alert('Error updating submission: ' + err.message);
+      alert('Review Failed: ' + err.message);
     }
   };
 
-  const filteredSubmissions = submissions.filter(s => 
-    s.problem_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    s.language.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const getProblemsByCategory = (cat) => {
+    switch(cat) {
+      case 'dsa': return DSA_PROBLEMS;
+      case 'sql': return SQL_PROBLEMS;
+      case 'python': return PYTHON_PROBLEMS;
+      case 'java': return JAVA_PROBLEMS;
+      case 'javascript': return JS_PROBLEMS;
+      default: return DSA_PROBLEMS;
+    }
+  };
 
   return (
-    <div style={{ flex: 1, overflowY: 'auto', background: '#0f172a', padding: '2rem', color: '#f8fafc' }}>
-      <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-        <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2.5rem' }}>
-          <div>
-            <h1 style={{ margin: 0, fontSize: '2.2rem', fontWeight: 800, color: '#fbbf24', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <Shield size={32} /> Administrator OS
-            </h1>
-            <p style={{ margin: '0.5rem 0 0 0', color: '#94a3b8', fontSize: '1rem' }}>Command center for system-wide verification & analytics</p>
+    <div style={{ display: 'flex', height: '100vh', background: '#0f172a', color: '#f8fafc', overflow: 'hidden' }}>
+      {/* Sidebar */}
+      <div style={{ width: '280px', background: '#1e293b', borderRight: '1px solid rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'column', padding: '2rem 1.5rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '3rem', padding: '0.5rem' }}>
+          <div style={{ background: 'linear-gradient(135deg, #fbbf24, #f59e0b)', padding: '0.75rem', borderRadius: '16px', boxShadow: '0 8px 16px rgba(245, 158, 11, 0.2)' }}>
+            <Shield color="#000" size={24} />
           </div>
-          
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <button 
-              onClick={() => { fetchSubmissions(); fetchStats(); }}
-              style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8', padding: '0.6rem 1rem', borderRadius: '12px', fontSize: '0.85rem', cursor: 'pointer', fontWeight: 600 }}
+          <h1 style={{ fontSize: '1.5rem', fontWeight: 800, margin: 0, letterSpacing: '-0.02em' }}>Admin OS</h1>
+        </div>
+
+        <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          {[
+            { id: 'dashboard', label: 'Overview', icon: LayoutDashboard },
+            { id: 'submissions', label: 'Code Reviews', icon: Terminal },
+            { id: 'contests', label: 'Contest Engine', icon: Trophy },
+            { id: 'users', label: 'System Users', icon: Users }
+          ].map(item => (
+            <button
+              key={item.id}
+              onClick={() => setActiveTab(item.id)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '1rem',
+                padding: '1rem 1.25rem',
+                borderRadius: '16px',
+                border: 'none',
+                background: activeTab === item.id ? 'rgba(255,255,255,0.05)' : 'transparent',
+                color: activeTab === item.id ? '#fbbf24' : '#94a3b8',
+                cursor: 'pointer',
+                fontWeight: 700,
+                transition: 'all 0.3s',
+                textAlign: 'left'
+              }}
             >
-               <RefreshCw size={16} className={isLoading ? 'animate-spin' : ''} /> Refresh
+              <item.icon size={20} />
+              {item.label}
             </button>
-            <div style={{ display: 'flex', background: '#1e293b', borderRadius: '12px', padding: '4px' }}>
-              <button 
-                onClick={() => setActiveTab('dashboard')}
-                style={{ padding: '0.6rem 1.25rem', border: 'none', borderRadius: '8px', background: activeTab === 'dashboard' ? '#fbbf24' : 'transparent', color: activeTab === 'dashboard' ? '#000' : '#94a3b8', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
-              >
-                 <LayoutDashboard size={18} /> Dashboard
-              </button>
-              <button 
-                onClick={() => setActiveTab('reviews')}
-                style={{ position: 'relative', padding: '0.6rem 1.25rem', border: 'none', borderRadius: '8px', background: activeTab === 'reviews' ? '#fbbf24' : 'transparent', color: activeTab === 'reviews' ? '#000' : '#94a3b8', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
-              >
-                 <Code2 size={18} /> Reviews
-                 {submissions.filter(s => s.status === 'pending').length > 0 && (
-                    <span style={{ position: 'absolute', top: '-5px', right: '-5px', background: '#ef4444', color: '#fff', fontSize: '0.65rem', padding: '2px 8px', borderRadius: '10px', border: '2px solid #0f172a', fontWeight: 800 }}>
-                      {submissions.filter(s => s.status === 'pending').length}
-                    </span>
-                 )}
-              </button>
-              <button 
-                onClick={() => setActiveTab('contests')}
-                style={{ padding: '0.6rem 1.25rem', border: 'none', borderRadius: '8px', background: activeTab === 'contests' ? '#fbbf24' : 'transparent', color: activeTab === 'contests' ? '#000' : '#94a3b8', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
-              >
-                 <Calendar size={18} /> Contests
-              </button>
-            </div>
-          </div>
-        </header>
+          ))}
+        </nav>
 
+        <div style={{ marginTop: 'auto', padding: '1.5rem', background: 'rgba(255,255,255,0.02)', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)' }}>
+           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
+              <Activity size={16} color="#22c55e" />
+              <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#22c55e' }}>System Online</span>
+           </div>
+           <p style={{ margin: 0, fontSize: '0.75rem', color: '#64748b' }}>Version 2.4.0 High-Performance Hub</p>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div style={{ flex: 1, overflowY: 'auto', padding: '2.5rem', position: 'relative' }}>
         {activeTab === 'dashboard' ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem' }}>
-               <div style={{ background: '#1e293b', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '20px', padding: '1.75rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                  <Users size={24} color="#3b82f6" />
-                  <div>
-                    <div style={{ fontSize: '0.9rem', color: '#94a3b8' }}>Total Users</div>
-                    <div style={{ fontSize: '2rem', fontWeight: 800 }}>{stats.users}</div>
-                  </div>
-               </div>
-               <div style={{ background: '#1e293b', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '20px', padding: '1.75rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                  <Code2 size={24} color="#a855f7" />
-                  <div>
-                    <div style={{ fontSize: '0.9rem', color: '#94a3b8' }}>Submissions</div>
-                    <div style={{ fontSize: '2rem', fontWeight: 800 }}>{stats.submissions}</div>
-                  </div>
-               </div>
-               <div style={{ background: '#1e293b', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '20px', padding: '1.75rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                  <CheckCircle2 size={24} color="#22c55e" />
-                  <div>
-                    <div style={{ fontSize: '0.9rem', color: '#94a3b8' }}>Verified</div>
-                    <div style={{ fontSize: '2rem', fontWeight: 800 }}>{stats.verified}</div>
-                  </div>
-               </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
+            <header>
+               <h1 style={{ fontSize: '2.5rem', fontWeight: 900, margin: 0, letterSpacing: '-0.03em' }}>System Analytics</h1>
+               <p style={{ color: '#94a3b8', fontSize: '1.1rem', marginTop: '0.5rem' }}>Real-time performance metrics and user engagement insights.</p>
+            </header>
+
+            {/* Top Cards */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem' }}>
+               {[
+                 { label: 'Total Enrolled', value: stats.users, icon: Users, color: '#3b82f6', trend: '+12%' },
+                 { label: 'Submissions', value: stats.submissions, icon: Code2, color: '#fbbf24', trend: '+24%' },
+                 { label: 'Verification Rate', value: `${stats.submissions ? Math.round((stats.verified / stats.submissions) * 100) : 0}%`, icon: CheckCircle2, color: '#22c55e', trend: '+5%' },
+                 { label: 'Active Contests', value: contests.length, icon: Trophy, color: '#ef4444', trend: 'Live' }
+               ].map((card, i) => (
+                 <div key={i} style={{ background: '#1e293b', padding: '2rem', borderRadius: '28px', border: '1px solid rgba(255,255,255,0.05)', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
+                       <div style={{ background: `${card.color}15`, padding: '0.75rem', borderRadius: '14px' }}>
+                          <card.icon color={card.color} size={28} />
+                       </div>
+                       <span style={{ color: card.trend === 'Live' ? '#ef4444' : '#22c55e', fontSize: '0.85rem', fontWeight: 800 }}>{card.trend}</span>
+                    </div>
+                    <div style={{ fontSize: '2.5rem', fontWeight: 900, marginBottom: '0.5rem' }}>{card.value}</div>
+                    <div style={{ color: '#94a3b8', fontSize: '1rem', fontWeight: 600 }}>{card.label}</div>
+                 </div>
+               ))}
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '1.5rem' }}>
-               {/* Language Distribution */}
-               <div style={{ background: '#1e293b', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '20px', padding: '1.75rem' }}>
-                  <h3 style={{ margin: '0 0 1.5rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#f8fafc' }}><Terminal size={20} color="#fbbf24" /> Language Distribution</h3>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-                     {Object.entries(stats.languages || {}).map(([lang, count]) => {
-                        const percent = (count / (stats.submissions || 1)) * 100;
+            {/* Charts Section */}
+            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem' }}>
+               {/* Language Breakdown */}
+               <div style={{ background: '#1e293b', borderRadius: '28px', border: '1px solid rgba(255,255,255,0.05)', padding: '2rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                     <h3 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.75rem' }}><PieChart color="#fbbf24" /> Language Distribution</h3>
+                     <button style={{ background: 'transparent', border: 'none', color: '#fbbf24', cursor: 'pointer', fontWeight: 700 }}>Export CSV</button>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                     {Object.entries(stats.languages).map(([lang, count]) => {
+                        const percent = (count / stats.submissions) * 100;
                         return (
                           <div key={lang}>
-                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.85rem' }}>
-                                <span style={{ textTransform: 'uppercase', fontWeight: 700, color: '#94a3b8' }}>{lang}</span>
-                                <span style={{ color: '#f8fafc' }}>{count} ({Math.round(percent)}%)</span>
+                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem', fontSize: '0.95rem' }}>
+                                <span style={{ fontWeight: 800, color: '#f8fafc' }}>{lang.toUpperCase()}</span>
+                                <span style={{ color: '#94a3b8' }}>{count} items • {Math.round(percent)}%</span>
                              </div>
-                             <div style={{ height: '8px', background: 'rgba(0,0,0,0.2)', borderRadius: '4px', overflow: 'hidden' }}>
-                                <div style={{ height: '100%', width: `${percent}%`, background: `linear-gradient(90deg, #fbbf24, #f59e0b)`, borderRadius: '4px' }}></div>
+                             <div style={{ height: '12px', background: 'rgba(0,0,0,0.2)', borderRadius: '6px', overflow: 'hidden' }}>
+                                <div style={{ height: '100%', width: `${percent}%`, background: 'linear-gradient(90deg, #6366f1, #a855f7)', borderRadius: '6px', boxShadow: '0 0 10px rgba(99, 102, 241, 0.4)' }}></div>
                              </div>
                           </div>
                         );
                      })}
-                     {(!stats.languages || Object.keys(stats.languages).length === 0) && <p style={{ color: '#64748b', textAlign: 'center' }}>No submission data yet.</p>}
                   </div>
                </div>
 
                {/* Top Problems */}
-               <div style={{ background: '#1e293b', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '20px', padding: '1.75rem' }}>
-                  <h3 style={{ margin: '0 0 1.5rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#f8fafc' }}><Trophy size={20} color="#3b82f6" /> Trending Challenges</h3>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                     {(stats.topProblems || []).map((prob, idx) => (
-                        <div key={prob.id} style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.75rem', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.03)' }}>
-                           <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: idx === 0 ? '#fbbf24' : '#334155', color: idx === 0 ? '#000' : '#94a3b8', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 800 }}>
-                              {idx + 1}
-                           </div>
-                           <div style={{ flex: 1 }}>
-                              <div style={{ fontSize: '0.9rem', fontWeight: 600, color: '#f8fafc', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{prob.id}</div>
-                              <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{prob.count} submissions</div>
-                           </div>
-                           <div style={{ color: '#22c55e', fontSize: '0.75rem', fontWeight: 700 }}>+{Math.floor(Math.random() * 20)}%</div>
-                        </div>
+               <div style={{ background: '#1e293b', borderRadius: '28px', border: '1px solid rgba(255,255,255,0.05)', padding: '2rem' }}>
+                  <h3 style={{ margin: '0 0 2rem 0', fontSize: '1.5rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.75rem' }}><TrendingUp color="#22c55e" /> Hottest Cases</h3>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                     {stats.topProblems.map((prob, i) => (
+                       <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1.25rem', background: 'rgba(255,255,255,0.02)', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                          <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: i === 0 ? '#fbbf24' : '#334155', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, color: i === 0 ? '#000' : '#fff' }}>{i + 1}</div>
+                          <div style={{ flex: 1 }}>
+                             <div style={{ fontWeight: 800, fontSize: '1rem' }}>{prob.title}</div>
+                             <div style={{ fontSize: '0.85rem', color: '#64748b' }}>{prob.count} submissions</div>
+                          </div>
+                          <BarChart3 size={20} color={i === 0 ? '#fbbf24' : '#334155'} />
+                       </div>
                      ))}
-                     {(!stats.topProblems || stats.topProblems.length === 0) && <p style={{ color: '#64748b', textAlign: 'center' }}>No challenge data yet.</p>}
                   </div>
                </div>
             </div>
           </div>
-        ) : activeTab === 'contests' ? (
+        ) : activeTab === 'submissions' ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-               <h2 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Calendar /> Scheduled Arenas</h2>
-               <button 
-                 onClick={() => setIsCreatingContest(!isCreatingContest)} 
-                 style={{ background: '#fbbf24', color: '#000', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '12px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
-               >
-                 <Plus size={18} /> {isCreatingContest ? 'Close Setup' : 'Create New Contest'}
-               </button>
+            <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+               <div>
+                  <h1 style={{ fontSize: '2rem', fontWeight: 900, margin: 0 }}>Review Command</h1>
+                  <p style={{ color: '#94a3b8', margin: '0.25rem 0 0 0' }}>Approve or reject developer submissions.</p>
+               </div>
+               <div style={{ display: 'flex', gap: '1rem' }}>
+                  <div style={{ background: '#1e293b', padding: '0.5rem', borderRadius: '14px', border: '1px solid #334155', display: 'flex', gap: '0.5rem' }}>
+                    {['pending', 'verified', 'rejected', 'all'].map(f => (
+                      <button 
+                        key={f}
+                        onClick={() => setFilter(f)}
+                        style={{
+                          padding: '0.6rem 1.25rem',
+                          borderRadius: '10px',
+                          border: 'none',
+                          background: filter === f ? '#fbbf24' : 'transparent',
+                          color: filter === f ? '#000' : '#94a3b8',
+                          cursor: 'pointer',
+                          fontWeight: 700,
+                          textTransform: 'capitalize'
+                        }}
+                      >
+                        {f}
+                      </button>
+                    ))}
+                  </div>
+               </div>
+            </header>
+
+            <div style={{ background: '#1e293b', borderRadius: '28px', border: '1px solid rgba(255,255,255,0.05)', overflow: 'hidden' }}>
+               <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                  <thead>
+                     <tr style={{ background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                        <th style={{ padding: '1.5rem', color: '#64748b', fontWeight: 800 }}>DEVELOPER</th>
+                        <th style={{ padding: '1.5rem', color: '#64748b', fontWeight: 800 }}>CHALLENGE</th>
+                        <th style={{ padding: '1.5rem', color: '#64748b', fontWeight: 800 }}>LANGUAGE</th>
+                        <th style={{ padding: '1.5rem', color: '#64748b', fontWeight: 800 }}>TIME</th>
+                        <th style={{ padding: '1.5rem', color: '#64748b', fontWeight: 800 }}>ACTION</th>
+                     </tr>
+                  </thead>
+                  <tbody>
+                     {submissions.map(s => (
+                       <tr key={s.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)', transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.01)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                          <td style={{ padding: '1.5rem' }}>
+                             <div style={{ fontWeight: 700 }}>{s.profile?.full_name || 'Anonymous'}</div>
+                             <div style={{ fontSize: '0.85rem', color: '#64748b' }}>{s.profile?.email}</div>
+                          </td>
+                          <td style={{ padding: '1.5rem', fontWeight: 700 }}>{s.problemTitle}</td>
+                          <td style={{ padding: '1.5rem' }}>
+                             <span style={{ background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', padding: '0.4rem 0.8rem', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 800 }}>{s.language.toUpperCase()}</span>
+                          </td>
+                          <td style={{ padding: '1.5rem', color: '#94a3b8', fontSize: '0.9rem' }}>{new Date(s.submitted_at).toLocaleString()}</td>
+                          <td style={{ padding: '1.5rem' }}>
+                             <button onClick={() => setSelectedSubmission(s)} style={{ background: 'rgba(251, 191, 36, 0.1)', border: '1px solid rgba(251, 191, 36, 0.2)', color: '#fbbf24', padding: '0.6rem 1.25rem', borderRadius: '12px', cursor: 'pointer', fontWeight: 700 }}>Inspect Code</button>
+                          </td>
+                       </tr>
+                     ))}
+                  </tbody>
+               </table>
+               {submissions.length === 0 && <div style={{ padding: '4rem', textAlign: 'center', color: '#64748b', fontWeight: 600 }}>No entries matched your filter.</div>}
             </div>
+          </div>
+        ) : activeTab === 'contests' ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
+            <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+               <div>
+                  <h1 style={{ fontSize: '2rem', fontWeight: 900, margin: 0 }}>Arena Scheduler</h1>
+                  <p style={{ color: '#94a3b8', margin: '0.25rem 0 0 0' }}>Deploy time-limited coding competitions.</p>
+               </div>
+               <button 
+                 onClick={() => setIsCreatingContest(true)}
+                 style={{ background: '#fbbf24', border: 'none', color: '#000', padding: '0.85rem 1.75rem', borderRadius: '16px', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.75rem' }}
+               >
+                 <Plus size={20} /> Deploy Contest
+               </button>
+            </header>
 
             {isCreatingContest && (
-              <div style={{ background: '#1e293b', border: '1px solid #fbbf24', borderRadius: '20px', padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', boxShadow: '0 0 40px rgba(251,191,36,0.1)' }}>
-                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                       <label style={{ fontSize: '0.9rem', color: '#94a3b8', fontWeight: 600 }}>Contest Title</label>
-                       <input 
-                         type="text" 
-                         placeholder="e.g. Masterclass Round #1" 
-                         value={newContest.title}
-                         onChange={(e) => setNewContest({...newContest, title: e.target.value})}
-                         style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid #334155', borderRadius: '10px', padding: '0.75rem', color: 'white', outline: 'none' }}
-                       />
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                       <label style={{ fontSize: '0.9rem', color: '#94a3b8', fontWeight: 600 }}>Assignment (Select Questions)</label>
-                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '0.5rem', background: 'rgba(0,0,0,0.2)', border: '1px solid #334155', borderRadius: '10px', padding: '0.75rem', maxHeight: '150px', overflowY: 'auto' }}>
-                          {DSA_PROBLEMS.map(prob => (
-                            <label key={prob.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '6px', borderRadius: '8px', cursor: 'pointer', border: '1px solid', borderColor: newContest.problems.includes(prob.id) ? '#fbbf24' : 'transparent', background: newContest.problems.includes(prob.id) ? 'rgba(251,191,36,0.1)' : 'transparent' }}>
-                               <input 
-                                 type="checkbox" 
-                                 checked={newContest.problems.includes(prob.id)}
-                                 onChange={(e) => {
-                                   if (e.target.checked) setNewContest({...newContest, problems: [...newContest.problems, prob.id]});
-                                   else setNewContest({...newContest, problems: newContest.problems.filter(id => id !== prob.id)});
-                                 }}
-                                 style={{ width: '16px', height: '16px', accentColor: '#fbbf24' }}
-                                />
-                                <span style={{ fontSize: '0.8rem' }}>{prob.title}</span>
-                            </label>
-                          ))}
-                       </div>
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                       <label style={{ fontSize: '0.9rem', color: '#94a3b8', fontWeight: 600 }}>Start Time</label>
-                       <input 
-                         type="datetime-local" 
-                         value={newContest.start_time}
-                         onChange={(e) => setNewContest({...newContest, start_time: e.target.value})}
-                         style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid #334155', borderRadius: '10px', padding: '0.75rem', color: 'white', outline: 'none' }}
-                       />
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                       <label style={{ fontSize: '0.9rem', color: '#94a3b8', fontWeight: 600 }}>End Time</label>
-                       <input 
-                         type="datetime-local" 
-                         value={newContest.end_time}
-                         onChange={(e) => setNewContest({...newContest, end_time: e.target.value})}
-                         style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid #334155', borderRadius: '10px', padding: '0.75rem', color: 'white', outline: 'none' }}
-                       />
-                    </div>
-                 </div>
-                 
-                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                    <label style={{ fontSize: '0.9rem', color: '#94a3b8', fontWeight: 600 }}>Description</label>
-                    <textarea 
-                      placeholder="Contest details..."
-                      value={newContest.description}
-                      onChange={(e) => setNewContest({...newContest, description: e.target.value})}
-                      style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid #334155', borderRadius: '10px', padding: '0.75rem', color: 'white', outline: 'none', height: '80px', resize: 'none' }}
-                    />
-                 </div>
+               <div style={{ position: 'fixed', inset: 0, zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(15, 23, 42, 0.9)', backdropFilter: 'blur(8px)' }}>
+                  <div style={{ background: '#1e293b', width: '100%', maxWidth: '900px', borderRadius: '32px', border: '1px solid #334155', padding: '3rem', position: 'relative', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)' }}>
+                     <button onClick={() => setIsCreatingContest(false)} style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer' }}><XCircle size={32} /></button>
+                     <h2 style={{ fontSize: '2rem', fontWeight: 900, marginBottom: '2rem', letterSpacing: '-0.02em' }}>Configure Competition</h2>
+                     
+                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginBottom: '2rem' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                           <label style={{ fontSize: '0.95rem', fontWeight: 800, color: '#94a3b8' }}>ARENA TITLE</label>
+                           <input 
+                             type="text" 
+                             value={newContest.title}
+                             onChange={e => setNewContest({...newContest, title: e.target.value})}
+                             placeholder="e.g. Summer Blitz 2024" 
+                             style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid #334155', borderRadius: '14px', padding: '1rem', color: '#fff', outline: 'none' }} 
+                            />
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                           <label style={{ fontSize: '0.95rem', fontWeight: 800, color: '#94a3b8' }}>TRACK CATEGORY</label>
+                           <select 
+                             value={newContest.category}
+                             onChange={e => setNewContest({...newContest, category: e.target.value, problems: []})}
+                             style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid #334155', borderRadius: '14px', padding: '1rem', color: '#fff', outline: 'none' }}
+                           >
+                              <option value="dsa">Advanced DSA</option>
+                              <option value="sql">SQL Systems</option>
+                              <option value="python">Python Core</option>
+                              <option value="java">Java Backend</option>
+                              <option value="javascript">Frontend / JS</option>
+                           </select>
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                           <label style={{ fontSize: '0.95rem', fontWeight: 800, color: '#94a3b8' }}>LAUNCH TIME</label>
+                           <input type="datetime-local" value={newContest.start_time} onChange={e => setNewContest({...newContest, start_time: e.target.value})} style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid #334155', borderRadius: '14px', padding: '1rem', color: '#fff' }} />
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                           <label style={{ fontSize: '0.95rem', fontWeight: 800, color: '#94a3b8' }}>EXPIRY TIME</label>
+                           <input type="datetime-local" value={newContest.end_time} onChange={e => setNewContest({...newContest, end_time: e.target.value})} style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid #334155', borderRadius: '14px', padding: '1rem', color: '#fff' }} />
+                        </div>
+                     </div>
 
-                 <button 
-                   onClick={handleCreateContest}
-                   disabled={isScheduling}
-                   style={{ background: isScheduling ? '#475569' : '#fbbf24', color: '#000', border: 'none', padding: '1rem', borderRadius: '12px', fontWeight: 800, cursor: isScheduling ? 'not-allowed' : 'pointer', fontSize: '1.1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
-                 >
-                   {isScheduling ? <><RefreshCw className="animate-spin" /> Scheduling...</> : 'Schedule Contest Now'}
-                 </button>
-              </div>
+                     <div style={{ marginBottom: '2rem' }}>
+                        <label style={{ fontSize: '0.95rem', fontWeight: 800, color: '#94a3b8', display: 'block', marginBottom: '0.75rem' }}>ASSIGN CHALLENGES</label>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '0.75rem', maxHeight: '200px', overflowY: 'auto', background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '14px' }}>
+                           {getProblemsByCategory(newContest.category).map(p => (
+                             <label key={p.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem', borderRadius: '12px', background: newContest.problems.includes(p.id) ? 'rgba(251,191,36,0.1)' : 'transparent', border: '1px solid', borderColor: newContest.problems.includes(p.id) ? '#fbbf24' : 'transparent', cursor: 'pointer' }}>
+                                <input type="checkbox" checked={newContest.problems.includes(p.id)} onChange={e => e.target.checked ? setNewContest({...newContest, problems: [...newContest.problems, p.id]}) : setNewContest({...newContest, problems: newContest.problems.filter(id => id !== p.id)})} style={{ accentColor: '#fbbf24', transform: 'scale(1.2)' }} />
+                                <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>{p.title}</span>
+                             </label>
+                           ))}
+                        </div>
+                     </div>
+
+                     <button onClick={handleCreateContest} disabled={isScheduling} style={{ width: '100%', background: '#fbbf24', border: 'none', color: '#000', padding: '1.25rem', borderRadius: '18px', fontSize: '1.1rem', fontWeight: 900, cursor: 'pointer' }}>
+                        {isScheduling ? 'PROVISIONING SYSTEM...' : 'FINALIZE & DEPLOY'}
+                     </button>
+                  </div>
+               </div>
             )}
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.5rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '1.5rem' }}>
                {contests.map(c => (
-                 <div key={c.id} style={{ background: '#1e293b', borderRadius: '20px', border: '1px solid #334155', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                       <h3 style={{ margin: 0, color: '#fbbf24' }}>{c.title}</h3>
-                       <button onClick={() => handleDeleteContest(c.id)} style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer' }}><Trash2 size={18} /></button>
+                 <div key={c.id} style={{ background: '#1e293b', padding: '2rem', borderRadius: '28px', border: '1px solid rgba(255,255,255,0.05)', position: 'relative' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
+                       <div style={{ background: 'rgba(251,191,36,0.1)', padding: '0.75rem', borderRadius: '14px' }}><Trophy color="#fbbf24" size={24} /></div>
+                       <button onClick={() => handleDeleteContest(c.id)} style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer' }}><Trash2 size={20} /></button>
                     </div>
-                    <div style={{ fontSize: '0.85rem', color: '#94a3b8' }}>
-                      <div style={{ marginBottom: '4px' }}>Starts: {new Date(c.start_time).toLocaleString()}</div>
-                      <div>Ends: {new Date(c.end_time).toLocaleString()}</div>
+                    <h3 style={{ fontSize: '1.4rem', fontWeight: 900, margin: '0 0 0.5rem 0' }}>{c.title}</h3>
+                    <p style={{ color: '#94a3b8', fontSize: '0.9rem', margin: '0 0 1.5rem 0', lineClamp: 2 }}>{c.description || 'No description provided.'}</p>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', background: 'rgba(0,0,0,0.1)', padding: '1.25rem', borderRadius: '18px' }}>
+                       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}><span style={{ color: '#64748b' }}>STARTS</span><span style={{ fontWeight: 800 }}>{new Date(c.start_time).toLocaleString()}</span></div>
+                       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}><span style={{ color: '#64748b' }}>ENDS</span><span style={{ fontWeight: 800 }}>{new Date(c.end_time).toLocaleString()}</span></div>
                     </div>
-                    <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', fontWeight: 700, color: new Date() > new Date(c.end_time) ? '#64748b' : new Date() >= new Date(c.start_time) ? '#22c55e' : '#3b82f6' }}>
-                       <Target size={14} />
-                       {new Date() > new Date(c.end_time) ? 'COMPLETED' : new Date() >= new Date(c.start_time) ? 'LIVE NOW' : 'UPCOMING'}
+                    <div style={{ marginTop: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                       <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: new Date() > new Date(c.end_time) ? '#64748b' : new Date() >= new Date(c.start_time) ? '#22c55e' : '#3b82f6' }}></div>
+                       <span style={{ fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', color: new Date() > new Date(c.end_time) ? '#64748b' : new Date() >= new Date(c.start_time) ? '#22c55e' : '#3b82f6' }}>
+                         {new Date() > new Date(c.end_time) ? 'CONCLUDED' : new Date() >= new Date(c.start_time) ? 'LIVE NOW' : 'SCHEDULED'}
+                       </span>
                     </div>
                  </div>
                ))}
             </div>
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#1e293b', padding: '1rem', borderRadius: '16px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                  <Filter size={18} color="#94a3b8" />
-                  <select value={filter} onChange={(e) => setFilter(e.target.value)} style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid #334155', borderRadius: '8px', padding: '0.5rem', color: 'white' }}>
-                    <option value="pending">Pending</option>
-                    <option value="verified">Verified</option>
-                    <option value="rejected">Rejected</option>
-                    <option value="all">All</option>
-                  </select>
-                </div>
-                <div style={{ position: 'relative' }}>
-                  <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#64748b' }} />
-                  <input type="text" placeholder="Search..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid #334155', borderRadius: '8px', padding: '0.5rem 1rem 0.5rem 2.5rem', color: 'white', width: '250px' }} />
-                </div>
-             </div>
-
-             <div style={{ display: 'grid', gap: '1rem' }}>
-                {filteredSubmissions.map(s => (
-                  <div key={s.id} onClick={() => setSelectedSubmission(s)} style={{ background: '#1e293b', padding: '1.25rem', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                     <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
-                        <div style={{ background: 'rgba(255,255,255,0.03)', padding: '10px', borderRadius: '12px' }}>
-                          <Code2 color="#a855f7" />
-                        </div>
-                        <div>
-                          <div style={{ fontWeight: 700, fontSize: '1.05rem' }}>{s.problem_id}</div>
-                          <div style={{ fontSize: '0.85rem', color: '#94a3b8' }}>{s.profile?.email} • {s.language}</div>
-                        </div>
-                     </div>
-                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                        {s.contest?.title && <span style={{ background: 'rgba(251,191,36,0.1)', color: '#fbbf24', fontSize: '0.7rem', padding: '3px 8px', borderRadius: '6px', border: '1px solid rgba(251,191,36,0.2)' }}>{s.contest.title}</span>}
-                        <span style={{ fontSize: '0.8rem', padding: '4px 12px', borderRadius: '10px', background: s.status === 'verified' ? 'rgba(34,197,94,0.1)' : s.status === 'rejected' ? 'rgba(239,68,68,0.1)' : 'rgba(251,191,36,0.1)', color: s.status === 'verified' ? '#22c55e' : s.status === 'rejected' ? '#ef4444' : '#fbbf24' }}>
-                          {s.status.toUpperCase()}
-                        </span>
-                     </div>
-                  </div>
-                ))}
-             </div>
+          <div style={{ padding: '4rem', textAlign: 'center' }}>
+             <Users size={64} color="#334155" style={{ marginBottom: '1.5rem' }} />
+             <h2 style={{ fontSize: '2rem', fontWeight: 900 }}>User Management</h2>
+             <p style={{ color: '#94a3b8' }}>User directory and deep-dive analytics coming in v3.0.</p>
           </div>
         )}
       </div>
 
+      {/* Submission Review Modal */}
       {selectedSubmission && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem', zIndex: 1000 }}>
-           <div style={{ background: '#0f172a', width: '100%', maxWidth: '900px', maxHeight: '90vh', borderRadius: '24px', border: '1px solid #334155', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-              <div style={{ padding: '1.5rem', borderBottom: '1px solid #334155', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                 <h3 style={{ margin: 0 }}>Review Submission: {selectedSubmission.problem_id}</h3>
-                 <button onClick={() => setSelectedSubmission(null)} style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer' }}><XCircle size={24} /></button>
-              </div>
-              <div style={{ flex: 1, overflowY: 'auto', padding: '1.5rem' }}>
-                 <pre style={{ background: '#000', padding: '1.5rem', borderRadius: '12px', color: '#10b981', fontSize: '0.9rem', overflowX: 'auto', border: '1px solid #1e293b' }}>{selectedSubmission.code}</pre>
-                 <div style={{ marginTop: '1.5rem' }}>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', color: '#94a3b8', fontSize: '0.9rem' }}>Admin Feedback (Optional)</label>
-                    <textarea value={feedback} onChange={(e) => setFeedback(e.target.value)} style={{ width: '100%', background: '#1e293b', border: '1px solid #334155', borderRadius: '12px', color: '#fff', padding: '1rem', minHeight: '100px', outline: 'none' }} placeholder="Write feedback for the developer..." />
+        <div style={{ position: 'fixed', inset: 0, zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(15, 23, 42, 0.95)', backdropFilter: 'blur(12px)', padding: '2rem' }}>
+           <div style={{ background: '#1e293b', width: '100%', maxWidth: '1200px', height: '90vh', borderRadius: '32px', border: '1px solid #334155', display: 'flex', flexDirection: 'column', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)' }}>
+              <div style={{ padding: '2rem', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.01)' }}>
+                 <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                    <div style={{ background: '#fbbf24', color: '#000', padding: '0.75rem', borderRadius: '16px' }}><Code2 size={24} /></div>
+                    <div>
+                       <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 900 }}>Submission Analysis</h2>
+                       <div style={{ display: 'flex', gap: '1rem', marginTop: '0.25rem', fontSize: '0.9rem', color: '#94a3b8' }}>
+                          <span>{selectedSubmission.profile?.full_name}</span>
+                          <span>•</span>
+                          <span style={{ color: '#fbbf24', fontWeight: 800 }}>{selectedSubmission.problemTitle}</span>
+                       </div>
+                    </div>
                  </div>
+                 <button onClick={() => setSelectedSubmission(null)} style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer' }}><XCircle size={32} /></button>
               </div>
-              <div style={{ padding: '1.5rem', borderTop: '1px solid #334155', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
-                 <button onClick={() => handleReview(selectedSubmission.id, 'rejected')} style={{ background: 'rgba(239,68,68,0.1)', color: '#ef4444', border: '1px solid #ef4444', padding: '0.75rem 1.5rem', borderRadius: '12px', fontWeight: 600, cursor: 'pointer' }}>Reject Submission</button>
-                 <button onClick={() => handleReview(selectedSubmission.id, 'verified')} style={{ background: '#22c55e', color: '#fff', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '12px', fontWeight: 600, cursor: 'pointer' }}>Verify & Award Points</button>
+
+              <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1.5fr 1fr', overflow: 'hidden' }}>
+                 {/* Code View */}
+                 <div style={{ padding: '2rem', background: '#0a0f1d', overflowY: 'auto' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                       <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#64748b' }}>SOURCE CODE ({selectedSubmission.language.toUpperCase()})</span>
+                       <button onClick={() => { navigator.clipboard.writeText(selectedSubmission.code); alert('Copied!'); }} style={{ background: 'rgba(255,255,255,0.05)', border: 'none', color: '#fff', padding: '0.4rem 0.8rem', borderRadius: '8px', fontSize: '0.75rem', cursor: 'pointer' }}>Copy Code</button>
+                    </div>
+                    <pre style={{ margin: 0, padding: '1.5rem', background: 'rgba(0,0,0,0.3)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.03)', color: '#e2e8f0', fontSize: '0.95rem', fontFamily: 'JetBrains Mono, monospace', lineHeight: 1.6 }}>
+                       {selectedSubmission.code}
+                    </pre>
+                 </div>
+
+                 {/* Review Controls */}
+                 <div style={{ padding: '2.5rem', background: 'rgba(255,255,255,0.01)', borderLeft: '1px solid rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                    <div>
+                       <label style={{ fontSize: '0.95rem', fontWeight: 800, color: '#94a3b8', display: 'block', marginBottom: '1rem' }}>ADMIN FEEDBACK</label>
+                       <textarea 
+                         value={feedback}
+                         onChange={e => setFeedback(e.target.value)}
+                         placeholder="Provide technical insights or reason for rejection..." 
+                         style={{ width: '100%', height: '200px', background: 'rgba(0,0,0,0.2)', border: '1px solid #334155', borderRadius: '20px', padding: '1.5rem', color: '#fff', outline: 'none', resize: 'none', fontSize: '1rem' }}
+                       />
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: 'auto' }}>
+                       <button 
+                         onClick={() => handleReview(selectedSubmission.id, 'verified')}
+                         style={{ background: '#22c55e', border: 'none', color: '#fff', padding: '1.25rem', borderRadius: '20px', fontSize: '1.1rem', fontWeight: 900, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', boxShadow: '0 10px 20px -5px rgba(34, 197, 94, 0.3)' }}
+                       >
+                         <CheckCircle2 size={24} /> VERIFY SUBMISSION
+                       </button>
+                       <button 
+                         onClick={() => handleReview(selectedSubmission.id, 'rejected')}
+                         style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#ef4444', padding: '1.25rem', borderRadius: '20px', fontSize: '1.1rem', fontWeight: 900, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem' }}
+                       >
+                         <XCircle size={24} /> REJECT WORK
+                       </button>
+                    </div>
+                 </div>
               </div>
            </div>
         </div>

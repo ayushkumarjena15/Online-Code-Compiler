@@ -67,7 +67,7 @@ export const DSA_PROBLEMS = [
   {
     id: 1,
     title: 'Two Sum',
-    difficulty: 'Easy',
+    difficulty: '1 Star',
     topic: 'Array, Hash Table',
     url: 'https://leetcode.com/problems/two-sum/',
     description: `Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.\n\nYou may assume that each input would have exactly one solution, and you may not use the same element twice.\n\nYou can return the answer in any order.`,
@@ -104,7 +104,7 @@ int main() {
   {
     id: 2,
     title: 'Add Two Numbers',
-    difficulty: 'Medium',
+    difficulty: '1 Star',
     topic: 'Linked List, Math',
     url: 'https://leetcode.com/problems/add-two-numbers/',
     description: `You are given two non-empty linked lists representing two non-negative integers. The digits are stored in reverse order, and each of their nodes contains a single digit. Add the two numbers and return the sum as a linked list.\n\nYou may assume the two numbers do not contain any leading zero, except the number 0 itself.`,
@@ -155,7 +155,7 @@ int main() {
   {
     id: 3,
     title: 'Longest Substring Without Repeating Characters',
-    difficulty: 'Medium',
+    difficulty: '2 Stars',
     topic: 'Hash Table, String',
     url: 'https://leetcode.com/problems/longest-substring-without-repeating-characters/',
     description: `Given a string s, find the length of the longest substring without repeating characters.`,
@@ -189,7 +189,7 @@ int main() {
   {
     id: 4,
     title: 'Median of Two Sorted Arrays',
-    difficulty: 'Hard',
+    difficulty: '5 Stars',
     topic: 'Array, Binary Search',
     url: 'https://leetcode.com/problems/median-of-two-sorted-arrays/',
     description: `Given two sorted arrays nums1 and nums2 of size m and n respectively, return the median of the two sorted arrays.\n\nThe overall run time complexity should be O(log (m+n)).`,
@@ -222,7 +222,7 @@ int main() {
   {
     id: 5,
     title: 'Longest Palindromic Substring',
-    difficulty: 'Medium',
+    difficulty: '2 Stars',
     topic: 'String, DP',
     url: 'https://leetcode.com/problems/longest-palindromic-substring/',
     description: `Given a string s, return the longest palindromic substring in s.`,
@@ -263,7 +263,7 @@ int main() {
   {
     id: 11,
     title: 'Container With Most Water',
-    difficulty: 'Medium',
+    difficulty: '3 Stars',
     topic: 'Array, Two Pointers',
     url: 'https://leetcode.com/problems/container-with-most-water/',
     description: `You are given an integer array height of length n. There are n vertical lines drawn such that the two endpoints of the iᵗʰ line are (i, 0) and (i, height[i]).\n\nFind two lines that together with the x-axis form a container, such that the container contains the most water.\n\nReturn the maximum amount of water a container can store.\n\nNotice that you may not slant the container.`,
@@ -295,7 +295,7 @@ int main() {
   {
     id: 15,
     title: '3Sum',
-    difficulty: 'Medium',
+    difficulty: '3 Stars',
     topic: 'Array, Two Pointers',
     url: 'https://leetcode.com/problems/3sum/',
     description: `Given an integer array nums, return all the triplets [nums[i], nums[j], nums[k]] such that i != j, i != k, and j != k, and nums[i] + nums[j] + nums[k] == 0.\n\nNotice that the solution set must not contain duplicate triplets.`,
@@ -329,7 +329,7 @@ int main() {
   {
     id: 20,
     title: 'Valid Parentheses',
-    difficulty: 'Easy',
+    difficulty: '1 Star',
     topic: 'String, Stack',
     url: 'https://leetcode.com/problems/valid-parentheses/',
     description: `Given a string s containing just the characters '(', ')', '{', '}', '[' and ']', determine if the input string is valid.\n\nAn input string is valid if:\n- Open brackets must be closed by the same type of brackets.\n- Open brackets must be closed in the correct order.\n- Every close bracket has a corresponding open bracket of the same type.`,
@@ -364,7 +364,7 @@ int main() {
   {
     id: 21,
     title: 'Merge Two Sorted Lists',
-    difficulty: 'Easy',
+    difficulty: '1 Star',
     topic: 'Linked List',
     url: 'https://leetcode.com/problems/merge-two-sorted-lists/',
     description: `You are given the heads of two sorted linked lists list1 and list2.\n\nMerge the two lists into one sorted list. The list should be made by splicing together the nodes of the first two lists.\n\nReturn the head of the merged linked list.`,
@@ -407,7 +407,7 @@ int main() {
   {
     id: 33,
     title: 'Search in Rotated Sorted Array',
-    difficulty: 'Medium',
+    difficulty: '4 Stars',
     topic: 'Array, Binary Search',
     url: 'https://leetcode.com/problems/search-in-rotated-sorted-array/',
     description: `There is an integer array nums sorted in ascending order (with distinct values).\n\nPrior to being passed to your function, nums is possibly rotated at an unknown pivot index k (1 ≤ k < nums.length) such that the resulting array is [nums[k], nums[k+1], ..., nums[n-1], nums[0], nums[1], ..., nums[k-1]].\n\nGiven the array nums after the possible rotation and an integer target, return the index of target if it is in nums, or -1 if it is not in nums.\n\nYou must write an algorithm with O(log n) runtime complexity.`,
@@ -440,7 +440,7 @@ int main() {
   {
     id: 42,
     title: 'Trapping Rain Water',
-    difficulty: 'Hard',
+    difficulty: '5 Stars',
     topic: 'Array, Two Pointers',
     url: 'https://leetcode.com/problems/trapping-rain-water/',
     description: `Given n non-negative integers representing an elevation map where the width of each bar is 1, compute how much water it can trap after raining.`,
@@ -472,7 +472,7 @@ int main() {
   {
     id: 53,
     title: 'Maximum Subarray',
-    difficulty: 'Medium',
+    difficulty: '3 Stars',
     topic: 'Array, DP',
     url: 'https://leetcode.com/problems/maximum-subarray/',
     description: `Given an integer array nums, find the subarray with the largest sum, and return its sum.\n\nA subarray is a contiguous non-empty sequence of elements within an array.`,
@@ -506,7 +506,7 @@ int main() {
   {
     id: 70,
     title: 'Climbing Stairs',
-    difficulty: 'Easy',
+    difficulty: '1 Star',
     topic: 'Math, DP',
     url: 'https://leetcode.com/problems/climbing-stairs/',
     description: `You are climbing a staircase. It takes n steps to reach the top.\n\nEach time you can either climb 1 or 2 steps. In how many distinct ways can you climb to the top?`,
@@ -539,7 +539,7 @@ int main() {
   {
     id: 121,
     title: 'Best Time to Buy and Sell Stock',
-    difficulty: 'Easy',
+    difficulty: '1 Star',
     topic: 'Array, DP',
     url: 'https://leetcode.com/problems/best-time-to-buy-and-sell-stock/',
     description: `You are given an array prices where prices[i] is the price of a given stock on the iᵗʰ day.\n\nYou want to maximize your profit by choosing a single day to buy one stock and choosing a different day in the future to sell that stock.\n\nReturn the maximum profit you can achieve from this transaction. If you cannot achieve any profit, return 0.`,
@@ -571,7 +571,7 @@ int main() {
   {
     id: 146,
     title: 'LRU Cache',
-    difficulty: 'Medium',
+    difficulty: '4 Stars',
     topic: 'Hash Table, Linked List',
     url: 'https://leetcode.com/problems/lru-cache/',
     description: `Design a data structure that follows the constraints of a Least Recently Used (LRU) cache.\n\nImplement the LRUCache class:\n- LRUCache(int capacity) Initialize the LRU cache with positive size capacity.\n- int get(int key) Return the value of the key if the key exists, otherwise return -1.\n- void put(int key, int value) Update the value of the key if the key exists. Otherwise, add the key-value pair to the cache. If the number of keys exceeds the capacity from this operation, evict the least recently used key.\n\nThe functions get and put must each run in O(1) average time complexity.`,
@@ -619,7 +619,7 @@ int main() {
   {
     id: 200,
     title: 'Number of Islands',
-    difficulty: 'Medium',
+    difficulty: '3 Stars',
     topic: 'Array, DFS, BFS',
     url: 'https://leetcode.com/problems/number-of-islands/',
     description: `Given an m x n 2D binary grid grid which represents a map of '1's (land) and '0's (water), return the number of islands.\n\nAn island is surrounded by water and is formed by connecting adjacent lands horizontally or vertically. You may assume all four edges of the grid are all surrounded by water.`,
@@ -660,7 +660,7 @@ int main() {
   {
     id: 206,
     title: 'Reverse Linked List',
-    difficulty: 'Easy',
+    difficulty: '1 Star',
     topic: 'Linked List',
     url: 'https://leetcode.com/problems/reverse-linked-list/',
     description: `Given the head of a singly linked list, reverse the list, and return the reversed list.`,
@@ -703,7 +703,7 @@ int main() {
   {
     id: 238,
     title: 'Product of Array Except Self',
-    difficulty: 'Medium',
+    difficulty: '3 Stars',
     topic: 'Array, Prefix Sum',
     url: 'https://leetcode.com/problems/product-of-array-except-self/',
     description: `Given an integer array nums, return an array answer such that answer[i] is equal to the product of all the elements of nums except nums[i].\n\nThe product of any prefix or suffix of nums is guaranteed to fit in a 32-bit integer.\n\nYou must write an algorithm that runs in O(n) time and without using the division operation.`,
@@ -735,7 +735,7 @@ int main() {
   {
     id: 49,
     title: 'Group Anagrams',
-    difficulty: 'Medium',
+    difficulty: '3 Stars',
     topic: 'Array, Hash Table, String',
     url: 'https://leetcode.com/problems/group-anagrams/',
     description: `Given an array of strings strs, group the anagrams together. You can return the answer in any order.\n\nAn Anagram is a word or phrase formed by rearranging the letters of a different word or phrase, typically using all the original letters exactly once.`,
@@ -750,7 +750,7 @@ int main() {
   {
     id: 56,
     title: 'Merge Intervals',
-    difficulty: 'Medium',
+    difficulty: '3 Stars',
     topic: 'Array, Sorting',
     url: 'https://leetcode.com/problems/merge-intervals/',
     description: `Given an array of intervals where intervals[i] = [startᵢ, endᵢ], merge all overlapping intervals, and return an array of the non-overlapping intervals that cover all the intervals in the input.`,
@@ -764,7 +764,7 @@ int main() {
   {
     id: 76,
     title: 'Minimum Window Substring',
-    difficulty: 'Hard',
+    difficulty: '5 Stars',
     topic: 'Hash Table, String, Sliding Window',
     url: 'https://leetcode.com/problems/minimum-window-substring/',
     description: `Given two strings s and t of lengths m and n respectively, return the minimum window substring of s such that every character in t (including duplicates) is included in the window. If there is no such substring, return the empty string "".\n\nThe testcases will be generated such that the answer is unique.`,
@@ -779,7 +779,7 @@ int main() {
   {
     id: 78,
     title: 'Subsets',
-    difficulty: 'Medium',
+    difficulty: '3 Stars',
     topic: 'Array, Backtracking, Bit Manipulation',
     url: 'https://leetcode.com/problems/subsets/',
     description: `Given an integer array nums of unique elements, return all possible subsets (the power set).\n\nThe solution set must not contain duplicate subsets. Return the solution in any order.`,
@@ -793,7 +793,7 @@ int main() {
   {
     id: 98,
     title: 'Validate Binary Search Tree',
-    difficulty: 'Medium',
+    difficulty: '4 Stars',
     topic: 'Binary Tree, DFS, BST',
     url: 'https://leetcode.com/problems/validate-binary-search-tree/',
     description: `Given the root of a binary tree, determine if it is a valid binary search tree (BST).\n\nA valid BST is defined as follows:\n- The left subtree of a node contains only nodes with keys less than the node's key.\n- The right subtree of a node contains only nodes with keys greater than the node's key.\n- Both the left and right subtrees must also be binary search trees.`,
@@ -807,7 +807,7 @@ int main() {
   {
     id: 102,
     title: 'Binary Tree Level Order Traversal',
-    difficulty: 'Medium',
+    difficulty: '3 Stars',
     topic: 'Binary Tree, BFS',
     url: 'https://leetcode.com/problems/binary-tree-level-order-traversal/',
     description: `Given the root of a binary tree, return the level order traversal of its nodes' values. (i.e., from left to right, level by level).`,
@@ -822,7 +822,7 @@ int main() {
   {
     id: 104,
     title: 'Maximum Depth of Binary Tree',
-    difficulty: 'Easy',
+    difficulty: '1 Star',
     topic: 'Binary Tree, DFS, BFS',
     url: 'https://leetcode.com/problems/maximum-depth-of-binary-tree/',
     description: `Given the root of a binary tree, return its maximum depth.\n\nA binary tree's maximum depth is the number of nodes along the longest path from the root node down to the farthest leaf node.`,
@@ -836,7 +836,7 @@ int main() {
   {
     id: 136,
     title: 'Single Number',
-    difficulty: 'Easy',
+    difficulty: '1 Star',
     topic: 'Array, Bit Manipulation',
     url: 'https://leetcode.com/problems/single-number/',
     description: `Given a non-empty array of integers nums, every element appears twice except for one. Find that single one.\n\nYou must implement a solution with a linear runtime complexity and use only constant extra space.`,
@@ -851,7 +851,7 @@ int main() {
   {
     id: 141,
     title: 'Linked List Cycle',
-    difficulty: 'Easy',
+    difficulty: '1 Star',
     topic: 'Linked List, Two Pointers',
     url: 'https://leetcode.com/problems/linked-list-cycle/',
     description: `Given head, the head of a linked list, determine if the linked list has a cycle in it.\n\nThere is a cycle in a linked list if there is some node in the list that can be reached again by continuously following the next pointer. Internally, pos is used to denote the index of the node that tail's next pointer is connected to. Note that pos is not passed as a parameter.\n\nReturn true if there is a cycle in the linked list. Otherwise, return false.`,
@@ -1011,7 +1011,7 @@ int main() {
   {
     id: 55,
     title: 'Jump Game',
-    difficulty: 'Medium',
+    difficulty: '3 Stars',
     topic: 'Array, Greedy, DP',
     url: 'https://leetcode.com/problems/jump-game/',
     description: `You are given an integer array nums. You are initially positioned at the array's first index, and each element in the array represents your maximum jump length at that position.\n\nReturn true if you can reach the last index, or false otherwise.`,
@@ -1025,7 +1025,7 @@ int main() {
   {
     id: 23,
     title: 'Merge k Sorted Lists',
-    difficulty: 'Hard',
+    difficulty: '5 Stars',
     topic: 'Linked List, Heap, Divide and Conquer',
     url: 'https://leetcode.com/problems/merge-k-sorted-lists/',
     description: `You are given an array of k linked-lists lists, each linked-list is sorted in ascending order.\n\nMerge all the linked-lists into one sorted linked-list and return it.`,
@@ -1040,7 +1040,7 @@ int main() {
   {
     id: 48,
     title: 'Rotate Image',
-    difficulty: 'Medium',
+    difficulty: '3 Stars',
     topic: 'Array, Matrix, Math',
     url: 'https://leetcode.com/problems/rotate-image/',
     description: `You are given an n x n 2D matrix representing an image, rotate the image by 90 degrees (clockwise).\n\nYou have to rotate the image in-place, which means you have to modify the input 2D matrix directly. DO NOT allocate another 2D matrix and do the rotation.`,
@@ -1054,7 +1054,7 @@ int main() {
   {
     id: 236,
     title: 'Lowest Common Ancestor of a Binary Tree',
-    difficulty: 'Medium',
+    difficulty: '4 Stars',
     topic: 'Binary Tree, DFS',
     url: 'https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree/',
     description: `Given a binary tree, find the lowest common ancestor (LCA) of two given nodes in the tree.\n\nAccording to the definition of LCA: "The lowest common ancestor is defined between two nodes p and q as the lowest node in T that has both p and q as descendants (where we allow a node to be a descendant of itself)."`,
@@ -1068,7 +1068,7 @@ int main() {
   {
     id: 347,
     title: 'Top K Frequent Elements',
-    difficulty: 'Medium',
+    difficulty: '3 Stars',
     topic: 'Array, Hash Table, Heap',
     url: 'https://leetcode.com/problems/top-k-frequent-elements/',
     description: `Given an integer array nums and an integer k, return the k most frequent elements. You may return the answer in any order.`,

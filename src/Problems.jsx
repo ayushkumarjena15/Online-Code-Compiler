@@ -1,79 +1,52 @@
 import React, { useState, useEffect } from 'react';
-import { Database, Search, Award, CheckCircle2, Play, Trophy, Lock } from 'lucide-react';
-import { DSA_PROBLEMS, SQL_PROBLEMS, PYTHON_PROBLEMS, JAVA_PROBLEMS, JS_PROBLEMS } from './problemData';
+import { 
+  Trophy, 
+  Database, 
+  Play, 
+  Search, 
+  CheckCircle2, 
+  Lock, 
+  ChevronRight, 
+  Award, 
+  ExternalLink,
+  Zap,
+  Star
+} from 'lucide-react';
+import { 
+  DSA_PROBLEMS, 
+  SQL_PROBLEMS, 
+  PYTHON_PROBLEMS, 
+  JAVA_PROBLEMS, 
+  JS_PROBLEMS 
+} from './problemData';
 import CertificateModal from './CertificateModal';
 
-export default function Problems({ onSelectProblem, user, supabase, contest, onClearContest }) {
-  const [activeTab, setActiveTab ] = useState('dsa');
+const Problems = ({ user, solvedProblems, onSelectProblem, contest, onClearContest }) => {
+  const [activeTab, setActiveTab] = useState('dsa');
   const [search, setSearch] = useState('');
-  const [solvedProblems, setSolvedProblems] = useState({});
-  const [certData, setCertData] = useState({ lang: '', title: '' });
-  const [contestProblems, setContestProblems] = useState([]);
-  const [isContestLoading, setIsContestLoading ] = useState(false);
   const [showCertificate, setShowCertificate] = useState(false);
+  const [certData, setCertData] = useState(null);
 
-  useEffect(() => {
-    const fetchProgress = async () => {
-      if (!user) return;
-      try {
-        const { data, error } = await supabase
-          .from('user_progress')
-          .select('problem_id')
-          .eq('user_id', user.id);
-        
-        if (!error && data) {
-          const solved = {};
-          data.forEach(p => solved[p.problem_id] = true);
-          setSolvedProblems(solved);
-        }
-      } catch (err) {
-        console.error("Error fetching progress:", err);
-      }
-    };
+  const getActiveProblems = () => {
+    switch (activeTab) {
+      case 'dsa': return DSA_PROBLEMS;
+      case 'sql': return SQL_PROBLEMS;
+      case 'python': return PYTHON_PROBLEMS;
+      case 'java': return JAVA_PROBLEMS;
+      case 'javascript': return JS_PROBLEMS;
+      default: return DSA_PROBLEMS;
+    }
+  };
 
-    const fetchContestProblems = async () => {
-      if (!contest) return;
-      setIsContestLoading(true);
-      try {
-        const { data, error } = await supabase
-          .from('contest_problems')
-          .select('problem_id')
-          .eq('contest_id', contest.id);
-        
-        if (!error && data) {
-          const ids = data.map(d => parseInt(d.problem_id));
-          const filtered = DSA_PROBLEMS.filter(p => ids.includes(p.id));
-          setContestProblems(filtered);
-        }
-      } catch (err) {
-        console.error("Error fetching contest problems:", err);
-      } finally {
-        setIsContestLoading(false);
-      }
-    };
-
-    fetchProgress();
-    if (contest) fetchContestProblems();
-  }, [activeTab, user, supabase, contest]);
-
-  const activeProblems = contest ? contestProblems : 
-                         activeTab === 'dsa' ? DSA_PROBLEMS :
-                         activeTab === 'sql' ? SQL_PROBLEMS :
-                         activeTab === 'python' ? PYTHON_PROBLEMS :
-                         activeTab === 'java' ? JAVA_PROBLEMS :
-                         activeTab === 'javascript' ? JS_PROBLEMS : [];
-                         
-  const filteredProblems = activeProblems.filter(p =>
-    p.title.toLowerCase().includes(search.toLowerCase()) ||
-    p.topic.toLowerCase().includes(search.toLowerCase())
-  );
+  const activeProblems = getActiveProblems();
 
   const getCategoryStats = () => {
-    const solvedCount = activeProblems.filter(p => solvedProblems[p.id]).length;
-    const totalCount = activeProblems.length;
-    const target = activeTab === 'dsa' ? 20 : 15;
-    const progressPct = Math.min(100, Math.round((solvedCount / target) * 100));
-    return { solvedCount, totalCount, target, progressPct };
+    const solvedInCat = activeProblems.filter(p => !!solvedProblems[p.id]).length;
+    return {
+      solvedCount: solvedInCat,
+      target: activeProblems.length,
+      progressPct: (solvedInCat / activeProblems.length) * 100
+    };
   };
 
   const stats = getCategoryStats();
@@ -84,29 +57,39 @@ export default function Problems({ onSelectProblem, user, supabase, contest, onC
 
   const handleViewCert = () => {
     const titles = {
-      dsa: 'DSA 5 ⭐ Associate',
-      sql: 'SQL 5 ⭐ Associate',
-      python: 'Python 5 ⭐ Associate',
-      java: 'Java 5 ⭐ Associate',
-      javascript: 'JavaScript 5 ⭐ Associate'
+      dsa: 'DSA Master Certified',
+      sql: 'SQL Database Specialist',
+      python: 'Python Core Developer',
+      java: 'Java Systems Associate',
+      javascript: 'JS Fullstack Architect'
     };
-    setCertData({ lang: activeTab.toUpperCase(), title: titles[activeTab] });
+    setCertData({ 
+      lang: activeTab === 'javascript' ? 'JavaScript' : activeTab.toUpperCase(), 
+      title: titles[activeTab] 
+    });
     setShowCertificate(true);
   };
 
   const getDifficultyColor = (diff) => {
-    switch(diff) {
-      case 'Easy': case '1 Star': return '#22c55e';
-      case '2 Stars': return '#84cc16';
-      case 'Medium': case '3 Stars': return '#fbbf24';
-      case '4 Stars': return '#f97316';
-      case 'Hard': case '5 Stars': return '#ef4444';
-      default: return '#fbbf24';
-    }
+    if (diff === '1 Star') return '#22c55e';
+    if (diff === '2 Stars') return '#84cc16';
+    if (diff === '3 Stars') return '#fbbf24';
+    if (diff === '4 Stars') return '#f97316';
+    if (diff === '5 Stars') return '#ef4444';
+    return '#3b82f6';
   };
 
+  const groupedByDifficulty = activeProblems.reduce((acc, prob) => {
+    const diff = prob.difficulty || '1 Star';
+    if (!acc[diff]) acc[diff] = [];
+    acc[diff].push(prob);
+    return acc;
+  }, {});
+
+  const difficultyOrder = ['1 Star', '2 Stars', '3 Stars', '4 Stars', '5 Stars'];
+
   return (
-    <div style={{ padding: '2rem', flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '2rem', background: '#0f172a', color: '#f8fafc' }}>
+    <div style={{ padding: '2rem', flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '2.5rem', background: '#0f172a', color: '#f8fafc' }}>
       {showCertificate && (
         <CertificateModal
           user={user}
@@ -115,170 +98,234 @@ export default function Problems({ onSelectProblem, user, supabase, contest, onC
         />
       )}
 
-      {contest && (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(251,191,36,0.1)', border: '1px solid #fbbf24', borderRadius: '16px', padding: '1.25rem 2rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <Trophy color="#fbbf24" size={24} />
-            <div>
-              <h2 style={{ margin: 0, fontSize: '1.2rem', color: '#fbbf24' }}>Active Contest: {contest.title}</h2>
-              <p style={{ margin: 0, fontSize: '0.85rem', color: '#94a3b8' }}>Complete these problems to rank up on the leaderboard!</p>
-            </div>
-          </div>
-          <button 
-            onClick={onClearContest}
-            style={{ background: 'rgba(251,191,36,0.1)', border: '1px solid rgba(251,191,36,0.3)', color: '#fbbf24', padding: '0.6rem 1.25rem', borderRadius: '8px', cursor: 'pointer', fontWeight: 600 }}
-          >
-            Leave Contest
-          </button>
-        </div>
-      )}
-
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      {/* Hero Section */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '2rem' }}>
         <div>
-          <h1 style={{ margin: 0, fontSize: '2rem', fontWeight: 800 }}>Challenge Arena</h1>
-          <p style={{ color: 'var(--text-3)', margin: '0.5rem 0 0 0' }}>Master every concept from 1⭐ to 5⭐</p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
+             <span style={{ background: 'linear-gradient(45deg, #a855f7, #6366f1)', padding: '0.4rem 0.8rem', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Journey</span>
+             <div style={{ height: '2px', width: '40px', background: 'rgba(255,255,255,0.1)' }}></div>
+          </div>
+          <h1 style={{ margin: 0, fontSize: '3rem', fontWeight: 900, letterSpacing: '-0.02em', background: 'linear-gradient(to right, #fff, #94a3b8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+            Problem Arena
+          </h1>
+          <p style={{ color: '#94a3b8', margin: '0.5rem 0 0 0', fontSize: '1.1rem', maxWidth: '500px' }}>
+            Master the art of coding step-by-step. Complete initial stars to unlock advanced challenges.
+          </p>
         </div>
+
         {!contest && (
-          <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid var(--panel-border)', padding: '1rem 1.5rem', borderRadius: '16px', minWidth: '250px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.85rem' }}>
-              <span style={{ color: 'var(--text-2)' }}>Course Progress</span>
-              <span style={{ fontWeight: 700, color: '#fff' }}>{stats.solvedCount}/{stats.target}</span>
+          <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255, 255, 255, 0.08)', backdropFilter: 'blur(20px)', padding: '1.75rem', borderRadius: '28px', minWidth: '320px', boxShadow: '0 20px 40px -15px rgba(0, 0, 0, 0.4)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem', alignItems: 'center' }}>
+              <span style={{ color: '#94a3b8', fontWeight: 600, fontSize: '0.95rem' }}>Path Progress</span>
+              <div style={{ padding: '0.4rem 0.8rem', background: 'rgba(255,255,255,0.05)', borderRadius: '12px', fontWeight: 800 }}>
+                 {stats.solvedCount} / {stats.target}
+              </div>
             </div>
-            <div style={{ height: '6px', background: 'rgba(255,255,255,0.05)', borderRadius: '3px', overflow: 'hidden' }}>
-              <div style={{ height: '100%', width: `${stats.progressPct}%`, background: stats.progressPct === 100 ? '#fbbf24' : '#3b82f6', transition: 'width 1s cubic-bezier(0.4, 0, 0.2, 1)' }}></div>
+            <div style={{ height: '10px', background: 'rgba(255,255,255,0.05)', borderRadius: '5px', overflow: 'hidden', marginBottom: '1.25rem' }}>
+              <div style={{ height: '100%', width: `${stats.progressPct}%`, background: stats.progressPct === 100 ? 'linear-gradient(90deg, #fbbf24, #f59e0b)' : 'linear-gradient(90deg, #3b82f6, #8b5cf6)', transition: 'width 2s ease-out' }}></div>
             </div>
             {stats.progressPct === 100 ? (
               <button 
                 onClick={handleViewCert}
-                style={{ marginTop: '0.6rem', background: 'linear-gradient(to right, #fbbf24, #d97706)', border: 'none', color: '#000', padding: '0.4rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}
+                style={{ width: '100%', background: 'linear-gradient(135deg, #fbbf24, #d97706)', border: 'none', color: '#000', padding: '0.85rem', borderRadius: '16px', fontSize: '0.95rem', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', transition: 'all 0.3s' }}
               >
-                <Trophy size={14} /> View Certificate
+                <Trophy size={20} /> Claim Certicate
               </button>
             ) : (
-              <div style={{ fontSize: '0.7rem', color: 'var(--text-3)', textAlign: 'center', marginTop: '4px' }}>
-                Solve {stats.target - stats.solvedCount} more to unlock certificate
+              <div style={{ fontSize: '0.8rem', color: '#64748b', textAlign: 'center', fontWeight: 600 }}>
+                Solve {stats.target - stats.solvedCount} more to unlock your Certificate
               </div>
             )}
           </div>
         )}
       </div>
 
-      {!contest && (
-        <div style={{ display: 'flex', gap: '0.8rem', borderBottom: '1px solid var(--panel-border)', paddingBottom: '0.5rem' }}>
-          {[
-            { id: 'dsa', label: 'DSA', icon: Trophy },
-            { id: 'sql', label: 'SQL', icon: Database },
-            { id: 'python', label: 'Python', icon: Play },
-            { id: 'java', label: 'Java', icon: Play },
-            { id: 'javascript', label: 'JS', icon: Play }
-          ].map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              style={{
-                background: activeTab === tab.id ? 'rgba(168, 85, 247, 0.15)' : 'transparent',
-                border: 'none',
-                color: activeTab === tab.id ? '#a855f7' : 'var(--text-2)',
-                padding: '0.6rem 1.2rem',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                fontWeight: 600,
-                transition: 'all 0.2s',
-                border: activeTab === tab.id ? '1px solid rgba(168, 85, 247, 0.3)' : '1px solid transparent'
-              }}
-            >
-              <tab.icon size={16} />
-              {tab.label}
-            </button>
-          ))}
+      {contest && (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(251,191,36,0.1)', border: '1px solid #fbbf24', borderRadius: '20px', padding: '1.5rem 2.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+            <div style={{ padding: '0.75rem', background: 'rgba(251,191,36,0.2)', borderRadius: '50%' }}>
+              <Trophy color="#fbbf24" size={32} />
+            </div>
+            <div>
+              <h2 style={{ margin: 0, fontSize: '1.4rem', color: '#fbbf24', fontWeight: 800 }}>Ongoing Contest: {contest.title}</h2>
+              <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.95rem', color: '#94a3b8' }}>Rank high to earn exclusive badges!</p>
+            </div>
+          </div>
+          <button 
+            onClick={onClearContest}
+            style={{ background: 'rgba(251,191,36,0.1)', border: '1px solid rgba(251,191,36,0.3)', color: '#fbbf24', padding: '0.75rem 1.5rem', borderRadius: '12px', cursor: 'pointer', fontWeight: 700, fontSize: '0.9rem' }}
+          >
+            Exit Contest
+          </button>
         </div>
       )}
 
-      <div style={{ position: 'relative' }}>
-        <Search style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-3)' }} size={18} />
-        <input
-          type="text"
-          placeholder="Search by title or topic..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--panel-border)', padding: '0.8rem 1rem 0.8rem 3rem', borderRadius: '12px', color: 'var(--text)', outline: 'none' }}
-        />
+      {/* Navigation & Search */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '2rem', flexWrap: 'wrap' }}>
+        {!contest && (
+          <div style={{ display: 'flex', gap: '0.5rem', background: 'rgba(255,255,255,0.03)', padding: '0.5rem', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)' }}>
+            {[
+              { id: 'dsa', label: 'DSA', icon: Award },
+              { id: 'sql', label: 'SQL', icon: Database },
+              { id: 'python', label: 'Python', icon: Zap },
+              { id: 'java', label: 'Java', icon: Play },
+              { id: 'javascript', label: 'JS', icon: Play }
+            ].map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                style={{
+                  background: activeTab === tab.id ? 'rgba(168, 85, 247, 0.15)' : 'transparent',
+                  border: 'none',
+                  color: activeTab === tab.id ? '#c084fc' : '#64748b',
+                  padding: '0.75rem 1.75rem',
+                  borderRadius: '16px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.75rem',
+                  fontWeight: 700,
+                  fontSize: '0.95rem',
+                  transition: 'all 0.3s',
+                  border: activeTab === tab.id ? '1px solid rgba(168, 85, 247, 0.2)' : '1px solid transparent'
+                }}
+              >
+                <tab.icon size={20} />
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        )}
+
+        <div style={{ position: 'relative', width: '100%', maxWidth: '400px' }}>
+          <Search style={{ position: 'absolute', left: '1.25rem', top: '50%', transform: 'translateY(-50%)', color: '#64748b' }} size={20} />
+          <input
+            type="text"
+            placeholder="Find a challenge..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', padding: '1rem 1.5rem 1rem 3.5rem', borderRadius: '18px', color: '#fff', outline: 'none', fontSize: '1rem', transition: 'all 0.3s' }}
+            onFocus={e => e.target.style.borderColor = '#a855f7'}
+            onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.08)'}
+          />
+        </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.2rem' }}>
-        {filteredProblems.map(prob => {
-          const problemIndex = activeProblems.findIndex(p => p.id === prob.id);
-          const isSolved = !!solvedProblems[prob.id];
-          const isUnlocked = user?.role === 'admin' || contest || problemIndex === 0 || !!solvedProblems[activeProblems[problemIndex - 1].id];
+      {/* Grouped Problems List */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '3.5rem' }}>
+        {difficultyOrder.map(diff => {
+          const problemsInGroup = groupedByDifficulty[diff]?.filter(p => 
+            p.title.toLowerCase().includes(search.toLowerCase()) || 
+            p.topic.toLowerCase().includes(search.toLowerCase())
+          );
+          if (!problemsInGroup || problemsInGroup.length === 0) return null;
 
           return (
-            <div
-              key={prob.id}
-              onClick={() => isUnlocked && handleSolve(prob)}
-              style={{
-                background: isUnlocked ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.2)',
-                border: '1px solid',
-                borderColor: isSolved ? 'rgba(34,197,94,0.3)' : (isUnlocked ? 'var(--panel-border)' : 'rgba(255,255,255,0.05)'),
-                borderRadius: '16px',
-                padding: '1.5rem',
-                cursor: isUnlocked ? 'pointer' : 'not-allowed',
-                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                position: 'relative',
-                overflow: 'hidden',
-                opacity: isUnlocked ? 1 : 0.6
-              }}
-              onMouseEnter={e => {
-                if (!isUnlocked) return;
-                e.currentTarget.style.background = 'rgba(255,255,255,0.04)';
-                e.currentTarget.style.transform = 'translateY(-4px)';
-                e.currentTarget.style.borderColor = 'rgba(168, 85, 247, 0.4)';
-              }}
-              onMouseLeave={e => {
-                if (!isUnlocked) return;
-                e.currentTarget.style.background = 'rgba(255,255,255,0.02)';
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.borderColor = isSolved ? 'rgba(34,197,94,0.3)' : 'var(--panel-border)';
-              }}
-            >
-              {!isUnlocked && (
-                <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(2px)', zIndex: 1 }}>
-                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', color: '#64748b' }}>
-                      <Lock size={20} />
-                      <span style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase' }}>Locked</span>
-                   </div>
-                </div>
-              )}
-              
-              {isSolved && (
-                <div style={{ position: 'absolute', top: '1rem', right: '1rem', zIndex: 2 }}>
-                  <CheckCircle2 size={20} color="#22c55e" />
-                </div>
-              )}
-              
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', position: 'relative', zIndex: 0 }}>
-                <span style={{ fontSize: '0.75rem', color: isUnlocked ? getDifficultyColor(prob.difficulty || prob.rating) : '#475569', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                  {prob.difficulty || prob.rating}
-                </span>
-                <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: isUnlocked ? '#fff' : '#475569' }}>{prob.title}</h3>
-                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                  <span style={{ fontSize: '0.75rem', background: isUnlocked ? 'rgba(168, 85, 247, 0.1)' : 'rgba(255,255,255,0.02)', color: isUnlocked ? '#a855f7' : '#475569', padding: '2px 8px', borderRadius: '4px', fontWeight: 600 }}>{prob.topic}</span>
-                </div>
-                <div style={{ marginTop: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <span style={{ fontSize: '0.8rem', color: 'var(--text-3)' }}>{prob.points || '100'} pts</span>
-                  {isUnlocked && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#a855f7', fontSize: '0.85rem', fontWeight: 600 }}>
-                      {isSolved ? 'Review' : 'Solve'} <Play size={14} fill="currentColor" />
-                    </div>
-                  )}
-                </div>
-              </div>
+            <div key={diff} style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+               <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', background: 'rgba(255,255,255,0.03)', padding: '0.6rem 1.25rem', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                    <Star size={20} style={{ color: getDifficultyColor(diff), fill: getDifficultyColor(diff) }} />
+                    <h2 style={{ margin: 0, fontSize: '1.4rem', fontWeight: 800, color: '#fff' }}>{diff} Tier</h2>
+                  </div>
+                  <div style={{ height: '1px', flex: 1, background: 'linear-gradient(90deg, rgba(255,255,255,0.1), transparent)' }}></div>
+               </div>
+
+               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', gap: '1.75rem' }}>
+                 {problemsInGroup.map(prob => {
+                    const problemIndexInActive = activeProblems.findIndex(p => p.id === prob.id);
+                    const isSolved = !!solvedProblems[prob.id];
+                    const isUnlocked = user?.role === 'admin' || contest || problemIndexInActive === 0 || !!solvedProblems[activeProblems[problemIndexInActive - 1].id];
+
+                    return (
+                      <div
+                        key={prob.id}
+                        onClick={() => isUnlocked && handleSolve(prob)}
+                        style={{
+                          background: isUnlocked ? 'rgba(255,255,255,0.02)' : 'rgba(15, 23, 42, 0.8)',
+                          border: '1px solid',
+                          borderColor: isSolved ? 'rgba(34,197,94,0.3)' : (isUnlocked ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.02)'),
+                          borderRadius: '28px',
+                          padding: '2rem',
+                          cursor: isUnlocked ? 'pointer' : 'not-allowed',
+                          transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                          position: 'relative',
+                          overflow: 'hidden',
+                          opacity: isUnlocked ? 1 : 0.7,
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '1.5rem'
+                        }}
+                        onMouseEnter={e => {
+                          if (!isUnlocked) return;
+                          e.currentTarget.style.transform = 'translateY(-10px)';
+                          e.currentTarget.style.borderColor = '#a855f7';
+                          e.currentTarget.style.background = 'rgba(255,255,255,0.04)';
+                        }}
+                        onMouseLeave={e => {
+                          if (!isUnlocked) return;
+                          e.currentTarget.style.transform = 'translateY(0)';
+                          e.currentTarget.style.borderColor = isSolved ? 'rgba(34,197,94,0.3)' : 'rgba(255,255,255,0.08)';
+                          e.currentTarget.style.background = 'rgba(255,255,255,0.02)';
+                        }}
+                      >
+                        {!isUnlocked && (
+                          <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(15, 23, 42, 0.85)', backdropFilter: 'blur(6px)', zIndex: 10 }}>
+                             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', color: '#64748b' }}>
+                                <div style={{ padding: '1.25rem', background: 'rgba(255,255,255,0.03)', borderRadius: '50%', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                  <Lock size={32} />
+                                </div>
+                                <span style={{ fontSize: '0.9rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em' }}>Locked</span>
+                             </div>
+                          </div>
+                        )}
+
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', background: 'rgba(255,255,255,0.05)', padding: '0.5rem 1rem', borderRadius: '14px' }}>
+                            <div style={{ height: '8px', width: '8px', borderRadius: '50%', background: getDifficultyColor(diff), boxShadow: `0 0 10px ${getDifficultyColor(diff)}` }}></div>
+                            <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#fff' }}>{diff}</span>
+                          </div>
+                          {isSolved && (
+                            <div style={{ background: 'rgba(34,197,94,0.15)', padding: '0.5rem', borderRadius: '50%' }}>
+                              <CheckCircle2 size={24} color="#22c55e" style={{ filter: 'drop-shadow(0 0 8px rgba(34, 197, 94, 0.4))' }} />
+                            </div>
+                          )}
+                        </div>
+
+                        <div style={{ flex: 1 }}>
+                          <h3 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 800, color: isUnlocked ? '#fff' : '#475569', lineHeight: 1.3, letterSpacing: '-0.01em' }}>
+                            {prob.title}
+                          </h3>
+                          <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap', marginTop: '1.25rem' }}>
+                            {prob.topic.split(',').map((t, idx) => (
+                              <span key={idx} style={{ fontSize: '0.75rem', background: 'rgba(168, 85, 247, 0.1)', color: '#d8b4fe', padding: '5px 14px', borderRadius: '12px', fontWeight: 700, border: '1px solid rgba(168, 85, 247, 0.1)' }}>{t.trim()}</span>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div style={{ marginTop: 'auto', paddingTop: '1.75rem', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                              <span style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Bounty</span>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                 <Zap size={16} fill="#fbbf24" color="#fbbf24" />
+                                 <span style={{ fontSize: '1.2rem', fontWeight: 900 }}>{prob.points || '100'} <span style={{ fontSize: '0.9rem', color: '#94a3b8' }}>XP</span></span>
+                              </div>
+                           </div>
+                           {isUnlocked && (
+                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: isSolved ? 'rgba(34,197,94,0.15)' : 'rgba(168, 85, 247, 0.15)', color: isSolved ? '#4ade80' : '#c084fc', padding: '0.85rem 1.75rem', borderRadius: '20px', fontSize: '1rem', fontWeight: 800, transition: 'all 0.3s' }}>
+                               {isSolved ? 'Review' : 'Enter Arena'} <ChevronRight size={18} />
+                             </div>
+                           )}
+                        </div>
+                      </div>
+                    );
+                 })}
+               </div>
             </div>
           );
         })}
       </div>
     </div>
   );
-}
+};
+
+export default Problems;
