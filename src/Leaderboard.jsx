@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Trophy, CalendarDays, ExternalLink, Activity, Medal, Star, Target } from 'lucide-react';
+import { Trophy, CalendarDays, ExternalLink, Activity, Medal, Star, Target, Clock, Search } from 'lucide-react';
 import axios from 'axios';
 
 export default function Leaderboard({ user, supabase }) {
@@ -30,6 +30,18 @@ export default function Leaderboard({ user, supabase }) {
 
   const [internalContests, setInternalContests] = useState([]);
   const [userJoinedContests, setUserJoinedContests] = useState([]);
+
+  const fetchContests = async () => {
+    try {
+      setIsLoadingContests(true);
+      const res = await axios.get('https://kontests.net/api/v1/all');
+      setContests(res.data);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsLoadingContests(false);
+    }
+  };
 
   const fetchRankings = async () => {
     try {
