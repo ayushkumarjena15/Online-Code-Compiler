@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CheckCircle2, XCircle, MessageSquare, Code2, ExternalLink, Clock, User, Filter, Search, LayoutDashboard, Shield, Users, Activity, RefreshCw, Calendar, Plus, Trash2, Target } from 'lucide-react';
+import { CheckCircle2, XCircle, MessageSquare, Code2, ExternalLink, Clock, User, Filter, Search, LayoutDashboard, Shield, Users, Activity, RefreshCw, Calendar, Plus, Trash2, Target, Trophy, Terminal } from 'lucide-react';
 import { DSA_PROBLEMS } from './problemData';
 
 export default function AdminPanel({ user, supabase }) {
@@ -10,7 +10,7 @@ export default function AdminPanel({ user, supabase }) {
   const [filter, setFilter] = useState('pending');
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [stats, setStats] = useState({ users: 0, submissions: 0, verified: 0, languages: {} });
+  const [stats, setStats] = useState({ users: 0, submissions: 0, verified: 0, languages: {}, topProblems: [] });
   const [contests, setContests] = useState([]);
   const [isCreatingContest, setIsCreatingContest] = useState(false);
   const [newContest, setNewContest] = useState({ title: '', description: '', start_time: '', end_time: '', problems: [] });
