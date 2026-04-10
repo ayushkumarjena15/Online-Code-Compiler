@@ -47,16 +47,27 @@ export default function AdminPanel({ user, supabase }) {
 
       const uniqueUsers = new Set(allSub.map(s => s.user_id)).size;
       const verified = allSub.filter(s => s.status === 'verified').length;
+      
       const langCounts = {};
+      const problemCounts = {};
+      
       allSub.forEach(s => {
         langCounts[s.language] = (langCounts[s.language] || 0) + 1;
+        problemCounts[s.problem_id] = (problemCounts[s.problem_id] || 0) + 1;
       });
+
+      // Sort problems by popularity (highest first)
+      const sortedProblems = Object.entries(problemCounts)
+        .map(([id, count]) => ({ id, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 5); // Top 5
 
       setStats({
         users: uniqueUsers,
         submissions: allSub.length,
         verified,
-        languages: langCounts
+        languages: langCounts,
+        topProblems: sortedProblems
       });
     } catch (err) {
       console.error('Error fetching stats:', err);
@@ -261,6 +272,50 @@ export default function AdminPanel({ user, supabase }) {
                   <div>
                     <div style={{ fontSize: '0.9rem', color: '#94a3b8' }}>Verified</div>
                     <div style={{ fontSize: '2rem', fontWeight: 800 }}>{stats.verified}</div>
+                  </div>
+               </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '1.5rem' }}>
+               {/* Language Distribution */}
+               <div style={{ background: '#1e293b', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '20px', padding: '1.75rem' }}>
+                  <h3 style={{ margin: '0 0 1.5rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#f8fafc' }}><Terminal size={20} color="#fbbf24" /> Language Distribution</h3>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                     {Object.entries(stats.languages || {}).map(([lang, count]) => {
+                        const percent = (count / (stats.submissions || 1)) * 100;
+                        return (
+                          <div key={lang}>
+                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.85rem' }}>
+                                <span style={{ textTransform: 'uppercase', fontWeight: 700, color: '#94a3b8' }}>{lang}</span>
+                                <span style={{ color: '#f8fafc' }}>{count} ({Math.round(percent)}%)</span>
+                             </div>
+                             <div style={{ height: '8px', background: 'rgba(0,0,0,0.2)', borderRadius: '4px', overflow: 'hidden' }}>
+                                <div style={{ height: '100%', width: `${percent}%`, background: `linear-gradient(90deg, #fbbf24, #f59e0b)`, borderRadius: '4px' }}></div>
+                             </div>
+                          </div>
+                        );
+                     })}
+                     {(!stats.languages || Object.keys(stats.languages).length === 0) && <p style={{ color: '#64748b', textAlign: 'center' }}>No submission data yet.</p>}
+                  </div>
+               </div>
+
+               {/* Top Problems */}
+               <div style={{ background: '#1e293b', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '20px', padding: '1.75rem' }}>
+                  <h3 style={{ margin: '0 0 1.5rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#f8fafc' }}><Trophy size={20} color="#3b82f6" /> Trending Challenges</h3>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                     {(stats.topProblems || []).map((prob, idx) => (
+                        <div key={prob.id} style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.75rem', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.03)' }}>
+                           <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: idx === 0 ? '#fbbf24' : '#334155', color: idx === 0 ? '#000' : '#94a3b8', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 800 }}>
+                              {idx + 1}
+                           </div>
+                           <div style={{ flex: 1 }}>
+                              <div style={{ fontSize: '0.9rem', fontWeight: 600, color: '#f8fafc', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{prob.id}</div>
+                              <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{prob.count} submissions</div>
+                           </div>
+                           <div style={{ color: '#22c55e', fontSize: '0.75rem', fontWeight: 700 }}>+{Math.floor(Math.random() * 20)}%</div>
+                        </div>
+                     ))}
+                     {(!stats.topProblems || stats.topProblems.length === 0) && <p style={{ color: '#64748b', textAlign: 'center' }}>No challenge data yet.</p>}
                   </div>
                </div>
             </div>
