@@ -11,6 +11,25 @@ export default function Problems({ onSelectProblem, user, supabase, contest, onC
   const [contestProblems, setContestProblems] = useState([]);
   const [isContestLoading, setIsContestLoading] = useState(false);
 
+  useEffect(() => {
+    const fetchProgress = async () => {
+      if (!user) return;
+      try {
+        const { data, error } = await supabase
+          .from('user_progress')
+          .select('problem_id')
+          .eq('user_id', user.id);
+        
+        if (!error && data) {
+          const solved = {};
+          data.forEach(p => solved[p.problem_id] = true);
+          setSolvedProblems(solved);
+        }
+      } catch (err) {
+        console.error("Error fetching progress:", err);
+      }
+    };
+
     const fetchContestProblems = async () => {
       if (!contest) return;
       setIsContestLoading(true);
