@@ -863,7 +863,7 @@ ${code}`;
               onClearContest={() => setActiveContest(null)} 
             />
           ) : view === 'problem' && activeProblem ? (
-            <ProblemDetail problem={activeProblem} problemLanguage={problemLanguage} onBack={() => setView('problems')} user={user} supabase={supabase} />
+            <ProblemDetail problem={activeProblem} problemLanguage={problemLanguage} onBack={() => setView('problems')} user={user} supabase={supabase} contest={activeContest} />
           ) : view === 'leaderboard' ? (
             <Leaderboard user={user} supabase={supabase} />
           ) : view === 'admin' && user?.role === 'admin' ? (

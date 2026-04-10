@@ -105,7 +105,7 @@ const generateAIContent = async (apiKey, prompt) => {
   throw lastError;
 };
 
-export default function ProblemDetail({ problem, onBack, problemLanguage, user, supabase }) {
+export default function ProblemDetail({ problem, onBack, problemLanguage, user, supabase, contest }) {
   const [dsaLang, setDsaLang] = useState('cpp');
   const [code, setCode] = useState(problem.templateCode || '');
   const [solved, setSolved] = useState(false);
@@ -161,7 +161,8 @@ export default function ProblemDetail({ problem, onBack, problemLanguage, user, 
           problem_id: problem.id,
           language: dsaLang || problemLanguage || 'unknown',
           code: code,
-          status: 'pending'
+          status: 'pending',
+          contest_id: contest?.id || null
         }]);
       
       if (error) throw error;

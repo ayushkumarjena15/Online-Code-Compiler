@@ -70,7 +70,8 @@ export default function AdminPanel({ user, supabase }) {
         .from('code_submissions')
         .select(`
           *,
-          profile: profiles ( email, full_name )
+          profile: profiles ( email, full_name ),
+          contest: contests ( title )
         `)
         .order('submitted_at', { ascending: false });
 
@@ -159,6 +160,24 @@ export default function AdminPanel({ user, supabase }) {
       fetchContests();
     } catch (err) {
       alert('Error deleting contest: ' + err.message);
+    }
+  };
+
+  const handleReview = async (id, status) => {
+    try {
+      const { error } = await supabase
+        .from('code_submissions')
+        .update({ status, admin_feedback: feedback, reviewed_at: new Date().toISOString() })
+        .eq('id', id);
+
+      if (error) throw error;
+      setSelectedSubmission(null);
+      setFeedback('');
+      fetchSubmissions();
+      fetchStats();
+      alert(`Submission ${status} successfully!`);
+    } catch (err) {
+      alert('Error updating submission: ' + err.message);
     }
   };
 
@@ -498,6 +517,11 @@ export default function AdminPanel({ user, supabase }) {
                         <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.4rem' }}>
                           <span style={{ fontSize: '0.75rem', background: 'rgba(59,130,246,0.1)', color: '#60a5fa', padding: '2px 8px', borderRadius: '4px', fontWeight: 600 }}>{sub.language}</span>
                           <span style={{ fontSize: '0.75rem', background: sub.status === 'pending' ? 'rgba(251,191,36,0.1)' : sub.status === 'verified' ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)', color: sub.status === 'pending' ? '#fbbf24' : sub.status === 'verified' ? '#4ade80' : '#f87171', padding: '2px 8px', borderRadius: '4px', fontWeight: 600, textTransform: 'uppercase' }}>{sub.status}</span>
+                          {sub.contest && (
+                            <span style={{ fontSize: '0.75rem', background: 'rgba(251,191,36,0.2)', color: '#fbbf24', padding: '2px 8px', borderRadius: '4px', fontWeight: 600, border: '1px solid rgba(251,191,36,0.3)' }}>
+                              🏆 {sub.contest.title}
+                            </span>
+                          )}
                         </div>
                       </div>
                       <Clock size={16} color="#64748b" />
