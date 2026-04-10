@@ -109,12 +109,17 @@ export default function AdminPanel({ user, supabase }) {
     }
   };
 
+  const [isScheduling, setIsScheduling] = useState(false);
+
   const handleCreateContest = async () => {
     try {
       if (!newContest.title || !newContest.start_time || !newContest.end_time || newContest.problems.length === 0) {
-        alert('Please fill all required fields and select at least one problem.');
+        alert('Missing Data: Please ensure Title, Start/End times, and at least one problem are selected.');
         return;
       }
+      
+      setIsScheduling(true);
+      console.log("Scheduling contest:", newContest);
 
       // 1. Create Contest
       const { data: contestData, error: contestError } = await supabase
@@ -122,8 +127,8 @@ export default function AdminPanel({ user, supabase }) {
         .insert({
           title: newContest.title,
           description: newContest.description,
-          start_time: newContest.start_time,
-          end_time: newContest.end_time,
+          start_time: new Date(newContest.start_time).toISOString(),
+          end_time: new Date(newContest.end_time).toISOString(),
           created_by: user.id
         })
         .select()
@@ -143,12 +148,15 @@ export default function AdminPanel({ user, supabase }) {
 
       if (probError) throw probError;
 
-      alert('Contest scheduled successfully!');
+      alert('SUCCESS: Contest scheduled successfully!');
       setIsCreatingContest(false);
       setNewContest({ title: '', description: '', start_time: '', end_time: '', problems: [] });
       fetchContests();
     } catch (err) {
-      alert('Error creating contest: ' + err.message);
+      console.error("Contest scheduling failed:", err);
+      alert('Contest Error: ' + (err.message || 'Check console for details'));
+    } finally {
+      setIsScheduling(false);
     }
   };
 
