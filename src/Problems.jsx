@@ -10,6 +10,7 @@ export default function Problems({ onSelectProblem, user, supabase, contest, onC
   const [certData, setCertData] = useState({ lang: '', title: '' });
   const [contestProblems, setContestProblems] = useState([]);
   const [isContestLoading, setIsContestLoading] = useState(false);
+  const [showCertificate, setShowCertificate] = useState(false);
 
   useEffect(() => {
     const fetchProgress = async () => {
@@ -104,6 +105,15 @@ export default function Problems({ onSelectProblem, user, supabase, contest, onC
     }
   };
 
+  if (isContestLoading) {
+    return (
+      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-3)' }}>
+        <RefreshCw className="animate-spin" size={32} />
+        <span style={{ marginLeft: '1rem' }}>Loading contest problems...</span>
+      </div>
+    );
+  }
+
   return (
     <div style={{ flex: 1, padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', overflowY: 'auto' }}>
       {showCertificate && (
@@ -111,23 +121,25 @@ export default function Problems({ onSelectProblem, user, supabase, contest, onC
       )}
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h1 style={{ margin: 0, fontSize: '1.8rem', color: contest ? '#fbbf24' : 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-            {contest ? <Trophy size={28} color="#fbbf24" /> : <Database size={28} color="#a855f7" />}
-            {contest ? contest.title : 'Masterclass Challenges'}
-          </h1>
-          <p style={{ margin: '0.5rem 0 0 0', color: 'var(--text-2)', fontSize: '0.95rem' }}>
-            {contest ? contest.description : 'Complete the curriculum to unlock your professional verified ' + activeTab.toUpperCase() + ' certification.'}
-          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+            <h1 style={{ margin: 0, fontSize: '1.8rem', color: contest ? '#fbbf24' : 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+              {contest ? <Trophy size={28} color="#fbbf24" /> : <Database size={28} color="#a855f7" />}
+              {contest ? contest.title : 'Masterclass Challenges'}
+            </h1>
+            <p style={{ margin: 0, color: 'var(--text-2)', fontSize: '0.95rem' }}>
+              {contest ? contest.description : 'Complete the curriculum to unlock your professional verified ' + activeTab.toUpperCase() + ' certification.'}
+            </p>
+          </div>
+          
+          {contest && (
+            <button 
+              onClick={onClearContest}
+              style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.2)', padding: '0.5rem 1rem', borderRadius: '8px', fontWeight: 700, cursor: 'pointer' }}
+            >
+              Exit Contest Arena
+            </button>
+          )}
         </div>
-        
-        {contest && (
-          <button 
-            onClick={onClearContest}
-            style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.2)', padding: '0.5rem 1rem', borderRadius: '8px', fontWeight: 700, cursor: 'pointer' }}
-          >
-            Exit Contest Arena
-          </button>
-        )}
         
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', width: '300px', background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '12px', border: '1px solid var(--panel-border)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'var(--text-3)' }}>
@@ -150,98 +162,97 @@ export default function Problems({ onSelectProblem, user, supabase, contest, onC
             </div>
           )}
         </div>
-      </div>
 
       {!contest && (
-        <div style={{ display: 'flex', gap: '1rem', borderBottom: '1px solid var(--panel-border)', paddingBottom: '1rem', flexWrap: 'wrap' }}>
-          {['dsa', 'sql', 'python', 'java', 'javascript'].map(tab => (
-             <button
-               key={tab}
-               onClick={() => setActiveTab(tab)}
-               style={{
-                 background: activeTab === tab ? 'rgba(168, 85, 247, 0.15)' : 'transparent',
-                 color: activeTab === tab ? '#d8b4fe' : 'var(--text-3)',
-                 border: `1px solid ${activeTab === tab ? '#a855f7' : 'transparent'}`,
-                 padding: '0.6rem 1.2rem',
-                 borderRadius: '8px',
-                 cursor: 'pointer',
-                 display: 'flex', alignItems: 'center', gap: '0.5rem',
-                 fontWeight: 600, transition: 'all 0.2s',
-                 textTransform: 'capitalize'
-               }}
-             >
-               {tab === 'dsa' ? 'Algorithms' : tab}
-             </button>
-          ))}
-
-          <div style={{ marginLeft: 'auto', position: 'relative', minWidth: '250px' }}>
-            <Search size={16} color="var(--text-3)" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
-            <input
-              type="text"
-              placeholder="Filter problems..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
+        <div style={{ display: 'flex', gap: '0.8rem', borderBottom: '1px solid var(--panel-border)', paddingBottom: '0.5rem' }}>
+          {[
+            { id: 'dsa', label: 'DSA', icon: Trophy },
+            { id: 'sql', label: 'SQL', icon: Database },
+            { id: 'python', label: 'Python', icon: Play },
+            { id: 'java', label: 'Java', icon: Play },
+            { id: 'javascript', label: 'JS', icon: Play }
+          ].map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
               style={{
-                width: '100%', padding: '0.6rem 1rem 0.6rem 2.5rem',
-                background: 'rgba(0,0,0,0.2)', border: '1px solid var(--panel-border)',
-                borderRadius: '8px', color: '#fff', outline: 'none', fontSize: '0.9rem'
+                background: activeTab === tab.id ? 'rgba(168, 85, 247, 0.15)' : 'transparent',
+                border: 'none',
+                color: activeTab === tab.id ? '#a855f7' : 'var(--text-2)',
+                padding: '0.6rem 1.2rem',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                fontWeight: 600,
+                transition: 'all 0.2s',
+                border: activeTab === tab.id ? '1px solid rgba(168, 85, 247, 0.3)' : '1px solid transparent'
               }}
-            />
-          </div>
+            >
+              <tab.icon size={16} />
+              {tab.label}
+            </button>
+          ))}
         </div>
       )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: '60px 4fr 1.5fr 3fr 120px', padding: '1rem', background: 'rgba(0,0,0,0.1)', borderBottom: '1px solid var(--panel-border)', fontWeight: 700, color: 'var(--text-2)', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
-        <div>#</div>
-        <div>Problem Name</div>
-        <div>Level</div>
-        <div>Category</div>
-        <div style={{ textAlign: 'right' }}>Status</div>
+      <div style={{ position: 'relative' }}>
+        <Search style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-3)' }} size={18} />
+        <input
+          type="text"
+          placeholder="Search by title or topic..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--panel-border)', padding: '0.8rem 1rem 0.8rem 3rem', borderRadius: '12px', color: 'var(--text)', outline: 'none' }}
+        />
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-        {filteredProblems.map((prob, index) => (
-          <div 
-            key={prob.id} 
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.2rem' }}>
+        {filteredProblems.map(prob => (
+          <div
+            key={prob.id}
             onClick={() => handleSolve(prob)}
             style={{
-              display: 'grid', gridTemplateColumns: '60px 4fr 1.5fr 3fr 120px',
-              padding: '1.25rem 1rem',
-              background: 'var(--panel-bg)',
-              borderBottom: '1px solid var(--panel-border)',
-              alignItems: 'center',
+              background: 'rgba(255,255,255,0.02)',
+              border: '1px solid var(--panel-border)',
+              borderRadius: '16px',
+              padding: '1.5rem',
               cursor: 'pointer',
-              transition: 'all 0.15s'
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+              position: 'relative',
+              overflow: 'hidden'
             }}
-            onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.02)'}
-            onMouseLeave={e => e.currentTarget.style.background = 'var(--panel-bg)'}
+            onMouseEnter={e => {
+              e.currentTarget.style.background = 'rgba(255,255,255,0.04)';
+              e.currentTarget.style.transform = 'translateY(-4px)';
+              e.currentTarget.style.borderColor = 'rgba(168, 85, 247, 0.4)';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.background = 'rgba(255,255,255,0.02)';
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.borderColor = 'var(--panel-border)';
+            }}
           >
-            <div style={{ color: 'var(--text-3)', fontSize: '0.85rem' }}>{index + 1}</div>
-            <div style={{ fontWeight: 600, color: '#fff', fontSize: '1rem' }}>{prob.title}</div>
-            <div style={{ color: getDifficultyColor(prob.difficulty), fontWeight: 700, fontSize: '0.8rem' }}>{prob.difficulty}</div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
-              {prob.topic.split(',').map(t => (
-                <span key={t} style={{ fontSize: '0.7rem', color: 'var(--text-3)', padding: '2px 8px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.05)' }}>{t.trim()}</span>
-              ))}
-            </div>
-            <div style={{ textAlign: 'right' }}>
-              {solvedProblems[prob.id] ? (
-                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: '#22c55e', fontWeight: 700, fontSize: '0.85rem' }}>
-                   <CheckCircle2 size={16} /> Solved
+            {solvedProblems[prob.id] && (
+              <div style={{ position: 'absolute', top: '1rem', right: '1rem' }}>
+                <CheckCircle2 size={20} color="#22c55e" />
+              </div>
+            )}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+              <span style={{ fontSize: '0.75rem', color: getDifficultyColor(prob.difficulty || prob.rating), fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                {prob.difficulty || prob.rating}
+              </span>
+              <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700 }}>{prob.title}</h3>
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '0.75rem', background: 'rgba(168, 85, 247, 0.1)', color: '#a855f7', padding: '2px 8px', borderRadius: '4px', fontWeight: 600 }}>{prob.topic}</span>
+              </div>
+              <div style={{ marginTop: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-3)' }}>{prob.points || '100'} pts</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#a855f7', fontSize: '0.85rem', fontWeight: 600 }}>
+                  Solve <Play size={14} fill="currentColor" />
                 </div>
-              ) : (
-                <button
-                  style={{
-                    background: 'rgba(59, 130, 246, 0.1)',
-                    color: '#60a5fa',
-                    border: '1px solid rgba(59, 130, 246, 0.2)',
-                    padding: '0.4rem 0.8rem', borderRadius: '6px', cursor: 'pointer',
-                    fontWeight: 700, fontSize: '0.8rem'
-                  }}
-                >
-                  Solve
-                </button>
-              )}
+              </div>
             </div>
           </div>
         ))}
