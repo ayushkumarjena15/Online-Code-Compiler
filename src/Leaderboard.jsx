@@ -12,8 +12,12 @@ export default function Leaderboard({ user, supabase }) {
 
   useEffect(() => {
     fetchContests();
+    fetchInternalContests();
     fetchRankings();
   }, []);
+
+  const [internalContests, setInternalContests] = useState([]);
+  const [userJoinedContests, setUserJoinedContests] = useState([]);
 
   const fetchRankings = async () => {
     try {
@@ -62,21 +66,49 @@ export default function Leaderboard({ user, supabase }) {
     }
   };
 
-  const fetchContests = async () => {
+  const fetchInternalContests = async () => {
     try {
-      setIsLoadingContests(true);
-      // Added 10s timeout to prevent hanging on network issues
-      const res = await axios.get('https://kontests.net/api/v1/all', { timeout: 10000 });
-      // Sort by start time soonest
-      const upcoming = res.data
-         .sort((a, b) => new Date(a.start_time) - new Date(b.start_time))
-         .filter(c => new Date(c.end_time) > new Date());
-      setContests(upcoming);
+      const { data, error } = await supabase
+        .from('contests')
+        .select(`
+          *,
+          contest_problems (*),
+          contest_participants (*)
+        `)
+        .order('start_time', { ascending: true });
+
+      if (error) throw error;
+      setInternalContests(data || []);
+      
+      if (user) {
+        const joined = data.filter(c => 
+          c.contest_participants.some(p => p.user_id === user.id)
+        ).map(c => c.id);
+        setUserJoinedContests(joined);
+      }
     } catch (e) {
-      console.error("Error fetching contests:", e);
-      setContests([]); // Ensure empty state on error
-    } finally {
-      setIsLoadingContests(false);
+      console.error("Error fetching internal contests:", e);
+    }
+  };
+
+  const handleJoinContest = async (contestId) => {
+    if (!user) {
+      alert("Please login to join the contest.");
+      return;
+    }
+    try {
+      const { error } = await supabase
+        .from('contest_participants')
+        .insert({
+          contest_id: contestId,
+          user_id: user.id
+        });
+
+      if (error) throw error;
+      alert("Joined contest successfully!");
+      fetchInternalContests();
+    } catch (e) {
+      alert("Error joining contest: " + e.message);
     }
   };
 
@@ -237,7 +269,100 @@ export default function Leaderboard({ user, supabase }) {
          )}
 
         {activeTab === 'contests' && (
-           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+           <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
+             
+             {/* Internal Contests Section */}
+             {internalContests.length > 0 && (
+               <div>
+                  <h2 style={{ fontSize: '1.5rem', color: '#fff', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <Medal color="#fbbf24" /> Platform Special Contests
+                  </h2>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '1.75rem' }}>
+                    {internalContests.map((c) => {
+                      const isUpcoming = new Date() < new Date(c.start_time);
+                      const isActive = new Date() >= new Date(c.start_time) && new Date() <= new Date(c.end_time);
+                      const hasJoined = userJoinedContests.includes(c.id);
+                      
+                      return (
+                        <div key={c.id} className="contest-card" style={{ 
+                          background: 'rgba(15, 23, 42, 0.4)', border: '1px solid var(--panel-border)', 
+                          borderRadius: '24px', padding: '1.75rem', display: 'flex', flexDirection: 'column', 
+                          gap: '1.25rem', backdropFilter: 'blur(20px)', transition: 'all 0.4s'
+                        }}>
+                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <span style={{ 
+                                padding: '6px 14px', borderRadius: '10px', background: 'rgba(251, 191, 36, 0.1)', 
+                                color: '#fbbf24', fontSize: '0.8rem', fontWeight: 700, border: '1px solid rgba(251, 191, 36, 0.3)',
+                                letterSpacing: '0.5px'
+                              }}>
+                                Official Contest
+                              </span>
+                              {isActive && (
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(34, 197, 94, 0.1)', padding: '6px 12px', borderRadius: '10px', border: '1px solid rgba(34, 197, 94, 0.2)' }}>
+                                  <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 10px #22c55e' }}></div>
+                                  <span style={{ color: '#22c55e', fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase' }}>Live Now</span>
+                                </div>
+                              )}
+                           </div>
+                           
+                           <h3 style={{ margin: 0, fontSize: '1.3rem', color: '#fff', fontWeight: 800 }}>{c.title}</h3>
+                           <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-3)', lineClamp: 2, display: '-webkit-box', WebkitBoxOrient: 'vertical', WebkitLineClamp: 2, overflow: 'hidden' }}>{c.description}</p>
+                           
+                           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', background: 'rgba(0,0,0,0.3)', padding: '1rem', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.02)' }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
+                                <span style={{ color: 'var(--text-3)' }}>Starts</span>
+                                <strong style={{ color: '#fff' }}>{formatDate(c.start_time)}</strong>
+                              </div>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
+                                <span style={{ color: 'var(--text-3)' }}>Problems</span>
+                                <strong style={{ color: '#fbbf24' }}>{c.contest_problems?.length || 0} Sets</strong>
+                              </div>
+                           </div>
+                           
+                           {!hasJoined ? (
+                              <button 
+                                onClick={() => handleJoinContest(c.id)}
+                                style={{ 
+                                  marginTop: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                                  gap: '0.75rem', padding: '1rem', background: '#fbbf24', color: '#000', 
+                                  borderRadius: '16px', border: 'none', fontWeight: 800, 
+                                  fontSize: '0.95rem', transition: 'all 0.3s', cursor: 'pointer'
+                                }}
+                              >
+                                Join Contest <Medal size={18} />
+                              </button>
+                           ) : (
+                              <button 
+                                disabled={!isActive}
+                                onClick={() => {
+                                  if (isActive) {
+                                    window.dispatchEvent(new CustomEvent('switch-tab', { 
+                                      detail: { tab: 'problems', contest: c } 
+                                    }));
+                                  }
+                                }}
+                                style={{ 
+                                  marginTop: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                                  gap: '0.75rem', padding: '1rem', background: isActive ? 'linear-gradient(135deg, #10b981, #059669)' : 'rgba(255,255,255,0.05)', 
+                                  color: isActive ? '#fff' : '#4b5563', 
+                                  borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)', fontWeight: 800, 
+                                  fontSize: '0.95rem', cursor: isActive ? 'pointer' : 'not-allowed'
+                                }}
+                              >
+                                {isActive ? "Enter Arena" : "Joined & Waiting"} {isActive ? <Target size={18} /> : <Clock size={18} />}
+                              </button>
+                           )}
+                        </div>
+                      );
+                    })}
+                  </div>
+               </div>
+             )}
+
+             <h2 style={{ fontSize: '1.5rem', color: '#fff', margin: '0', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+               <ExternalLink color="#3b82f6" /> Global Ecosystem Events
+             </h2>
+
              {isLoadingContests ? (
                <div style={{ padding: '6rem', display: 'flex', justifyContent: 'center' }}>
                  <div className="loader" style={{ width: 40, height: 40, borderTopColor: '#3b82f6' }}></div>

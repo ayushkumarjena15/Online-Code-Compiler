@@ -93,6 +93,7 @@ function App() {
   const [streak, setStreak] = useState(0);
   const [complexity, setComplexity] = useState(null);
   const [isAnalyzingComplexity, setIsAnalyzingComplexity] = useState(false);
+  const [activeContest, setActiveContest] = useState(null);
 
   // --- NEW FEATURES STATE ---
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -259,9 +260,17 @@ function App() {
       };
       document.addEventListener('mousedown', handleClickOutside);
 
+      const handleSwitchTab = (e) => {
+        const { tab, contest } = e.detail;
+        if (tab) setView(tab);
+        if (contest) setActiveContest(contest);
+      };
+      window.addEventListener('switch-tab', handleSwitchTab);
+
       return () => {
         subscription.unsubscribe();
         document.removeEventListener('mousedown', handleClickOutside);
+        window.removeEventListener('switch-tab', handleSwitchTab);
       };
   }, []);
 
@@ -846,7 +855,13 @@ ${code}`;
           ) : view === 'web' ? (
             <WebPlayground user={user} supabase={supabase} setToast={setToast} initialWebCode={initialWebCode} />
           ) : view === 'problems' ? (
-            <Problems onSelectProblem={(prob, lang) => { setActiveProblem(prob); setProblemLanguage(lang); setView('problem'); }} user={user} supabase={supabase} />
+            <Problems 
+              onSelectProblem={(prob, lang) => { setActiveProblem(prob); setProblemLanguage(lang); setView('problem'); }} 
+              user={user} 
+              supabase={supabase} 
+              contest={activeContest} 
+              onClearContest={() => setActiveContest(null)} 
+            />
           ) : view === 'problem' && activeProblem ? (
             <ProblemDetail problem={activeProblem} problemLanguage={problemLanguage} onBack={() => setView('problems')} user={user} supabase={supabase} />
           ) : view === 'leaderboard' ? (

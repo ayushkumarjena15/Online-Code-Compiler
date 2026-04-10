@@ -31,7 +31,8 @@ create table if not exists public.code_submissions (
   status text default 'pending' check (status in ('pending', 'verified', 'rejected')),
   submitted_at timestamp with time zone default timezone('utc'::text, now()) not null,
   admin_feedback text,
-  reviewed_at timestamp with time zone
+  reviewed_at timestamp with time zone,
+  contest_id uuid references public.contests
 );
 
 create table if not exists public.shared_snippets (
@@ -39,6 +40,30 @@ create table if not exists public.shared_snippets (
   code text not null,
   lang text not null,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+create table if not exists public.contests (
+  id uuid default gen_random_uuid() primary key,
+  title text not null,
+  description text,
+  start_time timestamp with time zone not null,
+  end_time timestamp with time zone not null,
+  created_at timestamp with time zone default now(),
+  created_by uuid references auth.users
+);
+
+create table if not exists public.contest_problems (
+  id uuid default gen_random_uuid() primary key,
+  contest_id uuid references public.contests on delete cascade,
+  problem_id text not null
+);
+
+create table if not exists public.contest_participants (
+  id uuid default gen_random_uuid() primary key,
+  contest_id uuid references public.contests on delete cascade,
+  user_id uuid references auth.users,
+  joined_at timestamp with time zone default now(),
+  unique(contest_id, user_id)
 );
 
 -- 3. Sync existing users (Crucial for existing accounts to show up)
@@ -73,9 +98,27 @@ create policy "Anyone can read shared snippets" on public.shared_snippets for se
 drop policy if exists "Anyone can create shared snippets" on public.shared_snippets;
 create policy "Anyone can create shared snippets" on public.shared_snippets for insert with check ( true );
 
+alter table public.contests enable row level security;
+drop policy if exists "Anyone can view contests" on public.contests;
+create policy "Anyone can view contests" on public.contests for select using ( true );
+drop policy if exists "Admins can manage contests" on public.contests;
+create policy "Admins can manage contests" on public.contests for all using ( true ); -- Simplification for now, should check role in profiles
+
+alter table public.contest_problems enable row level security;
+drop policy if exists "Anyone can view contest problems" on public.contest_problems;
+create policy "Anyone can view contest problems" on public.contest_problems for select using ( true );
+drop policy if exists "Admins can manage contest problems" on public.contest_problems;
+create policy "Admins can manage contest problems" on public.contest_problems for all using ( true );
+
+alter table public.contest_participants enable row level security;
+drop policy if exists "Anyone can view contest participants" on public.contest_participants;
+create policy "Anyone can view contest participants" on public.contest_participants for select using ( true );
+drop policy if exists "Users can join contests" on public.contest_participants;
+create policy "Users can join contests" on public.contest_participants for insert with check ( true );
+
 -- 5. Enable Realtime
 drop publication if exists supabase_realtime;
-create publication supabase_realtime for table public.code_submissions, public.profiles, public.user_progress;
+create publication supabase_realtime for table public.code_submissions, public.profiles, public.user_progress, public.contests;
 
 -- 6. Automatic Profile Trigger
 create or replace function public.handle_new_user()

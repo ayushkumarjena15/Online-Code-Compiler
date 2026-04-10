@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { CheckCircle2, XCircle, MessageSquare, Code2, ExternalLink, Clock, User, Filter, Search, LayoutDashboard, Shield, Users, Activity, RefreshCw } from 'lucide-react';
+import { CheckCircle2, XCircle, MessageSquare, Code2, ExternalLink, Clock, User, Filter, Search, LayoutDashboard, Shield, Users, Activity, RefreshCw, Calendar, Plus, Trash2 } from 'lucide-react';
+import { DSA_PROBLEMS } from './problemData';
 
 export default function AdminPanel({ user, supabase }) {
   const [submissions, setSubmissions] = useState([]);
@@ -10,10 +11,14 @@ export default function AdminPanel({ user, supabase }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('dashboard');
   const [stats, setStats] = useState({ users: 0, submissions: 0, verified: 0, languages: {} });
+  const [contests, setContests] = useState([]);
+  const [isCreatingContest, setIsCreatingContest] = useState(false);
+  const [newContest, setNewContest] = useState({ title: '', description: '', start_time: '', end_time: '', problems: [] });
 
   useEffect(() => {
     fetchSubmissions();
     if (activeTab === 'dashboard') fetchStats();
+    if (activeTab === 'contests') fetchContests();
   }, [filter, activeTab]);
 
   useEffect(() => {
@@ -83,24 +88,77 @@ export default function AdminPanel({ user, supabase }) {
     }
   };
 
-  const handleReview = async (id, status) => {
+  const fetchContests = async () => {
     try {
-      const { error } = await supabase
-        .from('code_submissions')
-        .update({
-          status,
-          admin_feedback: feedback,
-          reviewed_at: new Date().toISOString()
-        })
-        .eq('id', id);
+      setIsLoading(true);
+      const { data, error } = await supabase
+        .from('contests')
+        .select(`
+          *,
+          contest_problems (*)
+        `)
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setSelectedSubmission(null);
-      setFeedback('');
-      fetchSubmissions();
-      fetchStats();
+      setContests(data || []);
     } catch (err) {
-      alert('Error updating submission: ' + err.message);
+      console.error('Error fetching contests:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCreateContest = async () => {
+    try {
+      if (!newContest.title || !newContest.start_time || !newContest.end_time || newContest.problems.length === 0) {
+        alert('Please fill all required fields and select at least one problem.');
+        return;
+      }
+
+      // 1. Create Contest
+      const { data: contestData, error: contestError } = await supabase
+        .from('contests')
+        .insert({
+          title: newContest.title,
+          description: newContest.description,
+          start_time: newContest.start_time,
+          end_time: newContest.end_time,
+          created_by: user.id
+        })
+        .select()
+        .single();
+
+      if (contestError) throw contestError;
+
+      // 2. Add Problems
+      const problemInserts = newContest.problems.map(probId => ({
+        contest_id: contestData.id,
+        problem_id: probId.toString()
+      }));
+
+      const { error: probError } = await supabase
+        .from('contest_problems')
+        .insert(problemInserts);
+
+      if (probError) throw probError;
+
+      alert('Contest scheduled successfully!');
+      setIsCreatingContest(false);
+      setNewContest({ title: '', description: '', start_time: '', end_time: '', problems: [] });
+      fetchContests();
+    } catch (err) {
+      alert('Error creating contest: ' + err.message);
+    }
+  };
+
+  const handleDeleteContest = async (id) => {
+    if (!confirm('Are you sure you want to delete this contest?')) return;
+    try {
+      const { error } = await supabase.from('contests').delete().eq('id', id);
+      if (error) throw error;
+      fetchContests();
+    } catch (err) {
+      alert('Error deleting contest: ' + err.message);
     }
   };
 
@@ -145,6 +203,12 @@ export default function AdminPanel({ user, supabase }) {
                       {submissions.filter(s => s.status === 'pending').length}
                     </span>
                  )}
+              </button>
+              <button 
+                onClick={() => setActiveTab('contests')}
+                style={{ padding: '0.6rem 1.25rem', border: 'none', borderRadius: '8px', background: activeTab === 'contests' ? '#fbbf24' : 'transparent', color: activeTab === 'contests' ? '#000' : '#94a3b8', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s' }}
+              >
+                 <Calendar size={18} /> Contests
               </button>
             </div>
           </div>
@@ -255,6 +319,134 @@ export default function AdminPanel({ user, supabase }) {
                     {submissions.length === 0 && <p style={{ color: '#64748b', textAlign: 'center' }}>No recent activity</p>}
                   </div>
                </div>
+            </div>
+          </div>
+        ) : activeTab === 'contests' ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+               <h2 style={{ margin: 0 }}>Scheduled Contests</h2>
+               <button 
+                 onClick={() => setIsCreatingContest(true)}
+                 style={{ background: '#fbbf24', color: '#000', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '12px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+               >
+                 <Plus size={18} /> Create New Contest
+               </button>
+            </div>
+
+            {isCreatingContest && (
+              <div style={{ background: '#1e293b', border: '1px solid #fbbf24', borderRadius: '20px', padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <h3 style={{ margin: 0, color: '#fbbf24' }}>New Contest Setup</h3>
+                    <button onClick={() => setIsCreatingContest(false)} style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer' }}><XCircle size={24} /></button>
+                 </div>
+                 
+                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                       <label style={{ fontSize: '0.9rem', color: '#94a3b8', fontWeight: 600 }}>Contest Title</label>
+                       <input 
+                         type="text" 
+                         placeholder="e.g. Weekly Algorithm Challenge #1" 
+                         value={newContest.title}
+                         onChange={(e) => setNewContest({...newContest, title: e.target.value})}
+                         style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid #334155', borderRadius: '10px', padding: '0.75rem', color: 'white', outline: 'none' }}
+                       />
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                       <label style={{ fontSize: '0.9rem', color: '#94a3b8', fontWeight: 600 }}>Start Time</label>
+                       <input 
+                         type="datetime-local" 
+                         value={newContest.start_time}
+                         onChange={(e) => setNewContest({...newContest, start_time: e.target.value})}
+                         style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid #334155', borderRadius: '10px', padding: '0.75rem', color: 'white', outline: 'none' }}
+                       />
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                       <label style={{ fontSize: '0.9rem', color: '#94a3b8', fontWeight: 600 }}>End Time</label>
+                       <input 
+                         type="datetime-local" 
+                         value={newContest.end_time}
+                         onChange={(e) => setNewContest({...newContest, end_time: e.target.value})}
+                         style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid #334155', borderRadius: '10px', padding: '0.75rem', color: 'white', outline: 'none' }}
+                       />
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                       <label style={{ fontSize: '0.9rem', color: '#94a3b8', fontWeight: 600 }}>Select Problems</label>
+                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', background: 'rgba(0,0,0,0.2)', border: '1px solid #334155', borderRadius: '10px', padding: '0.75rem', maxHeight: '150px', overflowY: 'auto' }}>
+                          {DSA_PROBLEMS.map(prob => (
+                            <label key={prob.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: newContest.problems.includes(prob.id) ? 'rgba(251,191,36,0.2)' : 'rgba(255,255,255,0.05)', padding: '4px 10px', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem', border: '1px solid transparent', borderColor: newContest.problems.includes(prob.id) ? '#fbbf24' : 'transparent' }}>
+                               <input 
+                                 type="checkbox" 
+                                 checked={newContest.problems.includes(prob.id)}
+                                 onChange={(e) => {
+                                   if (e.target.checked) setNewContest({...newContest, problems: [...newContest.problems, prob.id]});
+                                   else setNewContest({...newContest, problems: newContest.problems.filter(id => id !== prob.id)});
+                                 }}
+                                 style={{ display: 'none' }}
+                               />
+                               {prob.title}
+                            </label>
+                          ))}
+                       </div>
+                    </div>
+                 </div>
+                 
+                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    <label style={{ fontSize: '0.9rem', color: '#94a3b8', fontWeight: 600 }}>Description</label>
+                    <textarea 
+                      placeholder="Contest rules, prizes, etc..."
+                      value={newContest.description}
+                      onChange={(e) => setNewContest({...newContest, description: e.target.value})}
+                      style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid #334155', borderRadius: '10px', padding: '0.75rem', color: 'white', outline: 'none', height: '100px', resize: 'none' }}
+                    />
+                 </div>
+
+                 <button 
+                   onClick={handleCreateContest}
+                   style={{ background: '#fbbf24', color: '#000', border: 'none', padding: '1rem', borderRadius: '12px', fontWeight: 800, cursor: 'pointer', marginTop: '1rem' }}
+                 >
+                   Schedule Contest
+                 </button>
+              </div>
+            )}
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '1.5rem' }}>
+               {contests.map(c => (
+                 <div key={c.id} style={{ background: '#1e293b', borderRadius: '20px', border: '1px solid #334155', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                       <h3 style={{ margin: 0, color: '#fbbf24' }}>{c.title}</h3>
+                       <button onClick={() => handleDeleteContest(c.id)} style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer' }}><Trash2 size={18} /></button>
+                    </div>
+                    <p style={{ margin: 0, fontSize: '0.9rem', color: '#94a3b8', lineClamp: 2, overflow: 'hidden', display: '-webkit-box', WebkitBoxOrient: 'vertical', WebkitLineClamp: 2 }}>{c.description}</p>
+                    
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '12px' }}>
+                       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
+                          <span style={{ color: '#64748b' }}>Start:</span>
+                          <span style={{ color: '#cbd5e1', fontWeight: 600 }}>{new Date(c.start_time).toLocaleString()}</span>
+                       </div>
+                       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
+                          <span style={{ color: '#64748b' }}>End:</span>
+                          <span style={{ color: '#cbd5e1', fontWeight: 600 }}>{new Date(c.end_time).toLocaleString()}</span>
+                       </div>
+                       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
+                          <span style={{ color: '#64748b' }}>Problems:</span>
+                          <span style={{ color: '#fbbf24', fontWeight: 700 }}>{c.contest_problems?.length || 0}</span>
+                       </div>
+                    </div>
+                    
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: 'auto' }}>
+                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', color: new Date() >= new Date(c.start_time) && new Date() <= new Date(c.end_time) ? '#4ade80' : '#94a3b8' }}>
+                          <div style={{ width: 8, height: 8, borderRadius: '50%', background: new Date() >= new Date(c.start_time) && new Date() <= new Date(c.end_time) ? '#4ade80' : '#475569' }}></div>
+                          {new Date() > new Date(c.end_time) ? 'Ended' : new Date() >= new Date(c.start_time) ? 'Active' : 'Upcoming'}
+                       </div>
+                    </div>
+                 </div>
+               ))}
+               {contests.length === 0 && !isCreatingContest && (
+                 <div style={{ gridColumn: 'span 2', textAlign: 'center', padding: '4rem', background: 'rgba(255,255,255,0.02)', borderRadius: '20px', border: '1px dashed #334155' }}>
+                    <Calendar size={48} style={{ opacity: 0.1, marginBottom: '1rem' }} />
+                    <p style={{ color: '#64748b' }}>No contests scheduled yet.</p>
+                 </div>
+               )}
             </div>
           </div>
         ) : (
