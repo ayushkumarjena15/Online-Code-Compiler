@@ -79,11 +79,7 @@ export default function AdminPanel({ user, supabase }) {
       setIsLoading(true);
       let query = supabase
         .from('code_submissions')
-        .select(`
-          *,
-          profile: profiles ( email, full_name ),
-          contest: contests ( title )
-        `)
+        .select('*')
         .order('submitted_at', { ascending: false });
 
       if (filter !== 'all') {
@@ -92,7 +88,25 @@ export default function AdminPanel({ user, supabase }) {
 
       const { data, error } = await query;
       if (error) throw error;
-      setSubmissions(data || []);
+
+      // Fetch user emails separately for display
+      const userIds = [...new Set((data || []).map(s => s.user_id))];
+      let profileMap = {};
+      if (userIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('id, email, full_name')
+          .in('id', userIds);
+        (profiles || []).forEach(p => { profileMap[p.id] = p; });
+      }
+
+      // Attach profile info to each submission
+      const enriched = (data || []).map(s => ({
+        ...s,
+        profile: profileMap[s.user_id] || { email: 'Unknown', full_name: '' }
+      }));
+
+      setSubmissions(enriched);
     } catch (err) {
       console.error('Error fetching submissions:', err);
     } finally {
@@ -105,10 +119,7 @@ export default function AdminPanel({ user, supabase }) {
       setIsLoading(true);
       const { data, error } = await supabase
         .from('contests')
-        .select(`
-          *,
-          contest_problems (*)
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
