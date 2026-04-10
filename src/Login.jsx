@@ -21,7 +21,7 @@ export default function Login({ onBack, onAdminLogin }) {
     e.preventDefault();
     // Specific hardcoded admin credentials as requested
     if (adminEmail === 'admin' && adminPassword === 'pass123') {
-      onAdminLogin({ id: 'admin-001', email: 'admin@codez.com', role: 'admin' });
+      onAdminLogin({ id: '00000000-0000-0000-0000-000000000000', email: 'admin@codez.com', role: 'admin' });
     } else {
       setError('Invalid Administrator Credentials');
       setTimeout(() => setError(''), 3000);
@@ -180,7 +180,7 @@ export default function Login({ onBack, onAdminLogin }) {
                  </button>
 
                  <div 
-                   onClick={() => onAdminLogin({ id: 'admin-001', email: 'admin@codez.com', role: 'admin' })}
+                   onClick={() => onAdminLogin({ id: '00000000-0000-0000-0000-000000000000', email: 'admin@codez.com', role: 'admin' })}
                    style={{ textAlign: 'center', fontSize: '0.85rem', color: '#475569', cursor: 'pointer', marginTop: '1rem', transition: 'color 0.3s' }}
                    onMouseEnter={(e) => e.target.style.color = '#94a3b8'}
                    onMouseLeave={(e) => e.target.style.color = '#475569'}
