@@ -198,12 +198,6 @@ function App() {
     // Verify Supabase Connection
     console.log("Supabase Client Loaded:", supabase);
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (user?.role !== 'admin') {
-        setUser(session?.user ?? null);
-      }
-    });
-
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (session?.user) {
         // Fetch real role from profiles table (v6 schema implementation)
@@ -215,12 +209,7 @@ function App() {
 
         const updatedUser = { ...session.user, role: profile?.role || 'student' };
         setUser(updatedUser);
-        
-        // Auto-switch view based on role for new login
-        if (_event === 'SIGNED_IN') {
-           setView(updatedUser.role === 'admin' ? 'admin' : 'editor');
-        }
-      } else {
+      } else if (_event === 'SIGNED_OUT') {
         setUser(null);
         setActiveContest(null);
       }
