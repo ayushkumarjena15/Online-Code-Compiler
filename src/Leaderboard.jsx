@@ -14,6 +14,18 @@ export default function Leaderboard({ user, supabase }) {
     fetchContests();
     fetchInternalContests();
     fetchRankings();
+
+    // Real-time listener for contests
+    const channel = supabase
+      .channel('contest-updates')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'contests' }, () => {
+        fetchInternalContests();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const [internalContests, setInternalContests] = useState([]);

@@ -204,12 +204,17 @@ function App() {
       }
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (session?.user) {
-        // If logged in via standard supabase, set role to student by default
-        // In a real app, you'd fetch the role from a profiles table
-        const updatedUser = { ...session.user, role: session.user.role || 'student' };
-        setUser(prev => prev?.role === 'admin' ? prev : updatedUser);
+        // Fetch real role from profiles table (v6 schema implementation)
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', session.user.id)
+          .single();
+
+        const updatedUser = { ...session.user, role: profile?.role || 'student' };
+        setUser(updatedUser);
         
         // Auto-switch view based on role for new login
         if (_event === 'SIGNED_IN') {
@@ -217,6 +222,7 @@ function App() {
         }
       } else {
         setUser(null);
+        setActiveContest(null);
       }
     });
 
