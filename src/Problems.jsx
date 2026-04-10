@@ -21,7 +21,7 @@ import {
 } from './problemData';
 import CertificateModal from './CertificateModal';
 
-const Problems = ({ user, solvedProblems, onSelectProblem, contest, onClearContest }) => {
+const Problems = ({ user, solvedProblems = {}, onSelectProblem, contest, onClearContest }) => {
   const [activeTab, setActiveTab] = useState('dsa');
   const [search, setSearch] = useState('');
   const [showCertificate, setShowCertificate] = useState(false);

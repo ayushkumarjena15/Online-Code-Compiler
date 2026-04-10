@@ -105,7 +105,7 @@ const generateAIContent = async (apiKey, prompt) => {
   throw lastError;
 };
 
-export default function ProblemDetail({ problem, onBack, problemLanguage, user, supabase, contest }) {
+export default function ProblemDetail({ problem, onBack, problemLanguage, user, supabase, contest, onSolve }) {
   const [dsaLang, setDsaLang] = useState('cpp');
   const [code, setCode] = useState(problem.templateCode || '');
   const [solved, setSolved] = useState(false);
@@ -231,6 +231,7 @@ export default function ProblemDetail({ problem, onBack, problemLanguage, user, 
       }
     }
     localStorage.setItem('solvedProblems', JSON.stringify(stored));
+    if (onSolve) onSolve();
   };
 
   useEffect(() => {
@@ -430,6 +431,7 @@ ${code}`;
              const stored = JSON.parse(localStorage.getItem('solvedProblems') || '{}');
              stored[problem.id] = true;
              localStorage.setItem('solvedProblems', JSON.stringify(stored));
+             if (onSolve) onSolve();
              setSolved(true);
              if (user && supabase) {
                 try {

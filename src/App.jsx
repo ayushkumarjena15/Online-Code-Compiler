@@ -110,6 +110,17 @@ function App() {
   
   const [diffCode, setDiffCode] = useState(null);
   const [isFixingBug, setIsFixingBug] = useState(false);
+  const [solvedProblems, setSolvedProblems] = useState({});
+
+  useEffect(() => {
+    const solved = JSON.parse(localStorage.getItem('solvedProblems') || '{}');
+    setSolvedProblems(solved);
+  }, []);
+
+  const refreshSolvedProblems = () => {
+    const solved = JSON.parse(localStorage.getItem('solvedProblems') || '{}');
+    setSolvedProblems(solved);
+  };
 
   const editorRef = useRef(null);
   const diffEditorRef = useRef(null);
@@ -856,9 +867,18 @@ ${code}`;
               supabase={supabase} 
               contest={activeContest} 
               onClearContest={() => setActiveContest(null)} 
+              solvedProblems={solvedProblems}
             />
           ) : view === 'problem' && activeProblem ? (
-            <ProblemDetail problem={activeProblem} problemLanguage={problemLanguage} onBack={() => setView('problems')} user={user} supabase={supabase} contest={activeContest} />
+            <ProblemDetail 
+              problem={activeProblem} 
+              problemLanguage={problemLanguage} 
+              onBack={() => { refreshSolvedProblems(); setView('problems'); }} 
+              onSolve={() => refreshSolvedProblems()}
+              user={user} 
+              supabase={supabase} 
+              contest={activeContest} 
+            />
           ) : view === 'leaderboard' ? (
             <Leaderboard user={user} supabase={supabase} />
           ) : view === 'admin' && user?.role === 'admin' ? (
