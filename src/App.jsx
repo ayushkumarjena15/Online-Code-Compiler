@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Editor, { DiffEditor } from '@monaco-editor/react';
 import { initVimMode } from 'monaco-vim';
-import { Play, Code2, Terminal, ChevronDown, CheckCircle2, AlertCircle, RefreshCw, LogOut, Save, Github, X, User, BookOpen, Wand2, Square, FolderOpen, Share2, MonitorPlay, Network, Database, Flame, AlignLeft, Settings as SettingsIcon, Download, Wrench, Trophy, Award, Shield, LayoutDashboard, Users } from 'lucide-react';
+import { Play, Code2, Terminal, ChevronDown, CheckCircle2, AlertCircle, RefreshCw, LogOut, Save, Github, X, User, BookOpen, Wand2, Square, FolderOpen, Share2, MonitorPlay, Network, Database, Flame, AlignLeft, Settings as SettingsIcon, Download, Wrench, Trophy, Award, Shield, LayoutDashboard, Users, Brain } from 'lucide-react';
 import Split from 'react-split';
 import axios from 'axios';
 import { supabase } from './supabaseClient';
