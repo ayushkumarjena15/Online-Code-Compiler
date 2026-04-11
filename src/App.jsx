@@ -33,7 +33,14 @@ const getIconUrlSafe = (id) => {
 
 const generateAIContent = async (apiKey, prompt) => {
   const genAI = new GoogleGenerativeAI(apiKey);
-  const models = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro", "gemini-pro"];
+  const models = [
+    "gemini-1.5-flash", 
+    "gemini-1.5-flash-latest", 
+    "gemini-1.5-flash-8b",
+    "gemini-1.5-pro", 
+    "gemini-2.0-flash", 
+    "gemini-pro"
+  ];
   let lastError;
   for (const modelName of models) {
      try {
@@ -45,6 +52,7 @@ const generateAIContent = async (apiKey, prompt) => {
         console.warn(`Dev Warning: AI Model ${modelName} encountered an error or 404. Dropping down to fallback...`);
      }
   }
+  console.error("All AI models failed. Final error:", lastError);
   throw lastError;
 };
 
@@ -1323,16 +1331,17 @@ ${code}`;
                       </div>
                     </div>
                   ) : outputTab === 'mltools' ? (
-                    <AIToolsPanel
-                      code={code}
-                      language={language}
-                      output={output}
-                      isError={isError}
-                      setCode={setCode}
-                      generateAIContent={generateAIContent}
-                      onToast={(msg, type) => { setToast({ message: msg, type }); setTimeout(() => setToast(null), 3000); }}
-                      allLanguages={ALL_LANGUAGES}
-                    />
+                      <AIToolsPanel
+                        code={code}
+                        language={language}
+                        output={output}
+                        isError={isError}
+                        setCode={setCode}
+                        generateAIContent={generateAIContent}
+                        apiKey={import.meta.env.VITE_GEMINI_API_KEY}
+                        onToast={(msg, type) => { setToast({ message: msg, type }); setTimeout(() => setToast(null), 3000); }}
+                        allLanguages={ALL_LANGUAGES}
+                      />
                   ) : null}
                 </div>
               </section>
