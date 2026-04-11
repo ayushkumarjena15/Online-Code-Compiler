@@ -15,8 +15,17 @@ import Profile from './Profile';
 import Problems from './Problems';
 import ProblemDetail from './ProblemDetail';
 import AdminPanel from './AdminPanel';
-import AIToolsPanel from './AIToolsPanel';
 import { ALL_LANGUAGES, SNIPPETS, LANGUAGES, FALLBACK_COMPILERS, DSA_PROBLEMS } from "./problemData";
+
+// ── Persistent Storage Helpers ──────────────────────────────
+const getLocalJSON = (key, fallback) => {
+  try { return JSON.parse(localStorage.getItem(key)) || fallback; }
+  catch { return fallback; }
+};
+const setLocalJSON = (key, val) => localStorage.setItem(key, JSON.stringify(val));
+
+const getUserSkill = () => getLocalJSON('codez_skill', { rating: 1200, solved: [], failed: [], topics: {} });
+const saveUserSkill = (s) => setLocalJSON('codez_skill', s);
 
 const getIconUrlSafe = (id) => {
    const map = {
@@ -100,6 +109,9 @@ function App() {
 
   const [mermaidCode, setMermaidCode] = useState('');
   const [isVisualizing, setIsVisualizing] = useState(false);
+
+  const [tutorInsight, setTutorInsight] = useState('');
+  const [isTutorInsightLoading, setIsTutorInsightLoading] = useState(false);
 
   const [initialWebCode, setInitialWebCode] = useState(null);
   const [streak, setStreak] = useState(0);
@@ -308,28 +320,6 @@ function App() {
       }
     };
   }, [editorSettings.vimMode, view]);
-
-  const handleFixBug = async () => {
-    if (!code.trim() || !output) return;
-    setIsFixingBug(true);
-    try {
-      const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-      if (!apiKey) {
-        showToast("Missing VITE_GEMINI_API_KEY", "error");
-        return;
-      }
-      const prompt = `You are an expert debugger. Fix the following code based on its execution error.\n\nCode:\n${code}\n\nError:\n${output}\n\nReturn EXACTLY and ONLY the fixed code without any markdown formatting, backticks, or explanation.`;
-      
-      let text = await generateAIContent(apiKey, prompt);
-      text = text.replace(/```[a-z]*\n?/gi, '').replace(/```/g, '').trim();
-      setDiffCode(text);
-      setOutputTab('execute'); // Ensure diff is visible
-    } catch (err) {
-      showToast("Error generating fix.", "error");
-    } finally {
-      setIsFixingBug(false);
-    }
-  };
 
   const handleLanguageChange = (langId) => {
     setLanguage(langId);
@@ -627,7 +617,14 @@ Code:
 ${code}`;
       
       let rawText = await generateAIContent(import.meta.env.VITE_GEMINI_API_KEY, prompt);
-      rawText = rawText.replace(/```json/gi, '').replace(/```/g, '').trim();
+      
+      // Robust JSON extraction
+      const jsonMatch = rawText.match(/\[\s*\{[\s\S]*\}\s*\]/);
+      if (jsonMatch) {
+         rawText = jsonMatch[0];
+      } else {
+         rawText = rawText.replace(/```json/gi, '').replace(/```/g, '').trim();
+      }
       
       let steps = [];
       try {
@@ -679,6 +676,36 @@ ${code}`;
     }
   };
 
+  const handleGetTutorInsight = async () => {
+    if (!code.trim() || isTutorInsightLoading) return;
+    setIsTutorInsightLoading(true);
+    setTutorInsight('');
+    try {
+      const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+      if (!apiKey) throw new Error("Missing API Key");
+      
+      const skill = getUserSkill();
+      const prompt = `You are a personalized AI coding tutor. Analyze the user's current code [${language}] and their skill level (Rating: ${skill.rating}/2000, Solved: ${skill.solved.length}).
+Provide a concise, high-impact insight covering:
+1. One strength in their code.
+2. One area for improvement.
+3. A "Next Step" suggestion to level up.
+4. A quick study tip for ${language}.
+
+Code:
+${code}`;
+
+      const text = await generateAIContent(apiKey, prompt);
+      setTutorInsight(text);
+      setOutputTab('explain');
+    } catch (err) {
+      setToast({ message: "Failed to generate tutor insight.", type: "error" });
+      setTimeout(() => setToast(null), 3000);
+    } finally {
+      setIsTutorInsightLoading(false);
+    }
+  };
+
   const handleVisualize = async () => {
     if (isVisualizing || !code.trim()) return;
     const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
@@ -696,7 +723,14 @@ ${code}`;
       const prompt = `You are a helpful AI coding tutor. The user wants a clean 2D flowchart diagram summarizing their code.\n\nAnalyze this code:\n\n${code}\n\nGenerate ONLY a strictly valid Mermaid.js graph chart (like flowchart TD or graph TD) representing the primary data structure, architecture, or algorithm control flow. DO NOT wrap it in markdown blockticks like \`\`\`mermaid. Start directly with the graph declaration. IMPORTANT: Use alphanumeric node IDs. Avoid quotes and special characters such as ()[]{} in node text unless strictly necessary, and surround labels with double quotes if they contain spaces. No subgraphs!`;
       
       let text = await generateAIContent(apiKey, prompt);
-      text = text.replace(/```[a-z]*\n?/gi, '').replace(/```/g, '').trim();
+      
+      // Robust extraction of Mermaid code
+      const mermaidMatch = text.match(/(graph|flowchart|sequenceDiagram|classDiagram|stateDiagram|erDiagram|gantt|pie|gitGraph|journey|C4Context|C4Container|C4Component|C4Dynamic|C4Deployment|mindmap|timeline)\s+[\s\S]+/i);
+      if (mermaidMatch) {
+        text = mermaidMatch[0].replace(/```/g, '').trim();
+      } else {
+        text = text.replace(/```[a-z]*\n?/gi, '').replace(/```/g, '').trim();
+      }
       
       setMermaidCode(text);
     } catch (err) {
@@ -1068,13 +1102,6 @@ ${code}`;
                     >
                       <Network size={14} /> Visualizer
                     </button>
-                    <button 
-                      className={`tab-btn ${outputTab === 'mltools' ? 'active' : ''}`}
-                      onClick={() => setOutputTab('mltools')}
-                      style={outputTab === 'mltools' ? { borderBottom: '2px solid #a855f7' } : {}}
-                    >
-                      <Database size={14} /> AI Tools
-                    </button>
                   </div>
                   
                   <div className="panel-actions" style={{ paddingRight: '1.25rem', gap: '0.8rem', display: 'flex', alignItems: 'center' }}>
@@ -1089,17 +1116,9 @@ ${code}`;
                        </select>
                     )}
                     {outputTab === 'execute' ? (
-                      <>
-                        {isError && (
-                          <button className="btn-run" onClick={handleFixBug} disabled={isFixingBug} style={{ padding: '0.2rem 0.5rem', background: '#ef4444', color: '#fff', marginRight: '0.5rem' }}>
-                              {isFixingBug ? <span className="loader" /> : <Wrench size={14} />}
-                              <span>{isFixingBug ? 'Fixing...' : 'Fix My Bug'}</span>
-                          </button>
-                        )}
-                        <button className="icon-btn" onClick={handleClearOutput} title="Clear output">
-                          <RefreshCw size={14} />
-                        </button>
-                      </>
+                      <button className="icon-btn" onClick={handleClearOutput} title="Clear output">
+                        <RefreshCw size={14} />
+                      </button>
                     ) : (
                       isSpeaking && (
                         <button className="icon-btn" onClick={stopSpeaking} title="Stop Speaking" style={{ color: '#ef4444' }}>
@@ -1280,6 +1299,25 @@ ${code}`;
                           </div>
                         )}
 
+                        {tutorInsight && (
+                          <div style={{ 
+                            margin: '1rem 0', 
+                            padding: '1.25rem', 
+                            background: 'rgba(168,85,247,0.05)', 
+                            borderRadius: '12px', 
+                            border: '1px solid rgba(168,85,247,0.2)',
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                          }}>
+                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.75rem', color: '#d8b4fe' }}>
+                               <Brain size={18} />
+                               <strong style={{ fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Personalized Growth Insight</strong>
+                             </div>
+                             <div style={{ whiteSpace: 'pre-wrap', color: '#f8fafc', fontSize: '0.9rem', lineHeight: 1.6 }}>
+                               {tutorInsight}
+                             </div>
+                          </div>
+                        )}
+
                         {/* Rendering Chat Array Below the Explanation */}
                         {tutorChat.map((msg, i) => (
                            <div key={i} style={{ 
@@ -1302,9 +1340,11 @@ ${code}`;
                         borderTop: '1px solid var(--panel-border)', background: 'var(--panel-bg)',
                         position: 'sticky', bottom: '65px' 
                       }}>
+                        <button onClick={handleGetTutorInsight} disabled={isTutorInsightLoading} style={{ fontSize: '0.75rem', background: 'rgba(168,85,247,0.1)', cursor: 'pointer', color: '#d8b4fe', border: '1px solid rgba(168,85,247,0.3)', borderRadius: '4px', padding: '3px 8px', fontWeight: 600 }}>
+                          {isTutorInsightLoading ? <RefreshCw size={10} className="spin-icon" /> : <Brain size={10} />} Personalized Insight
+                        </button>
                         <button onClick={() => { setTutorInput('Please review my code for best practices and space/time complexity.'); }} style={{ fontSize: '0.75rem', background: 'rgba(255,255,255,0.05)', cursor: 'pointer', color: 'var(--text-2)', border: '1px solid var(--panel-border)', borderRadius: '4px', padding: '3px 8px' }}>Code Review</button>
                         <button onClick={() => { setTutorInput('Explain how I can optimize this code.'); }} style={{ fontSize: '0.75rem', background: 'rgba(255,255,255,0.05)', cursor: 'pointer', color: 'var(--text-2)', border: '1px solid var(--panel-border)', borderRadius: '4px', padding: '3px 8px' }}>Optimize Code</button>
-                        <button onClick={() => { setTutorInput('Generate a few edge case scenarios to test this code.'); }} style={{ fontSize: '0.75rem', background: 'rgba(255,255,255,0.05)', cursor: 'pointer', color: 'var(--text-2)', border: '1px solid var(--panel-border)', borderRadius: '4px', padding: '3px 8px' }}>Test Cases</button>
                       </div>
                       <div style={{ 
                         display: 'flex', 
@@ -1333,18 +1373,6 @@ ${code}`;
                         </button>
                       </div>
                     </div>
-                  ) : outputTab === 'mltools' ? (
-                      <AIToolsPanel
-                        code={code}
-                        language={language}
-                        output={output}
-                        isError={isError}
-                        setCode={setCode}
-                        generateAIContent={generateAIContent}
-                        apiKey={import.meta.env.VITE_GEMINI_API_KEY}
-                        onToast={(msg, type) => { setToast({ message: msg, type }); setTimeout(() => setToast(null), 3000); }}
-                        allLanguages={ALL_LANGUAGES}
-                      />
                   ) : null}
                 </div>
               </section>
