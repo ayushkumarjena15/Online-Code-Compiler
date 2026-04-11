@@ -610,10 +610,10 @@ Each object must perfectly match this structure:
   "spokenText": "Step 1. Structure of Node. Each node has 3 parts, data, next, and previous." // A completely clean transcript. Do NOT include ANY syntax characters (no asterisks, slashes, brackets, parenthesis, or emojis) so the TTS engine speaks smoothly.
 }
 Do NOT wrap your response in markdown code blocks. Respond purely with a valid JSON array.
+Follow the format strictly: [{"line": 1, "color": "#hex", "uiText": "...", "spokenText": "..."}]
 Translate both text fields to ${tutorConfigLang === 'hi-IN' ? 'Hindi (Devanagari script)' : 'English'}.
 
 Code:
------
 ${code}`;
       
       let rawText = await generateAIContent(import.meta.env.VITE_GEMINI_API_KEY, prompt);
@@ -628,9 +628,14 @@ ${code}`;
       
       let steps = [];
       try {
-         steps = JSON.parse(rawText);
-         setTutorSteps(steps);
-         setExplanation('');
+         const parsed = JSON.parse(rawText);
+         if (Array.isArray(parsed)) {
+           steps = parsed;
+           setTutorSteps(steps);
+           setExplanation('');
+         } else {
+           throw new Error("Response was not an array");
+         }
       } catch (e) {
          setExplanation(rawText);
          setTutorSteps([]);
@@ -724,13 +729,16 @@ ${code}`;
       
       let text = await generateAIContent(apiKey, prompt);
       
-      // Robust extraction of Mermaid code
-      const mermaidMatch = text.match(/(graph|flowchart|sequenceDiagram|classDiagram|stateDiagram|erDiagram|gantt|pie|gitGraph|journey|C4Context|C4Container|C4Component|C4Dynamic|C4Deployment|mindmap|timeline)\s+[\s\S]+/i);
+      // Look for the start of mermaid blocks or the graph definition
+      const mermaidMatch = text.match(/(graph|flowchart|sequenceDiagram|classDiagram|stateDiagram|erDiagram|gantt|pie|gitGraph|journey|C4Context|mindmap|timeline)\s+[\s\S]+/i);
       if (mermaidMatch) {
-        text = mermaidMatch[0].replace(/```/g, '').trim();
+        text = mermaidMatch[0].replace(/```.*/g, '').trim();
       } else {
         text = text.replace(/```[a-z]*\n?/gi, '').replace(/```/g, '').trim();
       }
+      
+      // Escape backticks if any remained (unlikely but safe)
+      text = text.replace(/`/g, "'");
       
       setMermaidCode(text);
     } catch (err) {
