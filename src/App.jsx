@@ -15,6 +15,7 @@ import Profile from './Profile';
 import Problems from './Problems';
 import ProblemDetail from './ProblemDetail';
 import AdminPanel from './AdminPanel';
+import AIToolsPanel from './AIToolsPanel';
 import { ALL_LANGUAGES, SNIPPETS, LANGUAGES, FALLBACK_COMPILERS, DSA_PROBLEMS } from "./problemData";
 
 const getIconUrlSafe = (id) => {
@@ -32,7 +33,7 @@ const getIconUrlSafe = (id) => {
 
 const generateAIContent = async (apiKey, prompt) => {
   const genAI = new GoogleGenerativeAI(apiKey);
-  const models = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.5-flash-lite", "gemini-2.0-flash-lite", "gemini-flash-lite-latest"];
+  const models = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro", "gemini-pro"];
   let lastError;
   for (const modelName of models) {
      try {
