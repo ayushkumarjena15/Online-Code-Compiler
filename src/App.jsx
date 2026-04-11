@@ -44,13 +44,15 @@ const generateAIContent = async (apiKey, prompt) => {
   let errors = [];
   for (const modelName of models) {
      try {
-        const model = genAI.getGenerativeModel({ model: modelName });
+        // Force 'v1' for stable models, fall back if explicitly beta
+        const apiVersion = modelName.includes('2.0') ? 'v1beta' : 'v1';
+        const model = genAI.getGenerativeModel({ model: modelName }, { apiVersion });
         const result = await model.generateContent(prompt);
         return result.response.text();
      } catch (err) {
         errors.push(`${modelName}: ${err.message}`);
-        console.warn(`Dev Warning: AI Model ${modelName} failed. Retrying...`);
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        console.warn(`Dev Warning: AI Model ${modelName} failed on ${modelName.includes('2.0') ? 'v1beta' : 'v1'}. Retrying...`);
+        await new Promise(resolve => setTimeout(resolve, 800));
      }
   }
   const summary = errors.slice(0, 3).join(" | ");
