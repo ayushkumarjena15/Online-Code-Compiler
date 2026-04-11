@@ -90,7 +90,7 @@ function parseTestResults(output) {
 
 const generateAIContent = async (apiKey, prompt) => {
   const genAI = new GoogleGenerativeAI(apiKey);
-  const models = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.5-flash-lite", "gemini-2.0-flash-lite", "gemini-flash-lite-latest"];
+  const models = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro", "gemini-pro"];
   let lastError;
   for (const modelName of models) {
      try {
@@ -102,6 +102,7 @@ const generateAIContent = async (apiKey, prompt) => {
         console.warn(`Dev Warning: AI Model ${modelName} encountered an error or 404. Dropping down to fallback...`);
      }
   }
+  console.error("All AI models failed in ProblemDetail. Final error:", lastError);
   throw lastError;
 };
 

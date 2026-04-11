@@ -64,8 +64,8 @@ function ScoreBadge({ score, label }) {
 }
 
 // ── Main Component ──────────────────────────────────────────
-export default function AIToolsPanel({ code, language, output, isError, setCode, generateAIContent, onToast, allLanguages }) {
-  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+export default function AIToolsPanel({ code, language, output, isError, setCode, generateAIContent, apiKey: propApiKey, onToast, allLanguages }) {
+  const apiKey = propApiKey || import.meta.env.VITE_GEMINI_API_KEY;
 
   // Feature states
   const [activeCard, setActiveCard] = useState(null);
@@ -126,12 +126,13 @@ export default function AIToolsPanel({ code, language, output, isError, setCode,
   const [tutorLoading, setTutorLoading] = useState(false);
 
   const ai = async (prompt) => {
-    if (!apiKey) { onToast?.("Missing API Key", "error"); return null; }
+    if (!apiKey) { onToast?.("Missing API Key (VITE_GEMINI_API_KEY)", "error"); return null; }
     try {
       let text = await generateAIContent(apiKey, prompt);
       return text.replace(/```[a-z]*\n?/gi, '').replace(/```/g, '').trim();
     } catch (err) {
-      onToast?.("AI request failed", "error");
+      console.error("AI Tool Request Failed:", err);
+      onToast?.(`AI Request Failed: ${err.message || 'Unknown error'}`, "error");
       return null;
     }
   };
