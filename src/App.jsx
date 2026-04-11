@@ -641,7 +641,7 @@ ${code}`;
       speakNext(steps, 0);
       
     } catch (err) {
-      setExplanation("Sorry, I could not generate an explanation. Please check your API key or network connection.");
+      setExplanation(`AI Error: ${err.message || "I could not generate an explanation at this time."}\n\nTips: Verify your API key in .env and check if your region has Gemini access.`);
     } finally {
       setIsExplaining(false);
     }

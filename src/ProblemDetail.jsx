@@ -107,6 +107,8 @@ const generateAIContent = async (apiKey, prompt) => {
      } catch (err) {
         lastError = err;
         console.warn(`Dev Warning: AI Model ${modelName} encountered an error or 404. Dropping down to fallback...`);
+        // Add a small delay for 429 cases
+        await new Promise(resolve => setTimeout(resolve, 1000));
      }
   }
   console.error("All AI models failed in ProblemDetail. Final error:", lastError);
@@ -338,8 +340,8 @@ ${code}`;
       setIsSpeaking(true);
       speakNext(steps, 0);
       
-    } catch {
-      setExplanation("Sorry, I could not generate an explanation. Please check your API key or network connection.");
+    } catch (err) {
+      setExplanation(`AI Error: ${err.message || "I could not generate an explanation at this time."}\n\nTips: Verify your API key in .env and check if your region has Gemini access.`);
     } finally {
       setIsExplaining(false);
     }
