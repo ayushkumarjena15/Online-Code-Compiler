@@ -93,26 +93,25 @@ const generateAIContent = async (apiKey, prompt) => {
   const models = [
     "gemini-1.5-flash", 
     "gemini-1.5-flash-latest", 
-    "gemini-1.5-flash-8b",
     "gemini-1.5-pro", 
     "gemini-2.0-flash", 
-    "gemini-pro"
+    "gemini-2.0-flash-exp",
+    "gemini-1.0-pro"
   ];
-  let lastError;
+  let errors = [];
   for (const modelName of models) {
      try {
         const model = genAI.getGenerativeModel({ model: modelName });
         const result = await model.generateContent(prompt);
         return result.response.text();
      } catch (err) {
-        lastError = err;
-        console.warn(`Dev Warning: AI Model ${modelName} encountered an error or 404. Dropping down to fallback...`);
-        // Add a small delay for 429 cases
+        errors.push(`${modelName}: ${err.message}`);
+        console.warn(`Dev Warning: AI Model ${modelName} failed. Retrying...`);
         await new Promise(resolve => setTimeout(resolve, 1000));
      }
   }
-  console.error("All AI models failed in ProblemDetail. Final error:", lastError);
-  throw lastError;
+  const summary = errors.slice(0, 3).join(" | ");
+  throw new Error(`All models failed. Top errors: ${summary}`);
 };
 
 export default function ProblemDetail({ problem, onBack, problemLanguage, user, supabase, contest, onSolve }) {
