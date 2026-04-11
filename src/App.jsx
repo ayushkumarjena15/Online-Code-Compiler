@@ -41,31 +41,46 @@ const getIconUrlSafe = (id) => {
 };
 
 const generateAIContent = async (apiKey, prompt) => {
+  if (!apiKey || apiKey.length < 10) {
+    throw new Error("Invalid or missing Gemini API Key. Please add VITE_GEMINI_API_KEY to your .env file.");
+  }
+
   const genAI = new GoogleGenerativeAI(apiKey);
   const models = [
-    "gemini-2.0-flash", 
     "gemini-1.5-flash", 
-    "gemini-1.5-flash-latest", 
     "gemini-1.5-pro", 
+    "gemini-2.0-flash", 
+    "gemini-1.5-flash-latest",
     "gemini-2.0-flash-exp",
     "gemini-1.0-pro"
   ];
-  let errors = [];
+  
+  let lastError = null;
+  let errorLog = [];
+
   for (const modelName of models) {
-     try {
-        // Force 'v1' for stable models, fall back if explicitly beta
-        const apiVersion = modelName.includes('2.0') ? 'v1beta' : 'v1';
-        const model = genAI.getGenerativeModel({ model: modelName }, { apiVersion });
-        const result = await model.generateContent(prompt);
-        return result.response.text();
-     } catch (err) {
-        errors.push(`${modelName}: ${err.message}`);
-        console.warn(`Dev Warning: AI Model ${modelName} failed on ${modelName.includes('2.0') ? 'v1beta' : 'v1'}. Retrying...`);
-        await new Promise(resolve => setTimeout(resolve, 800));
-     }
+    try {
+      const model = genAI.getGenerativeModel({ model: modelName });
+      const result = await model.generateContent(prompt);
+      const text = result.response.text();
+      if (text) return text;
+    } catch (err) {
+      console.warn(`[AI] ${modelName} failed: ${err.message}`);
+      lastError = err;
+      errorLog.push(`${modelName}: ${err.message}`);
+      
+      // If it's a 404, the model name might be wrong or restricted, continue
+      // If it's a 429, we are rate limited/out of quota. 
+      // If it's a 400, the prompt might be blocked (Safety).
+    }
   }
-  const summary = errors.slice(0, 3).join(" | ");
-  throw new Error(`All models failed. Top errors: ${summary}`);
+
+  const isQuotaError = errorLog.some(e => e.includes('429') || e.toLowerCase().includes('quota'));
+  if (isQuotaError) {
+    throw new Error("Quota Exceeded: Your Gemini API free tier limit has been reached. Please try again in a few minutes or use a different API key.");
+  }
+  
+  throw new Error(`AI generation failed. Please check your network and API key. Details: ${errorLog[0]}`);
 };
 
 const checkNeedsInput = (code, langId) => {
